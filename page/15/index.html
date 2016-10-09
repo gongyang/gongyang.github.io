@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="gy blogs">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ban">
+<meta property="og:url" content="http://gongyang.wiki/page/15/index.html">
+<meta property="og:site_name" content="ban">
+<meta property="og:description" content="gy blogs">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ban">
+<meta name="twitter:description" content="gy blogs">
+  
+    <link rel="alternate" href="/atom.xml" title="ban" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">ban</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">blogs</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://gongyang.wiki"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-nginx_upgrade" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/29/nginx_upgrade/" class="article-date">
+  <time datetime="2016-05-28T16:00:00.000Z" itemprop="datePublished">2016-05-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/05/29/nginx_upgrade/">nginx 平滑升级</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="nginx-平滑升级"><a href="#nginx-平滑升级" class="headerlink" title="nginx 平滑升级"></a>nginx 平滑升级</h2><p>由于公司需要使用HTTP/2，以及IPv6等新特性，需要在nginx层添加相对应的模块。我们使用的是淘宝开源的tengine，需要下载最新的版本才能支持HTTP/2，<a href="http://tengine.taobao.org/download_cn.html" target="_blank" rel="external">下载地址</a>。</p>
+<h4 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h4><p>升级之前，我们还是先把配置文件copy一份。然后使用nginx -V查看nginx的版本和编译了哪些模块<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@bhqa nginx]# /usr/local/nginx/sbin/nginx -V</div><div class="line">Tengine version: Tengine/2.1.0 (nginx/1.6.2)</div><div class="line">built by gcc 4.4.7 20120313 (Red Hat 4.4.7-11) (GCC) </div><div class="line">TLS SNI support enabled</div><div class="line">configure arguments: --with-http_ssl_module --with-http_gzip_static_module --with-http_stub_status_module</div></pre></td></tr></table></figure></p>
+<p>解压下载的新版本，进入到解压后的目录，编译安装新版本。这里需要注意的一点是，我们原来在编译的时候，使用的默认安装路径，没有特别指定安装路径。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@bhqa tengine-2.1.2]# ./configure --with-http_ssl_module --with-http_gzip_static_module --with-http_stub_status_module --with-ipv6 --with-http_v2_module &amp;&amp; make &amp;&amp; make install</div></pre></td></tr></table></figure></p>
+<h4 id="升级"><a href="#升级" class="headerlink" title="升级"></a>升级</h4><p>首先检查新的nginx二进制文件是否可用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[bhuser@bhqa conf]$ sudo /usr/local/nginx/sbin/nginx -t -c /usr/local/nginx/conf/nginx.conf</div><div class="line">the configuration file /usr/local/nginx/conf/nginx.conf syntax is ok</div><div class="line">configuration file /usr/local/nginx/conf/nginx.conf test is successful</div></pre></td></tr></table></figure></p>
+<p>接下来我们使用kill -USR2给当前的nginx主进程发送一个信号<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">kill -USR2 `cat /usr/local/nginx/logs/nginx.pid`</div></pre></td></tr></table></figure></p>
+<p>我们来看下此时的nginx进程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@bhqa tengine-2.1.2]# ps aux | grep nginx</div><div class="line">root      2073  0.0  0.0  71056  2056 ?        Ss   May19   0:00 nginx: master process /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf</div><div class="line">nobody    2076  0.0  0.0 101300  9396 ?        S    May19   7:07 nginx: worker process                                          </div><div class="line">nobody    2077  0.0  0.1 101756 10972 ?        S    May19   7:15 nginx: worker process                                          </div><div class="line">root     12857  0.6  0.0  71640  7696 ?        S    15:49   0:00 nginx: master process /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf</div><div class="line">nobody   12858  0.4  0.3  99288 32396 ?        S    15:49   0:00 nginx: worker process                                          </div><div class="line">nobody   12859  0.2  0.3  99288 32396 ?        S    15:49   0:00 nginx: worker process</div></pre></td></tr></table></figure></p>
+<p>此时的新老进程会同时存在，都会接受并处理请求，并且原来/usr/local/nginx/logs/nginx.pid会改为/usr/local/nginx/logs/nginx.pid.oldbin。</p>
+<p>这个时候，我们可以使用kill -WINCH这个信号来让老的worker进程不再接受新的请求并退出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">kill -WINCH `cat /usr/local/nginx/logs/nginx.pid.oldbin`</div></pre></td></tr></table></figure></p>
+<p>此时我们再来看下这个时候nginx进程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@bhqa tengine-2.1.2]# ps aux | grep nginx</div><div class="line">root      2073  0.0  0.0  71056  2084 ?        Ss   May19   0:00 nginx: master process /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf</div><div class="line">root     12857  0.0  0.0  71640  7696 ?        S    15:49   0:00 nginx: master process /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf</div><div class="line">nobody   12858  0.2  0.3  99288 33780 ?        S    15:49   0:00 nginx: worker process                                          </div><div class="line">nobody   12859  0.2  0.3  99288 33820 ?        S    15:49   0:00 nginx: worker process</div></pre></td></tr></table></figure></p>
+<p>我们发现老的worker都退出了，只剩下一个master进程。此时如果我们由于其他原因，不想升级到新版本了，还是可以回退到旧版本的，具体步骤如下：</p>
+<ul>
+<li>发送HUP 信号给旧的master process；</li>
+<li>发送QUIT 信号给新的master process，从容关闭它的worker processes；</li>
+<li>发送TERM 信号给新的master process, 强迫关闭；</li>
+<li>如果一些原因新的worker process没有关闭，发送KILL 信号给它；</li>
+<li>新的master process 关闭后，旧的master process 删除.oldbin后缀，这样就恢复到升级前的状态了。</li>
+</ul>
+<p>如果我们不需要回退，那现在就剩下最后一步升级就完成了，使用kill -QUIT信号，让老的master进程也退出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">kill -QUIT `cat /usr/local/nginx/logs/nginx.pid.oldbin`</div></pre></td></tr></table></figure></p>
+<p>到此，整个升级我们就完成了，我们来看下当前的nginx版本<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@bhqa tengine-2.1.2]# /usr/local/nginx/sbin/nginx -V</div><div class="line">Tengine version: Tengine/2.1.2 (nginx/1.6.2)</div><div class="line">built by gcc 4.4.7 20120313 (Red Hat 4.4.7-16) (GCC) </div><div class="line">TLS SNI support enabled</div><div class="line">configure arguments: --with-http_ssl_module --with-http_gzip_static_module --with-http_stub_status_module --with-ipv6 --with-http_v2_module</div></pre></td></tr></table></figure></p>
+<p>版本已是最新的2.1.2，IPv6和HTTP/2相应的模块也编译进去了。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://gongyang.wiki/2016/05/29/nginx_upgrade/" data-id="ciu2ftol6000kw5hprq409zm4" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+
+  <nav id="page-nav">
+    <a class="extend prev" rel="prev" href="/page/14/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/16/">__('next') &raquo;</a>
+  </nav>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/21/puppet/">puppet 安装</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 ggyy<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

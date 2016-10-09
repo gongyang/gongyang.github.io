@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Linux 的封包过滤软件--iptables | ban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言iptables，对于接触过linux的人来说，对这个概念不会感到陌生。它是linux系统自带的一款软件防火墙。以前我一直对这个知识点掌握的比较零散，今天决定系统的来学习一下。早期的linux并不是使用iptables，在内核版本2.0是使用的 ipfwadm 这个防火墙机制，在内核版本2.2是ipchains 这个防火墙机制，在内核版本2.6之后就是使用的iptables了。
+了解了它的发展">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux 的封包过滤软件--iptables">
+<meta property="og:url" content="http://gongyang.wiki/2016/04/17/iptables/index.html">
+<meta property="og:site_name" content="ban">
+<meta property="og:description" content="前言iptables，对于接触过linux的人来说，对这个概念不会感到陌生。它是linux系统自带的一款软件防火墙。以前我一直对这个知识点掌握的比较零散，今天决定系统的来学习一下。早期的linux并不是使用iptables，在内核版本2.0是使用的 ipfwadm 这个防火墙机制，在内核版本2.2是ipchains 这个防火墙机制，在内核版本2.6之后就是使用的iptables了。
+了解了它的发展">
+<meta property="og:updated_time" content="2016-10-09T08:53:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux 的封包过滤软件--iptables">
+<meta name="twitter:description" content="前言iptables，对于接触过linux的人来说，对这个概念不会感到陌生。它是linux系统自带的一款软件防火墙。以前我一直对这个知识点掌握的比较零散，今天决定系统的来学习一下。早期的linux并不是使用iptables，在内核版本2.0是使用的 ipfwadm 这个防火墙机制，在内核版本2.2是ipchains 这个防火墙机制，在内核版本2.6之后就是使用的iptables了。
+了解了它的发展">
+  
+    <link rel="alternate" href="/atom.xml" title="ban" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">ban</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">blogs</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://gongyang.wiki"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-iptables" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/17/iptables/" class="article-date">
+  <time datetime="2016-04-16T16:00:00.000Z" itemprop="datePublished">2016-04-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Linux 的封包过滤软件--iptables
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>iptables，对于接触过linux的人来说，对这个概念不会感到陌生。它是linux系统自带的一款软件防火墙。以前我一直对这个知识点掌握的比较零散，今天决定系统的来学习一下。早期的linux并不是使用iptables，在内核版本2.0是使用的 ipfwadm 这个防火墙机制，在内核版本2.2是ipchains 这个防火墙机制，在内核版本2.6之后就是使用的iptables了。</p>
+<p>了解了它的发展史，接下来进入正题。</p>
+<h3 id="工作机制"><a href="#工作机制" class="headerlink" title="工作机制"></a>工作机制</h3><p>iptables 是利用封包过滤的机制， 所以他会分析封包的表头数据。根据表头数据与定义的规则来决定该封包是否可以进入主机或者是被丢弃。 意思就是说：根据封包的分析资料 “比对” 你预先定义的规则内容， 若封包数据与规则内容相同则进行动作，否则就继续下一条规则的比对！<br>所以，重点就在比对与分析顺序上。</p>
+<h3 id="iptables的表格-table-与链-chain"><a href="#iptables的表格-table-与链-chain" class="headerlink" title="iptables的表格 (table) 与链 (chain)"></a>iptables的表格 (table) 与链 (chain)</h3><p>Linux 的 iptables 至少就有三个表格，包括管理本机进出的 filter 、管理后端主机 (防火墙内部的其他计算机) 的 nat 、管理特殊旗标使用的 mangle (较少使用) ，表格和链的用途分别是这样的</p>
+<p><strong>filter (过滤器)</strong><br>主要跟进入 Linux 本机的封包有关，这个是预设的 table</p>
+<ul>
+<li>INPUT：主要与想要进入我们 Linux 本机的封包有关</li>
+<li>OUTPUT：主要与我们 Linux 本机所要送出的封包有关</li>
+<li>FORWARD：这个咚咚与 Linux 本机比较没有关系， 他可以转递封包到后端的计算机中，与下列 nat table 相关性较高</li>
+</ul>
+<p><strong>nat (地址转换)</strong><br>是 Network Address Translation 的缩写， 这个表格主要在进行来源与目的之 IP 或 port 的转换，与 Linux 本机较无关，主要与 Linux 主机后的局域网络内计算机较有相关</p>
+<ul>
+<li>PREROUTING：在进行路由判断之前所要进行的规则(DNAT/REDIRECT)</li>
+<li>POSTROUTING：在进行路由判断之后所要进行的规则(SNAT/MASQUERADE)</li>
+<li>OUTPUT：与发送出去的封包有关</li>
+</ul>
+<p><strong>mangle (破坏者)</strong><br>这个表格主要是与特殊的封包的路由旗标有关， 早期仅有 PREROUTING 及 OUTPUT 链，不过从 kernel 2.4.18 之后加入了 INPUT 及 FORWARD 链。 由于这个表格与特殊旗标相关性较高，所以像咱们这种单纯的环境当中，较少使用 mangle 这个表格</p>
+<h3 id="iptables-语法"><a href="#iptables-语法" class="headerlink" title="iptables 语法"></a>iptables 语法</h3><p>了解了概念性的知识，我来进入实战。我们在安装好linux系统之后，系统会自动启动一个防火墙规则，不过这个可能不是我们想要的模式，因此我们需要额外进行一些修订的行为。不过，我们在进行练习的过程中，最好不要在远程的机器上面进行操作，因为 iptables 的指令会将网络封包进行过滤及抵挡的动作，你很有可能一不小心将自己关在家门外。</p>
+<h4 id="查看与清除iptables规则"><a href="#查看与清除iptables规则" class="headerlink" title="查看与清除iptables规则"></a>查看与清除iptables规则</h4><p><strong>查看语法</strong><br>iptables [-t tables] [-L] [-nv]<br>选项与参数：<br>-t ：后面接 table ，例如 nat 或 filter ，若省略此项目，则使用默认的 filter<br>-L ：列出目前的 table 的规则<br>-n ：不进行 IP 与 HOSTNAME 的反查，显示讯息的速度会快很多！<br>-v ：列出更多的信息，包括通过该规则的封包总位数、相关的网络接口等<br>例如查看本机的防火墙规则：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm04 ~]# iptables -L -n</div><div class="line">Chain INPUT (policy ACCEPT) //针对 INPUT 链，且预设政策为可接受</div><div class="line">target     prot opt source  //说明栏              destination         </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           state RELATED,ESTABLISHED  //第 1 条规则</div><div class="line">ACCEPT     icmp --  0.0.0.0/0            0.0.0.0/0 //第 2 条规则        </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0 //第 3 条规则  以下类推   </div><div class="line">ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           state NEW tcp dpt:22  </div><div class="line">ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           state NEW tcp dpt:80  </div><div class="line">ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           state NEW tcp dpt:443 </div><div class="line">REJECT     all  --  0.0.0.0/0            0.0.0.0/0           reject-with icmp-host-prohibited </div><div class="line"></div><div class="line">Chain FORWARD (policy ACCEPT) //针对 FORWARD 链，且预设政策为可接受</div><div class="line">target     prot opt source               destination         </div><div class="line">DOCKER     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           ctstate RELATED,ESTABLISHED </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">REJECT     all  --  0.0.0.0/0            0.0.0.0/0           reject-with icmp-host-prohibited </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line"></div><div class="line">Chain OUTPUT (policy ACCEPT) //针对 OUTPUT 链，且预设政策为可接受</div><div class="line">target     prot opt source               destination         </div><div class="line"></div><div class="line">Chain DOCKER (1 references) //这是关于docker的自定义链</div><div class="line">target     prot opt source               destination         </div><div class="line">[root@gy-vm04 ~]#</div></pre></td></tr></table></figure></p>
+<p>如果要查看关于nat 的table规则<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm04 ~]# iptables -t nat -L -n</div><div class="line">Chain PREROUTING (policy ACCEPT)</div><div class="line">target     prot opt source               destination         </div><div class="line">DOCKER     all  --  0.0.0.0/0            0.0.0.0/0           ADDRTYPE match dst-type LOCAL </div><div class="line"></div><div class="line">Chain POSTROUTING (policy ACCEPT)</div><div class="line">target     prot opt source               destination         </div><div class="line">MASQUERADE  all  --  172.17.0.0/16        0.0.0.0/0           </div><div class="line"></div><div class="line">Chain OUTPUT (policy ACCEPT)</div><div class="line">target     prot opt source               destination         </div><div class="line">DOCKER     all  --  0.0.0.0/0           !127.0.0.0/8         ADDRTYPE match dst-type LOCAL </div><div class="line"></div><div class="line">Chain DOCKER (2 references)</div><div class="line">target     prot opt source               destination</div></pre></td></tr></table></figure></p>
+<p>上面的每一个Chain就是所谓的链，Chain 那一行里面括号的 policy 就是预设的政策，什么是policy，就是当一个封包不匹配所有的规则，就默认执行这个政策。其他的参数说明</p>
+<ul>
+<li>target：代表进行的动作， ACCEPT 是放行，而 - REJECT 则是拒绝，此外，尚有 DROP (丢弃) 的项目！</li>
+<li>prot：代表使用的封包协议，主要有 tcp, udp 及 icmp 三种封包格式；</li>
+<li>opt：额外的选项说明</li>
+<li>source ：代表此规则是针对哪个来源 IP进行限制？</li>
+<li>destination ：代表此规则是针对哪个目标 IP进行限制？</li>
+</ul>
+<p><strong>清除规则</strong><br>如何删除默认的规则，来建立我们自己想要定义的规则了。<br>语法：<br>iptables [-t tables] [-FXZ]<br>选项与参数：<br>-F ：清除所有的已订定的规则；<br>-X ：杀掉所有使用者 “自定义” 的 chain (应该说的是 tables ）啰；<br>-Z ：将所有的 chain 的计数与流量统计都归零</p>
+<p><strong><em>切记</em></strong><br>这个操作一定要小心，这三个指令会将本机防火墙的所有规则都清除，但却不会改变预设政策 (policy) ， 所以如果你不是在本机下达这三行指令时，很可能你会被自己挡在家门外</p>
+<h4 id="定义预设policy（政策）"><a href="#定义预设policy（政策）" class="headerlink" title="定义预设policy（政策）"></a>定义预设policy（政策）</h4><p>语法：<br> iptables [-t nat] -P [INPUT,OUTPUT,FORWARD] [ACCEPT,DROP]<br> 选项与参数：<br>-P ：定义政策( Policy )。注意，这个 P 为大写啊！<br>ACCEPT ：该封包可接受<br>DROP   ：该封包直接丢弃，不会让 client 端知道为何被丢弃。<br>例如将本机的INPUT 设定为 DROP ，其他设定为 ACCEPT<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm04 ~]# iptables -P INPUT DROP</div><div class="line">[root@gy-vm04 ~]# iptables -P OUTPUT  ACCEPT</div><div class="line">[root@gy-vm04 ~]# iptables -P FORWARD ACCEPT</div></pre></td></tr></table></figure></p>
+<p><strong>tips</strong><br>我们在修改完规则之后，记得使用iptables-save这条命名保存，不然的话，我们以后在重启iptables的服务之后，规则就不存在了。</p>
+<h4 id="针对IP已经网口的设置"><a href="#针对IP已经网口的设置" class="headerlink" title="针对IP已经网口的设置"></a>针对IP已经网口的设置</h4><p>语法：<br> iptables [-AI 链名] [-io 网络接口] [-p 协议]  [-s 来源IP/网域] [-d 目标IP/网域] -j [ACCEPT|DROP|REJECT|LOG]</p>
+<p>选项与参数：<br>-AI 链名：针对某的链进行规则的 “插入” 或 “累加”<br>    -A ：新增加一条规则，该规则增加在原本规则的最后面。例如原本已经有四条规则，<br>         使用 -A 就可以加上第五条规则！<br>    -I ：插入一条规则。如果没有指定此规则的顺序，默认是插入变成第一条规则。<br>         例如原本有四条规则，使用 -I 则该规则变成第一条，而原本四条变成 2~5 号<br>    链 ：有 INPUT, OUTPUT, FORWARD 等，此链名称又与 -io 有关，请看底下。</p>
+<p>-io 网络接口：设定封包进出的接口规范<br>    -i ：封包所进入的那个网络接口，例如 eth0, lo 等接口。需与 INPUT 链配合；<br>    -o ：封包所传出的那个网络接口，需与 OUTPUT 链配合；</p>
+<p>-p 协定：设定此规则适用于哪种封包格式<br>   主要的封包格式有： tcp, udp, icmp 及 all 。</p>
+<p>-s 来源 IP/网域：设定此规则之封包的来源项目，可指定单纯的 IP 或包括网域，例如：<br>   IP  ：192.168.0.100<br>   网域：192.168.0.0/24, 192.168.0.0/255.255.255.0 均可。<br>   若规范为『不许』时，则加上 ! 即可，例如：<br>   -s ! 192.168.100.0/24 表示不许 192.168.100.0/24 之封包来源；</p>
+<p>-d 目标 IP/网域：同 -s ，只不过这里指的是目标的 IP 或网域。</p>
+<p>-j ：后面接动作，主要的动作有接受(ACCEPT)、丢弃(DROP)、拒绝(REJECT)及记录(LOG)</p>
+<p>例如我们对于lo接口所有封包添加为接受<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm04 ~]# iptables -A INPUT -i lo -j ACCEPT</div></pre></td></tr></table></figure></p>
+<p><strong>tips</strong><br>如果没有没有列出 -s, -d 等等的规则，这表示：不论封包来自何处或去到哪里，只要是来自 lo 这个接口，就予以接受！</p>
+<p>由于我比较喜欢使用Xshell登录来操作虚拟机，所以一般会把我本机的IP添加为ACCEPT<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm04 ~]# iptables -A INPUT -s 192.168.168.2 -j ACCEPT</div></pre></td></tr></table></figure></p>
+<p>这样我才能登录到这台虚拟机上面去。</p>
+<h4 id="针对端口的设定"><a href="#针对端口的设定" class="headerlink" title="针对端口的设定"></a>针对端口的设定</h4><p>语法：<br>iptables [-AI 链] [-io 网络接口] [-p tcp,udp]  [-s 来源IP/网域] [–sport 端口范围] [-d 目标IP/网域] [–dport 端口范围] -j [ACCEPT|DROP|REJECT]<br>例如：<br>打开eth0上的8080端口<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm04 ~]# iptables -A INPUT -i eht0  --dport 8080 -j ACCEPT</div><div class="line">iptables v1.4.7: unknown option `--dport&apos;</div><div class="line">Try `iptables -h&apos; or &apos;iptables --help&apos; for more information.</div></pre></td></tr></table></figure></p>
+<p>额，怎么报错了，提示不知道参数–dport。<br>这是因为仅有 tcp 与 udp 封包具有端口，因此你想要使用 –dport, –sport 时，得要加上 -p tcp 或 -p udp 的参数才会成功<br>正确的写法是：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm04 ~]# iptables -A INPUT -i eht0 -p tcp --dport 8080 -j ACCEPT</div></pre></td></tr></table></figure></p>
+<p><strong>tips</strong><br>我们可以指定连续的端口<br>例如：–dport 1000:2000</p>
+<h4 id="iptables-外挂模块：mac-与-state"><a href="#iptables-外挂模块：mac-与-state" class="headerlink" title="iptables 外挂模块：mac 与 state"></a>iptables 外挂模块：mac 与 state</h4><p>语法：<br> iptables -A INPUT [-m state] [–state 状态]<br> 选项与参数：<br>-m ：一些 iptables 的外挂模块，主要常见的有：<br>     state ：状态模块<br>     mac   ：网络卡硬件地址 (hardware address)<br>–state ：一些封包的状态，主要有：<br>     INVALID    ：无效的封包，例如数据破损的封包状态<br>     ESTABLISHED：已经联机成功的联机状态；<br>     NEW        ：想要新建立联机的封包状态；<br>     RELATED    ：这个最常用！表示这个封包是与我们主机发送出去的封包有关</p>
+<p>例如：<br>只要已建立或相关封包就予以通过，只要是不合法封包就丢弃<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm04 ~]# iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT</div><div class="line">[root@gy-vm04 ~]# iptables -A INPUT -m state --state INVALID -j DROP</div></pre></td></tr></table></figure></p>
+<p>iptables还可以针对网卡来进行放行与防御<br>语法：<br>iptables -A INPUT -m mac –mac-source aa:bb:cc:dd:ee:ff -j ACCEPT<br>选项与参数：<br>–mac-source ：就是来源主机的 MAC</p>
+<h4 id="ICMP-封包规则"><a href="#ICMP-封包规则" class="headerlink" title="ICMP 封包规则"></a>ICMP 封包规则</h4><p>语法：<br>iptables -A INPUT [-p icmp] [–icmp-type 类型] -j ACCEPT<br>选项与参数：<br>–icmp-type ：后面必须要接 ICMP 的封包类型，也可以使用代号，例如 8  代表 echo request 的意思。<br>默认系统是对所有类型都ACCEPT</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://gongyang.wiki/2016/04/17/iptables/" data-id="ciu2ftokj000dw5hpcs5f0w0q" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/04/24/ansible/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          自动化运维工具ansible--入门使用
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/03/ddos/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Linux防DDOS攻击软件--DDoS-Deflate</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/21/puppet/">puppet 安装</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 ggyy<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="gy blogs">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ban">
+<meta property="og:url" content="http://gongyang.wiki/page/16/index.html">
+<meta property="og:site_name" content="ban">
+<meta property="og:description" content="gy blogs">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ban">
+<meta name="twitter:description" content="gy blogs">
+  
+    <link rel="alternate" href="/atom.xml" title="ban" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">ban</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">blogs</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://gongyang.wiki"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-route" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/29/route/" class="article-date">
+  <time datetime="2016-05-28T16:00:00.000Z" itemprop="datePublished">2016-05-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/05/29/route/">linux 路由表</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>我们知道，同一个局域网里面，我们可以通过ip广播的方式来实现数据传递的目的。但是不是同一个局域网内的数据传递，就需要路由器来实现了。</p>
+<p>假设我们一台主机A（192.168.1.100/24），主机B（192.168.2.100/24），它们是不同的网段，所以不能直接通讯。那A是怎么知道B不是同一个网段了，当然是通过Net_ID（网络号码）来区分的。一个完整的IP是由Net_ID（网络号码）和Host_ID（主机号码）组成，Net_ID是用来区分是不是同一个网段，而Host_ID是用来区分不同主机的。一台主机需要发送数据，主要是通过参考本机的路由表来决定。</p>
+<h3 id="查看主机路由表"><a href="#查看主机路由表" class="headerlink" title="查看主机路由表"></a>查看主机路由表</h3><p>在linux系统下面，我们可以通过route这条命令查看一下本机的路由信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# route </div><div class="line">Kernel IP routing table</div><div class="line">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</div><div class="line">192.168.1.0     *               255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.168.0   *               255.255.255.0   U     0      0        0 eth1</div><div class="line">link-local      *               255.255.0.0     U     1002   0        0 eth0</div><div class="line">link-local      *               255.255.0.0     U     1003   0        0 eth1</div><div class="line">172.17.0.0      *               255.255.0.0     U     0      0        0 docker0</div><div class="line">default         192.168.1.1     0.0.0.0         UG    0      0        0 eth0</div></pre></td></tr></table></figure></p>
+<p>一般我们会加上参数-n，将主机名以 IP 的方式显示<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# route -n</div><div class="line">Kernel IP routing table</div><div class="line">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</div><div class="line">192.168.1.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.168.0   0.0.0.0         255.255.255.0   U     0      0        0 eth1</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1002   0        0 eth0</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1003   0        0 eth1</div><div class="line">172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0</div><div class="line">0.0.0.0         192.168.1.1     0.0.0.0         UG    0      0        0 eth0</div></pre></td></tr></table></figure></p>
+<p>上面输出的数据共有八个字段，你需要注意的有几个地方：<br> Destination ：其实就是 Network 的意思；<br> Gateway     ：就是该接口的 Gateway 那个 IP ，若为 0.0.0.0 表示不需要额外的 IP；<br> Genmask     ：就是 Netmask 啦，与 Destination 组合成为一部主机或网域；<br> Flags       ：共有多个标志可以来表示该网域或主机代表的意义：</p>
+<ul>
+<li>U：代表该路由可用；</li>
+<li>G：代表该网域需要经由 Gateway 来帮忙转递；</li>
+<li>H：代表该行路由为一部主机，而非一整个网域；</li>
+</ul>
+<p>Iface       ：就是 Interface (接口) 的意思。</p>
+<p>上面的信息就是我本机的路由表信息，如果我们有个数据包目的IP是192.168.1.0/24网段的，那么就会选择第一条路由，并且通过eth0这个接口发送出去。同理，如果我们有个数据包目的IP是192.168.168.0/24网段的，那么就会选择第二条路由，并且通过eth1这个接口发送出去。如果目的IP不在路由表的规则里面，那么就会将数据包传送到Flags带有G的那条路由规则里面，也就是192.168.1.1这个Gateway。</p>
+<h3 id="添加路由信息"><a href="#添加路由信息" class="headerlink" title="添加路由信息"></a>添加路由信息</h3><p>上面，我们通过route这条命令，可以看到本机的路由信息，那么这些信息是如何产生的了？<br>首先，192.168.1.0/24和192.168.168.0/24这两条路由信息的存在是因为我们本机有192.168.1.109和192.168.168.11这两个ip。也就是说，主机上面有几个网络接口，就会存在几条对应的路由信息。下面我来添加一个虚拟接口来验证一下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# ifconfig eth0:0 192.168.2.100</div></pre></td></tr></table></figure></p>
+<p>再来查看一下路由信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# route -n</div><div class="line">Kernel IP routing table</div><div class="line">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</div><div class="line">192.168.2.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.1.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.168.0   0.0.0.0         255.255.255.0   U     0      0        0 eth1</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1002   0        0 eth0</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1003   0        0 eth1</div><div class="line">172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0</div><div class="line">0.0.0.0         192.168.1.1     0.0.0.0         UG    0      0        0 eth0</div></pre></td></tr></table></figure></p>
+<p>系统自动添加了192.168.2.0/24这条路由信息。</p>
+<h4 id="手动添加路由"><a href="#手动添加路由" class="headerlink" title="手动添加路由"></a>手动添加路由</h4><p>我们可以通过route这条命令手动添加路由信息，但是需要注意的一点就是，<strong>我们所添加的路由，必须是我们主机上的设备（网络接口）或IP可以直接连接的才行。</strong><br>举个例子：我们现在有个路由器IP为192.168.10.254，我们想要连接到这个路由器，可以运行下面的命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# route add -net 192.168.10.0 netmask 255.255.255.0 gw 192.168.10.254</div><div class="line">SIOCADDRT: No such process</div></pre></td></tr></table></figure></p>
+<p>系统提示，不能连接到该网络，应为我们的网络接口与192.168.10.0/24根本就没有关系。那如果192.168.10.254真的是我们的实体网络连接，并且是通过eth0连接在一起的，那其实我们可以这样做：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# route add -net 192.168.10.0 netmask 255.255.255.0 dev eth0</div><div class="line">[root@gy-vm02 ~]# route -n</div><div class="line">Kernel IP routing table</div><div class="line">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</div><div class="line">192.168.2.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.1.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.168.0   0.0.0.0         255.255.255.0   U     0      0        0 eth1</div><div class="line">192.168.10.0    0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1002   0        0 eth0</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1003   0        0 eth1</div><div class="line">172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0</div><div class="line">0.0.0.0         192.168.1.1     0.0.0.0         UG    0      0        0 eth0</div></pre></td></tr></table></figure></p>
+<p>这样，主机就可以通过eth0去连接192.168.10.254了。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://gongyang.wiki/2016/05/29/route/" data-id="ciu2ftole000pw5hpjh6l4sy5" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+
+  <nav id="page-nav">
+    <a class="extend prev" rel="prev" href="/page/15/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><span class="page-number current">16</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/17/">__('next') &raquo;</a>
+  </nav>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/21/puppet/">puppet 安装</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 ggyy<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

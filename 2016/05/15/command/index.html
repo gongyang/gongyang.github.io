@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>command中单双引的区别 | ban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="在讲今天的主题之前，我们先来了解一下shell中一些基础知识。当我们在shell prompt后面敲打键盘, 直到按下Enter键的时候，你输入的文字就是command line了， 然后shell才会以进程的方式执行你所交给它的命令。 但是，你又可知道：你在command line中输入的每一个文字， 对shell来说，是有类别之分的呢？
+简单而言，command line的每一个charact">
+<meta property="og:type" content="article">
+<meta property="og:title" content="command中单双引的区别">
+<meta property="og:url" content="http://gongyang.wiki/2016/05/15/command/index.html">
+<meta property="og:site_name" content="ban">
+<meta property="og:description" content="在讲今天的主题之前，我们先来了解一下shell中一些基础知识。当我们在shell prompt后面敲打键盘, 直到按下Enter键的时候，你输入的文字就是command line了， 然后shell才会以进程的方式执行你所交给它的命令。 但是，你又可知道：你在command line中输入的每一个文字， 对shell来说，是有类别之分的呢？
+简单而言，command line的每一个charact">
+<meta property="og:updated_time" content="2016-10-09T08:53:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="command中单双引的区别">
+<meta name="twitter:description" content="在讲今天的主题之前，我们先来了解一下shell中一些基础知识。当我们在shell prompt后面敲打键盘, 直到按下Enter键的时候，你输入的文字就是command line了， 然后shell才会以进程的方式执行你所交给它的命令。 但是，你又可知道：你在command line中输入的每一个文字， 对shell来说，是有类别之分的呢？
+简单而言，command line的每一个charact">
+  
+    <link rel="alternate" href="/atom.xml" title="ban" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">ban</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">blogs</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://gongyang.wiki"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-command" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/15/command/" class="article-date">
+  <time datetime="2016-05-14T16:00:00.000Z" itemprop="datePublished">2016-05-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      command中单双引的区别
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在讲今天的主题之前，我们先来了解一下shell中一些基础知识。<br>当我们在shell prompt后面敲打键盘, 直到按下Enter键的时候，你输入的文字就是command line了， 然后shell才会以进程的方式执行你所交给它的命令。 但是，你又可知道：你在command line中输入的每一个文字， 对shell来说，是有类别之分的呢？</p>
+<p>简单而言，command line的每一个charactor， 分为如下两种：</p>
+<ul>
+<li>literal：也就是普通的纯文字，对shell来说没特殊功能；</li>
+<li>meta: 对shell来说，具有特定功能的特殊保留元字符。</li>
+</ul>
+<p>literal就是我们正常输入的字符串， 像 abcd、123456 这些 “文字” 都是 literal，而常用的meta有：</p>
+<ul>
+<li>IFS（ Interchange Format Syntax ）：有space或者tab或者Enter三者之一组成 (我们常用 space)</li>
+<li>CR（回车键）: 由Enter产生；</li>
+</ul>
+<p>IFS是用来拆解command line中每一个词 (word) 用的， 因为shell command line是按词来处理的。 而CR则是用来结束command line用的，这也是为何我们敲Enter键， 命令就会运行的原因。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">除了常用的IFS与CR, 常用的 meta 还有：</div><div class="line">= ：  设定变量。</div><div class="line">$ ：  做变量或运算替换(请不要与 shell prompt 搞混了)。</div><div class="line">&gt; ：  重定向 stdout（标准输出standard out）。</div><div class="line">&lt; ：  重定向 stdin（标准输入standard in）。</div><div class="line">|：   管道命令。</div><div class="line">&amp; ：  重定向 file descriptor （文件描述符），或将命令置于后台执行。</div><div class="line">( )： 將其內的命令置于 nested subshell （嵌套的子shell）执行，或用于运算或命令替换。</div><div class="line">&#123; &#125;： 將其內的命令置于 non-named function（未命名函数） 中执行，或用在变量替换的界定范围。</div><div class="line">; ：  在前一个命令结束时，而忽略其返回值，继续执行下一個命令。</div><div class="line">&amp;&amp; ： 在前一個命令结束时，若返回值为 true，继续执行下一個命令。</div><div class="line">|| ： 在前一個命令结束时，若返回值为 false，继续执行下一個命令。</div><div class="line">!：   执行 history 列表中的命令</div></pre></td></tr></table></figure></p>
+<p>假如我们需要在command line中将这些保留元字符的功能关闭的话， 就需要 quoting 处理了。<br>在bash中，常用的 quoting 有以下三种方法：</p>
+<ul>
+<li>hard quote：’’(单引号)，凡在 hard quote 中的所有 meta 均被关闭；</li>
+<li>soft quote：””（双引号），在soft quote中的大部分meta都会被关闭，但某些保留（如$）。</li>
+<li>escape：\ （反斜线），只有紧接在escape（跳脱字符）之后的单一meta才被关闭。</li>
+</ul>
+<p>下面我们通过实验来对quote进一步的了解<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ A=B C</div><div class="line">-bash: C: command not found</div><div class="line">[ggyy@gy-vm02 ~]$ echo $A</div><div class="line"></div><div class="line">[ggyy@gy-vm02 ~]$ A=&quot;B C&quot;</div><div class="line">[ggyy@gy-vm02 ~]$ echo $A</div><div class="line">B C</div><div class="line">[ggyy@gy-vm02 ~]$</div></pre></td></tr></table></figure></p>
+<p>在给第一个A赋值的时候，由于空白符没有被关闭，command line 将被解释为： A=B 然后碰到<ifs>，接着执行C命令，所以会提示一个C命令没找到，并且A赋值也没有成功。<br>在第二次给 A 变量赋值时，由于空白符被置于 soft quote 中， 因此被关闭，不在作为IFS；<br>事实上，空白符无论在 soft quote 还是在 hard quote 中， 均被关闭。Enter 键字符亦然：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ A=&apos;B C&apos;</div><div class="line">[ggyy@gy-vm02 ~]$ echo $A</div><div class="line">B C</div></pre></td></tr></table></figure></ifs></p>
+<p>我们再来看一个例子：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ a=&apos;1</div><div class="line">&gt; 2</div><div class="line">&gt; 3</div><div class="line">&gt; &apos;</div><div class="line">[ggyy@gy-vm02 ~]$ echo &quot;$a&quot;</div><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line"></div><div class="line">[ggyy@gy-vm02 ~]$ echo $a</div><div class="line">1 2 3</div></pre></td></tr></table></figure></p>
+<p>在上例中，由于 <enter> 被置于 hard quote 当中，因此不再作为 CR 字符來处理。<br>这里的 <enter> 单纯只是一个断行符号(new-line)而已，由于 command line 并沒得到 CR 字符，<br>因此进入第二個 shell prompt (PS2，以 &gt; 符号表示)，command line 并不会结束，<br>直到第四行，我们输入的 <enter> 并不在  hard quote 里面，此时，command line 碰到 CR 字符，于是结束、交给 shell 來处理。<br>但是为什么<figure class="highlight plain"><figcaption><span>"$a" ``` 和 ```echo $a``` 会输出不一样的结果了。</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">这是因为 ```echo $a ```时的变量沒置于 soft quote 中，因此当变量替换完成后并作命令行重组时，&lt;enter&gt; 会被解释为 IFS ，而不是解释为 New Line 字符。</div><div class="line"></div><div class="line">其实我们可以用 escape 亦可关闭 CR 字符：</div></pre></td></tr></table></figure></enter></enter></enter></p>
+<p>[ggyy@gy-vm02 ~]$ a=1\</p>
+<blockquote>
+<p>2\<br>3<br>[ggyy@gy-vm02 ~]$ echo $a<br>123<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">上例中，第一个 &lt;enter&gt; 跟第二个 &lt;enter&gt; 均被 escape 字符关闭了，因此也不作为 CR 來处理，</div><div class="line">但第三个 &lt;enter&gt; 由于没有被转义，因此作为 CR 结束 command line 。</div><div class="line"></div><div class="line">至于 soft quote 跟 hard quote 的不同，主要是对于某些 meta 的关闭与否，以 $ 來作说明：</div></pre></td></tr></table></figure></p>
+</blockquote>
+<p>[ggyy@gy-vm02 ~]$ a=1<br>[ggyy@gy-vm02 ~]$ echo “$a”<br>1<br>[ggyy@gy-vm02 ~]$ echo ‘$a’<br>$a<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">在第一个echo命令行中，$ 被置于 soft quote 中，将不被关闭， 因此继续处理变量替换， 因此，echo将 a 的变量值输出到屏幕，也就是 1 的结果。</div><div class="line"></div><div class="line">在第二个echo命令行中，```$ ```被置于 hard quote 中，则被关闭， 因此，```$``` 只是一个 ```$``` 符号，并不会用来做变量替换处理， 因此结果是``` $``` 符号后面接一个 a 字母：```$a```。</div><div class="line"></div><div class="line">下面这个例子就能完美反映出他们的不同</div></pre></td></tr></table></figure></p>
+<p>[ggyy@gy-vm02 ~]$ a=b\ c<br>[ggyy@gy-vm02 ~]$ echo “$a”<br>b c<br>[ggyy@gy-vm02 ~]$ echo $a<br>b c<br>[ggyy@gy-vm02 ~]$ echo ‘“$a”‘<br>“$a”<br>[ggyy@gy-vm02 ~]$ echo “‘$a’”<br>‘b c’<br>```</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://gongyang.wiki/2016/05/15/command/" data-id="ciu2ftojz0003w5hpiru50ur7" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/05/22/dns/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          DNS -- 查询讲解
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/05/08/grep/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">linux 基础的正则表达式 -- grep</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/21/puppet/">puppet 安装</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 ggyy<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
