@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="gy blogs">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ban">
+<meta property="og:url" content="http://gongyang.wiki/page/28/index.html">
+<meta property="og:site_name" content="ban">
+<meta property="og:description" content="gy blogs">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ban">
+<meta name="twitter:description" content="gy blogs">
+  
+    <link rel="alternate" href="/atom.xml" title="ban" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">ban</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">blogs</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://gongyang.wiki"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-ftp" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/02/27/ftp/" class="article-date">
+  <time datetime="2016-02-26T16:00:00.000Z" itemprop="datePublished">2016-02-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/02/27/ftp/">记一次关于ftp使用的那些事</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>FTP，是一个相当古老的文件传输协议之一，相比大家伙都不会陌生，它的主要功能是在服务器和客户端之间进行文件的传输。由于比较古老，在安全方面比较落后，所以在实际应用当中，一般都会使用vsftp这个软件。</p>
+<p>今天我为什么要讲一讲这个大家都很熟悉的软件了，自然是我们也在使用它，并且和它也发生了那么些事。<br>关于如何安装和使用，我在这里就不具体详解了，网上资料一大把。今天我们主要来讲讲实际应用当中，遇到的那些事。</p>
+<p>我把vsftp服务搭建好了之后，创建了虚拟用户，并使用TLS协议加密登录，在公司稳稳当当的使用了一段时间，后来断断续续有人来跟我说，vsftp连接不上去；这里注明一下，我们是使用filezilla客户端进行连接的。我跑到安装vsftp的服务器上面查看，发现虽然客户端那边断开了，但是还是有进程在，开始以为是客户端的问题，我把进程kill之后，就能正常连接了。但是后来，一直都有类似的问题出现，我把服务端这边的配置都重新清理了一遍，实在是找不到原因。直到有一次，ftp又出现不能连接的问题之后，我是用netstat查看ftp端口发现是close_wait状态，我仿佛像是抓到了救命稻草一样，发现了问题的所在，虽然我不知道这是什么意思，但我敢肯定，问题就在这。</p>
+<p>首先我们知道，如果我们的服务器程序处于CLOSE_WAIT状态的话，说明套接字是被动关闭的！<br>因为如果是CLIENT端主动断掉当前连接的话，那么双方关闭这个TCP连接共需要四个packet：</p>
+<p>Client –-&gt; FIN  –-&gt; Server<br>Client &lt;–- ACK  &lt;–- Server<br>这时候Client端处于FIN_WAIT_2状态；而Server 程序处于CLOSE_WAIT状态。<br>Client &lt;–- FIN  &lt;–- Server<br>这时Server 发送FIN给Client，Server 就置为LAST_ACK状态。<br>Client –-&gt; ACK  –-&gt; Server<br>Client回应了ACK，那么Server 的套接字才会真正置为CLOSED状态。</p>
+<p>Server 程序处于CLOSE_WAIT状态，而不是LAST_ACK状态，说明还没有发FIN给Client，那么可能是在关闭连接之前还有许多数据要发送或者其他事要做，导致没有发这个FIN packet。<br>通常来说，一个CLOSE_WAIT会维持至少2个小时的时间（这个时间外网服务器通常会做调整，要不然太危险了）。如果有个流氓特地写了个程序，给你造成一堆的CLOSE_WAIT，消耗你的资源，那么通常是等不到释放那一刻，系统就已经解决崩溃了。<br>只能通过修改一下TCP/IP的参数，来缩短这个时间：修改tcp<em>keepalive</em>*系列参数有助于解决这个问题。<br>其实一个close_wait并不会导致ftp服务不可用，问题就在于我们是使用ftp被动连接模式，并且只对外打开了一个端口。如果产生了一个close_wait，那么相应的端口也被占用了，那么这个时候，其他人就连接不上去了，或者等两个小时之后等服务器自动断开。<br>解决方法，要么修改TCP/IP参数，这个比较麻烦，所以采用第二种方式，增加一个端口，由于是被动模式，我们是可以在配置文件里面定义对外的端口范围。我在原来的基础上增加了一个对外的端口，如果有一个端口处于close_wait状态，至少还有一个可以使用，果然到现在只出现过一次连接不上的问题了。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://gongyang.wiki/2016/02/27/ftp/" data-id="ciu2ftokf000bw5hpbgolkwja" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+
+  <nav id="page-nav">
+    <a class="extend prev" rel="prev" href="/page/27/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="page-number" href="/page/27/">27</a><span class="page-number current">28</span><a class="page-number" href="/page/29/">29</a><a class="page-number" href="/page/30/">30</a><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/29/">__('next') &raquo;</a>
+  </nav>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/21/puppet/">puppet 安装</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 ggyy<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
