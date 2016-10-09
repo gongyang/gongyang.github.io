@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Linux防DDOS攻击软件--DDoS-Deflate | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="简介DDoS-Deflate是一款免费的用来防御和减轻DDoS攻击的脚本。它通过netstat监测跟踪创建大量网络连接的IP地址，在检测到某个结点超过预设的限制时，该程序会通过APF或IPTABLES禁止或阻挡这些IP.这个工具对大量模拟的假IP地址效果不是很明显
+如何确认是否受到DDOS攻击？使用下面这条命令进行查看netstat -ntu | awk ‘{print $5}’ | cut -d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux防DDOS攻击软件--DDoS-Deflate">
+<meta property="og:url" content="http://yoursite.com/2016/04/03/ddos/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="简介DDoS-Deflate是一款免费的用来防御和减轻DDoS攻击的脚本。它通过netstat监测跟踪创建大量网络连接的IP地址，在检测到某个结点超过预设的限制时，该程序会通过APF或IPTABLES禁止或阻挡这些IP.这个工具对大量模拟的假IP地址效果不是很明显
+如何确认是否受到DDOS攻击？使用下面这条命令进行查看netstat -ntu | awk ‘{print $5}’ | cut -d">
+<meta property="og:updated_time" content="2016-10-09T08:53:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux防DDOS攻击软件--DDoS-Deflate">
+<meta name="twitter:description" content="简介DDoS-Deflate是一款免费的用来防御和减轻DDoS攻击的脚本。它通过netstat监测跟踪创建大量网络连接的IP地址，在检测到某个结点超过预设的限制时，该程序会通过APF或IPTABLES禁止或阻挡这些IP.这个工具对大量模拟的假IP地址效果不是很明显
+如何确认是否受到DDOS攻击？使用下面这条命令进行查看netstat -ntu | awk ‘{print $5}’ | cut -d">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-ddos" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/03/ddos/" class="article-date">
+  <time datetime="2016-04-02T16:00:00.000Z" itemprop="datePublished">2016-04-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Linux防DDOS攻击软件--DDoS-Deflate
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><a href="https://github.com/jgmdev/ddos-deflate" target="_blank" rel="external">DDoS-Deflate</a>是一款免费的用来防御和减轻DDoS攻击的脚本。它通过netstat监测跟踪创建大量网络连接的IP地址，在检测到某个结点超过预设的限制时，该程序会通过APF或IPTABLES禁止或阻挡这些IP.<br>这个工具对大量模拟的假IP地址效果不是很明显</p>
+<p>如何确认是否受到DDOS攻击？<br>使用下面这条命令进行查看<br>netstat -ntu | awk ‘{print $5}’ | cut -d: -f1 | sort | uniq -c | sort -n<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">[bhuser@boohee-rc ~]$ netstat -ntu | awk &apos;&#123;print $5&#125;&apos; | cut -d: -f1 | sort | uniq -c | sort -n</div><div class="line">      1 101.200.31.129</div><div class="line">      1 101.200.31.147</div><div class="line">      1 103.240.124.9</div><div class="line">      1 192.168.1.18</div><div class="line">      1 64.125.239.126</div><div class="line">      1 Address</div><div class="line">      1 servers)</div><div class="line">      2 114.114.114.114</div><div class="line">      2 192.168.1.64</div><div class="line">      2 210.22.84.3</div><div class="line">      2 58.246.136.4</div><div class="line">      8 192.168.1.51</div><div class="line">     16 192.168.1.16</div><div class="line">     63 </div><div class="line">     91 192.168.1.20</div><div class="line">    107 192.168.1.44</div><div class="line">    243 127.0.0.1</div></pre></td></tr></table></figure></p>
+<p>每个IP(内网IP除外)几个、十几个或几十个连接数都还算比较正常，如果某个IP连接数有几百上千就是攻击了。</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>使用root用户<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">wget https://github.com/jgmdev/ddos-deflate/archive/master.zip</div><div class="line">unzip master.zip</div><div class="line">cd ddos-deflate-master</div><div class="line">./install.sh</div></pre></td></tr></table></figure></p>
+<p>在执行install.sh可能会提示如下信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm03 ddos-deflate-master]# ./install.sh </div><div class="line">which: no tcpkill in (/usr/lib/jvm/java-7-oracle/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin)</div><div class="line">error: Required dependency &apos;tcpkill&apos; is missing.</div></pre></td></tr></table></figure></p>
+<p><strong><em>tcpkill</em></strong><br>当遇到TCP链接迟迟不能释放的情况，类似FIN_WAIT1、FIN_WAIT2的状态，释放时间不确定，而且对应的程序已经关闭，相应的端口也不再监听，无法通过杀进程来解决，这种情况下，为了快速恢复正常，不得不采用重启服务器的方法加以解决，Linux下可以借助dsniff包中含有tcpkill命令，该命令可以将上述状态的TCP链接加以清除</p>
+<p><strong><em>下载dsniff rpm包</em></strong><br>wget <a href="http://mirrors.zju.edu.cn/epel/6/x86_64/libnet-1.1.6-7.el6.x86_64.rpm" target="_blank" rel="external">http://mirrors.zju.edu.cn/epel/6/x86_64/libnet-1.1.6-7.el6.x86_64.rpm</a><br>wget <a href="http://mirrors.zju.edu.cn/epel/6/x86_64/libnids-1.24-1.el6.x86_64.rpm" target="_blank" rel="external">http://mirrors.zju.edu.cn/epel/6/x86_64/libnids-1.24-1.el6.x86_64.rpm</a><br>wget <a href="http://mirrors.zju.edu.cn/epel/6/x86_64/dsniff-2.4-0.17.b1.el6.x86_64.rpm" target="_blank" rel="external">http://mirrors.zju.edu.cn/epel/6/x86_64/dsniff-2.4-0.17.b1.el6.x86_64.rpm</a><br>其中libnet和libnids是两个依赖包</p>
+<p>再次执行install.sh<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm03 ddos-deflate-master]# ./install.sh </div><div class="line"></div><div class="line">Installing DOS-Deflate 0.8</div><div class="line"></div><div class="line">Adding: /etc/ddos/ddos.conf... (done)</div><div class="line">Adding: /etc/ddos/ignore.ip.list... (done)</div><div class="line">Adding: /etc/ddos/ignore.host.list... (done)</div><div class="line">Adding: /usr/local/ddos/LICENSE... (done)</div><div class="line">Adding: /usr/local/ddos/ddos.sh... (done)</div><div class="line">Creating ddos script: /usr/local/sbin/ddos... (done)</div><div class="line">Adding man page... (done)</div><div class="line">Adding logrotate configuration... (done)</div><div class="line"></div><div class="line">Setting up init script... (done)</div><div class="line">Activating ddos service... (done)</div><div class="line"></div><div class="line">Installation has completed!</div><div class="line">Config files are located at /etc/ddos/</div><div class="line"></div><div class="line">Please send in your comments and/or suggestions to:</div><div class="line">https://github.com/jgmdev/ddos-deflate/issues</div></pre></td></tr></table></figure></p>
+<p>可以看到，主要配置文件在/etc/ddos/<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm03 ddos]# cd /etc/ddos/</div><div class="line">[root@gy-vm03 ddos]# ls</div><div class="line">ddos.conf  ignore.host.list  ignore.ip.list</div><div class="line">[root@gy-vm03 ddos]#</div></pre></td></tr></table></figure></p>
+<p>ddos.conf是主配置文件<br>ignore.host.list 你可以添加主机名到这个文件里面做为白名单</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">boohee.com</div><div class="line">www.boohee.com</div></pre></td></tr></table></figure>
+<p>ignore.ip.list  你可以添加IP到这个文件里面做为白名单</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">192.168.1.20</div></pre></td></tr></table></figure>
+<p>安装完成之后，系统默认启动了ddos<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm03 ddos]# ps aux | grep ddos</div><div class="line">root      2616  0.1  0.1  11472  1456 pts/0    S    20:34   0:01 /bin/bash /usr/local/ddos/ddos.sh -l</div><div class="line">root      5945  0.0  0.0 103252   836 pts/0    S+   20:48   0:00 grep ddos</div><div class="line">[root@gy-vm03 ddos]#</div></pre></td></tr></table></figure></p>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>ddos.conf是它的主配置文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"># Paths of the script and other files</div><div class="line">PROGDIR=&quot;/usr/local/ddos&quot; </div><div class="line">SBINDIR=&quot;/usr/local/sbin&quot;</div><div class="line">PROG=&quot;$PROGDIR/ddos.sh&quot;</div><div class="line">IGNORE_IP_LIST=&quot;ignore.ip.list&quot;</div><div class="line">IGNORE_HOST_LIST=&quot;ignore.host.list&quot;</div><div class="line">CRON=&quot;/etc/cron.d/ddos&quot;</div><div class="line"># Make sure your APF version is atleast 0.96</div><div class="line">APF=&quot;/usr/sbin/apf&quot;</div><div class="line">CSF=&quot;/usr/sbin/csf&quot;</div><div class="line">IPT=&quot;/sbin/iptables&quot;</div><div class="line"></div><div class="line"># frequency in minutes for running the script as a cron job</div><div class="line"># Caution: Every time this setting is changed, run the script with --cron</div><div class="line">#          option so that the new frequency takes effect</div><div class="line">FREQ=1  //检查时间间隔，默认1分钟</div><div class="line"></div><div class="line"># frequency in seconds when running as a daemon</div><div class="line">DAEMON_FREQ=5</div><div class="line"></div><div class="line"># How many connections define a bad IP? Indicate that below.</div><div class="line">NO_OF_CONNECTIONS=150 //最大连接数，超过这个数IP就会被屏蔽，默认150</div><div class="line"></div><div class="line"># The firewall to use for blocking/unblocking, valid values are:</div><div class="line"># auto, apf, csf and iptables</div><div class="line">FIREWALL=&quot;iptables&quot;</div><div class="line"></div><div class="line"># An email is sent to the following address when an IP is banned.</div><div class="line"># Blank would suppress sending of mails</div><div class="line">EMAIL_TO=&quot;root&quot; //当IP被屏蔽时给指定邮箱发送邮件，推荐使用，换成自己的邮箱即可</div><div class="line"></div><div class="line"># Number of seconds the banned ip should remain in blacklist.</div><div class="line">BAN_PERIOD=600 //禁用IP留在黑名单中的时间，默认600秒，可根据情况调整</div><div class="line"></div><div class="line"># Connection states to block. See: man netstat</div><div class="line">CONN_STATES=&quot;ESTABLISHED|SYN_SENT|SYN_RECV|FIN_WAIT1|FIN_WAIT2|TIME_WAIT|CLOSE_WAIT|LAST_ACK|CLOSING&quot;</div></pre></td></tr></table></figure></p>
+<p>这个软件的关键程序就是这个ddos.sh脚本，原理是利用cron定时执行一次ddos.sh脚本，而ddos.sh通过执行netstat命令获取到异常的IP列表，添加到iptables中去。</p>
+<p><strong>tips：</strong><br><strong>crontab任务是要执行ddos -c来创建的，更多参数请执行ddos –help查看</strong></p>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>这里我们使用ab测试工具来检验一下<br>测试用到下面两台虚拟机<br>192.168.1.105  vm02 安装了ddos-deflate，并且是nginx服务器<br>192.168.1.104  vm03 测试机器<br>首先在vm03上面正常访问<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm03 ~]# curl -I ban1.gy.com</div><div class="line">HTTP/1.1 200 OK</div><div class="line">Server: Tengine/2.1.0</div><div class="line">Date: Sun, 03 Apr 2016 13:13:53 GMT</div><div class="line">Content-Type: text/html</div><div class="line">Content-Length: 5</div><div class="line">Last-Modified: Mon, 30 Nov 2015 17:18:12 GMT</div><div class="line">Connection: keep-alive</div><div class="line">ETag: &quot;565c84d4-5&quot;</div><div class="line">Accept-Ranges: bytes</div></pre></td></tr></table></figure></p>
+<p>接下来在vm03上面使用ab测试工具<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm03 ~]# ab -c 1 -n 100 http://ban1.gy.com/inex.html</div></pre></td></tr></table></figure></p>
+<p>然后再到vm02上面查看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# netstat -ntu | awk &apos;&#123;print $5&#125;&apos; | cut -d: -f1 | sort | uniq -c | sort -n</div><div class="line">      1 192.168.168.1</div><div class="line">      1 Address</div><div class="line">      1 servers)</div><div class="line">    100 192.168.10.104</div></pre></td></tr></table></figure></p>
+<p>使用iptable查看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# iptables -L -n</div><div class="line">Chain INPUT (policy ACCEPT)</div><div class="line">target     prot opt source               destination         </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           state RELATED,ESTABLISHED </div><div class="line">ACCEPT     icmp --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           state NEW tcp dpt:22 </div><div class="line">ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           state NEW tcp dpt:873 </div><div class="line">ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           state NEW tcp dpt:80 </div><div class="line">REJECT     all  --  0.0.0.0/0            0.0.0.0/0           reject-with icmp-host-prohibited </div><div class="line"></div><div class="line">Chain FORWARD (policy ACCEPT)</div><div class="line">target     prot opt source               destination         </div><div class="line">DOCKER     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           ctstate RELATED,ESTABLISHED </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">REJECT     all  --  0.0.0.0/0            0.0.0.0/0           reject-with icmp-host-prohibited </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line"></div><div class="line">Chain OUTPUT (policy ACCEPT)</div><div class="line">target     prot opt source               destination         </div><div class="line"></div><div class="line">Chain DOCKER (1 references)</div><div class="line">target     prot opt source               destination</div></pre></td></tr></table></figure></p>
+<p>此时并没有添加进来</p>
+<p>再次到vm03上面测试<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm03 ~]# ab -c 1 -n 300 http://ban1.gy.com/inex.html</div></pre></td></tr></table></figure></p>
+<p>然后到vm02上面进行查看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# iptables -L -n</div><div class="line">Chain INPUT (policy ACCEPT)</div><div class="line">target     prot opt source               destination         </div><div class="line">DROP       all  --  192.168.10.104       0.0.0.0/0           </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           state RELATED,ESTABLISHED </div><div class="line">ACCEPT     icmp --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           state NEW tcp dpt:22 </div><div class="line">ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           state NEW tcp dpt:873 </div><div class="line">ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           state NEW tcp dpt:80 </div><div class="line">REJECT     all  --  0.0.0.0/0            0.0.0.0/0           reject-with icmp-host-prohibited </div><div class="line"></div><div class="line">Chain FORWARD (policy ACCEPT)</div><div class="line">target     prot opt source               destination         </div><div class="line">DOCKER     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           ctstate RELATED,ESTABLISHED </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line">REJECT     all  --  0.0.0.0/0            0.0.0.0/0           reject-with icmp-host-prohibited </div><div class="line">ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           </div><div class="line"></div><div class="line">Chain OUTPUT (policy ACCEPT)</div><div class="line">target     prot opt source               destination         </div><div class="line"></div><div class="line">Chain DOCKER (1 references)</div><div class="line">target     prot opt source               destination</div></pre></td></tr></table></figure></p>
+<p>此时192.168.10.104被添加了进来<br>并且在bhvm02上面查看日志<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# tail /var/log/ddos.log </div><div class="line">[2016-03-29 20:02:28] daemon started</div><div class="line">[2016-03-29 20:02:50] banned 192.168.1.124 with 13557 connections for ban period 600</div><div class="line">[2016-03-29 20:12:55] unbanned 192.168.1.124</div><div class="line">[2016-03-29 20:13:00] banned 192.168.1.124 with 600 connections for ban period 600</div><div class="line">[2016-03-29 20:23:17] unbanned 192.168.1.124</div><div class="line">[2016-03-29 23:31:56] daemon started</div><div class="line">[2016-03-30 09:50:37] daemon started</div><div class="line">[2016-04-03 21:12:23] added cron job</div><div class="line">[2016-04-03 21:22:06] daemon started</div><div class="line">[2016-04-03 21:22:06] banned 192.168.10.104 with 900 connections for ban period 200</div><div class="line">[root@gy-vm02 ~]#</div></pre></td></tr></table></figure></p>
+<h3 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd ddos-deflate-master</div><div class="line">./uninstall.sh</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/04/03/ddos/" data-id="ciu2e80ev00057rhpnhfw6qqt" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/04/17/iptables/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Linux 的封包过滤软件--iptables
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/27/linux-file/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">linux 文件时间atime、mtime、ctime</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/10/09/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

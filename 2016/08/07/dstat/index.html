@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>dstat--多功能系统资源统计生成工具 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="dstat–多功能系统资源统计生成工具dstat是一个用来替换vmstat、iostat、netstat、nfsstat和ifstat这些命令的工具，是一个全能系统信息统计工具，而且还可以通过使用插件扩展其功能。
+安装centos系统上直接使用yum安装1yum install dstat
+使用使用语法1dstat [-afv] [options..] [delay [count]]
+安装完成之后">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dstat--多功能系统资源统计生成工具">
+<meta property="og:url" content="http://yoursite.com/2016/08/07/dstat/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="dstat–多功能系统资源统计生成工具dstat是一个用来替换vmstat、iostat、netstat、nfsstat和ifstat这些命令的工具，是一个全能系统信息统计工具，而且还可以通过使用插件扩展其功能。
+安装centos系统上直接使用yum安装1yum install dstat
+使用使用语法1dstat [-afv] [options..] [delay [count]]
+安装完成之后">
+<meta property="og:updated_time" content="2016-10-09T08:53:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="dstat--多功能系统资源统计生成工具">
+<meta name="twitter:description" content="dstat–多功能系统资源统计生成工具dstat是一个用来替换vmstat、iostat、netstat、nfsstat和ifstat这些命令的工具，是一个全能系统信息统计工具，而且还可以通过使用插件扩展其功能。
+安装centos系统上直接使用yum安装1yum install dstat
+使用使用语法1dstat [-afv] [options..] [delay [count]]
+安装完成之后">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-dstat" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/08/07/dstat/" class="article-date">
+  <time datetime="2016-08-06T16:00:00.000Z" itemprop="datePublished">2016-08-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      dstat--多功能系统资源统计生成工具
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="dstat–多功能系统资源统计生成工具"><a href="#dstat–多功能系统资源统计生成工具" class="headerlink" title="dstat–多功能系统资源统计生成工具"></a>dstat–多功能系统资源统计生成工具</h2><p>dstat是一个用来替换vmstat、iostat、netstat、nfsstat和ifstat这些命令的工具，是一个全能系统信息统计工具，而且还可以通过使用插件扩展其功能。</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>centos系统上直接使用yum安装<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum install dstat</div></pre></td></tr></table></figure></p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>使用语法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dstat [-afv] [options..] [delay [count]]</div></pre></td></tr></table></figure></p>
+<p>安装完成之后，我们就可以直接使用dstat了，默认参数是-cdngy，分别代表显示cpu、disk、net、page、system信息，还可以在命令后面加上输出间隔时间(delay)以及输出次数(count)。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">[root@bhqa ~]# dstat 3 5</div><div class="line">----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system--</div><div class="line">usr sys idl wai hiq siq| read  writ| recv  send|  in   out | int   csw </div><div class="line"> 10   4  85   1   0   0|  46k   40k|   0     0 |5085B 3034B| 599  2316 </div><div class="line">  8   4  85   3   0   1|  24k  105k| 493B  965B|   0     0 |1744  2630 </div><div class="line"> 11   4  86   0   0   0|   0    23k|4642B 5476B|   0     0 |1653  2086 </div><div class="line">  7   3  90   0   0   0|   0     0 | 551B  738B|   0     0 |1523  1969 </div><div class="line">  7   3  90   0   0   0|   0    12k|1421B 1211B|   0     0 |1590  2010 </div><div class="line">  8   3  88   0   0   1|  67k 1365B|1607B 1008B|   0     0 |1592  1975</div></pre></td></tr></table></figure></p>
+<p>其中cpu一栏中的hiq、siq分别为硬中断和软中断次数。<br>system一栏的int、csw分别为系统的中断次数（interrupt）和上下文切换（context switch）。<br>其他常用选项<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">-c：显示CPU系统占用，用户占用，空闲，等待，中断，软件中断等信息。 </div><div class="line">-C：当有多个CPU时候，此参数可按需分别显示cpu状态，例：-C 0,1 是显示cpu0和cpu1的信息。 </div><div class="line">-d：显示磁盘读写数据大小。 </div><div class="line">-D  和-C类似，默认是显示所有磁盘信息，使用-D可以指定查看单个磁盘的信息</div><div class="line">-n：显示网络状态。 </div><div class="line">-N eth1,total：有多块网卡时，指定要显示的网卡。 </div><div class="line">-l：显示系统负载情况。 </div><div class="line">-m：显示内存使用情况。 </div><div class="line">-g：显示页面使用情况。 </div><div class="line">-p：显示进程状态。 </div><div class="line">-s：显示交换分区使用情况。 </div><div class="line">-S：类似D/N。 </div><div class="line">-r：I/O请求情况。 </div><div class="line">-y：系统状态。 </div><div class="line">--ipc：显示ipc消息队列，信号等信息。 </div><div class="line">--socket：用来显示tcp udp端口状态。 </div><div class="line">-a：此为默认选项，等同于-cdngy。 </div><div class="line">-v：等同于 -pmgdsc -D total。 </div><div class="line">--output 文件：此选项也比较有用，可以把状态信息以csv的格式重定向到指定的文件中，以便日后查看。例：dstat --output /tmp/dstat.csv</div></pre></td></tr></table></figure></p>
+<p>更多的参数请查看<a href="http://linux.die.net/man/1/dstat" target="_blank" rel="external">man dstat</a> 或者使用dstat -h来查看</p>
+<p>除了常用的功能，dstat还支持插件提供而外功能。<br>通过输入命令dstat –list查看所有参数<br>上面internal是dstat本身自带的一些监控参数；<br>下面/usr/share/dstat中是dstat的插件，这些插件可以扩展dstat的功能，如可以监控电源（battery）、mysql等。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">[root@bhqa ~]# dstat --list</div><div class="line">internal:</div><div class="line">	aio, cpu, cpu24, disk, disk24, disk24old, epoch, fs, int, int24, io, ipc, load, lock, mem, net, page, page24, </div><div class="line">	proc, raw, socket, swap, swapold, sys, tcp, time, udp, unix, vm</div><div class="line">/usr/share/dstat:</div><div class="line">	battery, battery-remain, cpufreq, dbus, disk-util, fan, freespace, gpfs, gpfs-ops, helloworld, innodb-buffer, </div><div class="line">	innodb-io, innodb-ops, lustre, memcache-hits, mysql-io, mysql-keys, mysql5-cmds, mysql5-conn, mysql5-io, </div><div class="line">	mysql5-keys, net-packets, nfs3, nfs3-ops, nfsd3, nfsd3-ops, ntp, postfix, power, proc-count, rpc, rpcd, </div><div class="line">	sendmail, snooze, thermal, top-bio, top-cpu, top-cputime, top-cputime-avg, top-io, top-latency, </div><div class="line">	top-latency-avg, top-mem, top-oom, utmp, vm-memctl, vmk-hba, vmk-int, vmk-nic, vz-cpu, vz-io, vz-ubc, wifi</div></pre></td></tr></table></figure></p>
+<p>例如通过–top-(io|bio|cpu|cputime|cputime-avg|mem) 这几个选项，可以看到具体是那个用户那个进程占用了相关系统资源，对系统调优非常有效。如查看当前占用I/O、cpu、内存等最高的进程信息可以使用dstat –top-mem –top-io –top-cpu。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/08/07/dstat/" data-id="ciu2e80f4000a7rhpp0pqyrbn" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/08/13/08-13/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          在nginx层配置某段逻辑按照时间段生效
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/07/28/sar/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">linux 系统运维工具--sar</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/10/09/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ngxtop---nginx日志实时监控工具 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="ngxtop—nginx日志实时监控工具前言在工作当中，我们会经常通过tail -f去实时查看nginx的日志，但是这样很难提取到有用的信息，今天我们就来介绍一个好用的工具，ngxtop。ngxtop是一个实时查看nginx日志，并能对其进行分析的工具，它的输出有点类似于我们常用的top命令
+安装由于ngxtop是用python编写的，首先得安装依赖库pip然后我们使用如下命令安装ngxtop1[">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ngxtop---nginx日志实时监控工具">
+<meta property="og:url" content="http://yoursite.com/2016/09/17/ngxtop/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="ngxtop—nginx日志实时监控工具前言在工作当中，我们会经常通过tail -f去实时查看nginx的日志，但是这样很难提取到有用的信息，今天我们就来介绍一个好用的工具，ngxtop。ngxtop是一个实时查看nginx日志，并能对其进行分析的工具，它的输出有点类似于我们常用的top命令
+安装由于ngxtop是用python编写的，首先得安装依赖库pip然后我们使用如下命令安装ngxtop1[">
+<meta property="og:updated_time" content="2016-10-09T08:53:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ngxtop---nginx日志实时监控工具">
+<meta name="twitter:description" content="ngxtop—nginx日志实时监控工具前言在工作当中，我们会经常通过tail -f去实时查看nginx的日志，但是这样很难提取到有用的信息，今天我们就来介绍一个好用的工具，ngxtop。ngxtop是一个实时查看nginx日志，并能对其进行分析的工具，它的输出有点类似于我们常用的top命令
+安装由于ngxtop是用python编写的，首先得安装依赖库pip然后我们使用如下命令安装ngxtop1[">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-ngxtop" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/09/17/ngxtop/" class="article-date">
+  <time datetime="2016-09-16T16:00:00.000Z" itemprop="datePublished">2016-09-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ngxtop---nginx日志实时监控工具
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="ngxtop—nginx日志实时监控工具"><a href="#ngxtop—nginx日志实时监控工具" class="headerlink" title="ngxtop—nginx日志实时监控工具"></a>ngxtop—nginx日志实时监控工具</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>在工作当中，我们会经常通过tail -f去实时查看nginx的日志，但是这样很难提取到有用的信息，今天我们就来介绍一个好用的工具，<a href="https://github.com/lebinh/ngxtop" target="_blank" rel="external">ngxtop</a>。<br>ngxtop是一个实时查看nginx日志，并能对其进行分析的工具，它的输出有点类似于我们常用的top命令</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>由于ngxtop是用python编写的，首先得安装依赖库<a href="http://ask.xmodulo.com/install-pip-linux.html" target="_blank" rel="external">pip</a><br>然后我们使用如下命令安装ngxtop<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# pip install ngxtop</div></pre></td></tr></table></figure></p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>我们使用ngxtop –help查看使用方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# ngxtop --help</div><div class="line">ngxtop - ad-hoc query for nginx access log.</div><div class="line"></div><div class="line">Usage:</div><div class="line">    ngxtop [options]</div><div class="line">    ngxtop [options] (print|top|avg|sum) &lt;var&gt; ...</div><div class="line">    ngxtop info</div><div class="line">    ngxtop [options] query &lt;query&gt; ...</div><div class="line"></div><div class="line">Options:</div><div class="line">    -l &lt;file&gt;, --access-log &lt;file&gt;  access log file to parse.</div><div class="line">    -f &lt;format&gt;, --log-format &lt;format&gt;  log format as specify in log_format directive. [default: combined]</div><div class="line">    --no-follow  ngxtop default behavior is to ignore current lines in log</div><div class="line">                     and only watch for new lines as they are written to the access log.</div><div class="line">                     Use this flag to tell ngxtop to process the current content of the access log instead.</div><div class="line">    -t &lt;seconds&gt;, --interval &lt;seconds&gt;  report interval when running in follow mode [default: 2.0]</div><div class="line"></div><div class="line">    -g &lt;var&gt;, --group-by &lt;var&gt;  group by variable [default: request_path]</div><div class="line">    -w &lt;var&gt;, --having &lt;expr&gt;  having clause [default: 1]</div><div class="line">    -o &lt;var&gt;, --order-by &lt;var&gt;  order of output for default query [default: count]</div><div class="line">    -n &lt;number&gt;, --limit &lt;number&gt;  limit the number of records included in report for top command [default: 10]</div><div class="line">    -a &lt;exp&gt; ..., --a &lt;exp&gt; ...  add exp (must be aggregation exp: sum, avg, min, max, etc.) into output</div><div class="line"></div><div class="line">    -v, --verbose  more verbose output</div><div class="line">    -d, --debug  print every line and parsed record</div><div class="line">    -h, --help  print this help message.</div><div class="line">    --version  print version information.</div><div class="line"></div><div class="line">    Advanced / experimental options:</div><div class="line">    -c &lt;file&gt;, --config &lt;file&gt;  allow ngxtop to parse nginx config file for log format and location.</div><div class="line">    -i &lt;filter-expression&gt;, --filter &lt;filter-expression&gt;  filter in, records satisfied given expression are processed.</div><div class="line">    -p &lt;filter-expression&gt;, --pre-filter &lt;filter-expression&gt; in-filter expression to check in pre-parsing phase.</div></pre></td></tr></table></figure></p>
+<p><strong>实时监控日志</strong><br>ngxtop -l /usr/local/nginx/logs/access.log<br>这样，我们所看到的就类似于top命令一样的输出，当然我们可以加上-n参数，显示最多的几行信息。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">running for 8 seconds, 154 records processed: 19.01 req/sec</div><div class="line"></div><div class="line">Summary:</div><div class="line">|   count |   avg_bytes_sent |   2xx |   3xx |   4xx |   5xx |</div><div class="line">|---------+------------------+-------+-------+-------+-------|</div><div class="line">|     154 |          133.260 |    31 |   123 |     0 |     0 |</div><div class="line"></div><div class="line">Detailed:</div><div class="line">| request_path              |   count |   avg_bytes_sent |   2xx |   3xx |   4xx |   5xx |</div><div class="line">|---------------------------+---------+------------------+-------+-------+-------+-------|</div><div class="line">| /api/v1/patch             |	   89 |            0.607 |    12 |    77 |     0 |     0 |</div><div class="line">| /api/v1/tabbar_settings   |      35 |           12.229 |     4 |    31 |     0 |     0 |</div><div class="line">| /api/v1/carts             |      16 |          141.000 |    11 |     5 |     0 |     0 |</div><div class="line">| /api/v1/carts.json        |       6 |            0.000 |     0 |     6 |     0 |     0 |</div><div class="line">| /api/v1/orders/stats.json |       4 |            0.000 |     0 |     4 |     0 |     0 |</div></pre></td></tr></table></figure></p>
+<p>如果要分析以前的日志，我们可以加上–no-follow参数，默认是分析实时的日志，而不会分析以前的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">[root@bhqa logs]# ngxtop -l passport-access.log --no-follow</div><div class="line">running for 4 seconds, 46051 records processed: 13119.42 req/sec</div><div class="line"></div><div class="line">Summary:</div><div class="line">|   count |   avg_bytes_sent |   2xx |   3xx |   4xx |   5xx |</div><div class="line">|---------+------------------+-------+-------+-------+-------|</div><div class="line">|   46051 |          628.178 | 38283 |  4024 |  3642 |   102 |</div><div class="line"></div><div class="line">Detailed:</div><div class="line">| request_path                              |   count |   avg_bytes_sent |   2xx |   3xx |   4xx |   5xx |</div><div class="line">|-------------------------------------------+---------+------------------+-------+-------+-------+-------|</div><div class="line">| /api/v1/users/(null)                      |   13094 |          307.985 | 12910 |     2 |   178 |     4 |</div><div class="line">| /api/v1/users/login                       |    7395 |          320.068 |  6211 |     0 |  1181 |     3 |</div><div class="line">| /login                                    |    6153 |         1989.940 |  6083 |    33 |    27 |    10 |</div><div class="line">| /admin/sessions                           |    3355 |          462.457 |   489 |  2791 |    75 |     0 |</div><div class="line">| /api/v1/user_connections.json             |    2011 |           94.427 |  1864 |   124 |    14 |     9 |</div><div class="line">| /api/v1/users/3819                        |    1378 |          344.372 |  1377 |     0 |     1 |     0 |</div><div class="line">| /api/v1/user_connections/authenticate_sns |    1219 |          827.696 |  1132 |     0 |    48 |    39 |</div><div class="line">| /api/v1/user_connections                  |     999 |          108.591 |   513 |   435 |    49 |     2 |</div><div class="line">| /api/v1/users/14                          |     798 |          348.147 |   798 |     0 |     0 |     0 |</div><div class="line">| /admin/users                              |     716 |         1285.564 |   444 |   249 |    23 |     0 |</div></pre></td></tr></table></figure></p>
+<p>我们还可以使用-g -o参数对结果进行group和order<br><strong>order-by</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">[root@bhqa logs]# ngxtop -l passport-access.log --no-follow -o &quot;avg_bytes_sent&quot;</div><div class="line">running for 4 seconds, 46051 records processed: 13151.85 req/sec</div><div class="line"></div><div class="line">Summary:</div><div class="line">|   count |   avg_bytes_sent |   2xx |   3xx |   4xx |   5xx |</div><div class="line">|---------+------------------+-------+-------+-------+-------|</div><div class="line">|   46051 |          628.178 | 38283 |  4024 |  3642 |   102 |</div><div class="line"></div><div class="line">Detailed:</div><div class="line">| request_path                  |   count |   avg_bytes_sent |   2xx |   3xx |   4xx |   5xx |</div><div class="line">|-------------------------------+---------+------------------+-------+-------+-------+-------|</div><div class="line">| /admin/administrators/64/edit |       1 |         3409.000 |     1 |     0 |     0 |     0 |</div><div class="line">| /admin/administrators/20/edit |       1 |         3402.000 |     1 |     0 |     0 |     0 |</div><div class="line">| /admin/administrators/46/edit |       2 |         3398.000 |     2 |     0 |     0 |     0 |</div><div class="line">| /admin/administrators/71/edit |       3 |         3387.667 |     3 |     0 |     0 |     0 |</div><div class="line">| /admin/administrators/69/edit |       1 |         3384.000 |     1 |     0 |     0 |     0 |</div><div class="line">| /admin/administrators/56/edit |       3 |         3374.333 |     3 |     0 |     0 |     0 |</div><div class="line">| /admin/administrators/63/edit |       4 |         3308.500 |     4 |     0 |     0 |     0 |</div><div class="line">| /admin/administrators/66/edit |       3 |         3058.333 |     3 |     0 |     0 |     0 |</div><div class="line">| /admin/administrators/36/edit |       1 |         3053.000 |     1 |     0 |     0 |     0 |</div><div class="line">| /admin/administrators/54/edit |       7 |         2954.714 |     7 |     0 |     0 |     0 |</div></pre></td></tr></table></figure></p>
+<p><strong>group-by</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">[root@bhqa logs]# ngxtop -l passport-access.log --no-follow -g remote_addr</div><div class="line">running for 3 seconds, 46051 records processed: 13252.85 req/sec</div><div class="line"></div><div class="line">Summary:</div><div class="line">|   count |   avg_bytes_sent |   2xx |   3xx |   4xx |   5xx |</div><div class="line">|---------+------------------+-------+-------+-------+-------|</div><div class="line">|   46051 |          628.178 | 38283 |  4024 |  3642 |   102 |</div><div class="line"></div><div class="line">Detailed:</div><div class="line">| remote_addr    |   count |   avg_bytes_sent |   2xx |   3xx |   4xx |   5xx |</div><div class="line">|----------------+---------+------------------+-------+-------+-------+-------|</div><div class="line">| 58.246.136.4   |   29045 |          563.002 | 23989 |  3199 |  1795 |    62 |</div><div class="line">| 58.246.136.2   |   11409 |          530.525 |  9520 |   641 |  1218 |    30 |</div><div class="line">| 127.0.0.1      |     224 |          139.362 |   185 |     0 |    39 |     0 |</div><div class="line">| 211.22.145.234 |     215 |          307.242 |   214 |     1 |     0 |     0 |</div><div class="line">| 101.80.45.210  |     170 |          335.000 |   170 |     0 |     0 |     0 |</div><div class="line">| 222.65.137.160 |     149 |          259.685 |   144 |     0 |     5 |     0 |</div><div class="line">| 116.230.205.93 |     116 |          338.828 |   116 |     0 |     0 |     0 |</div><div class="line">| 101.229.195.1  |     108 |          314.370 |   100 |     0 |     8 |     0 |</div><div class="line">| 180.164.242.31 |     104 |          474.654 |    53 |     0 |    51 |     0 |</div><div class="line">| 114.88.231.181 |      90 |          264.633 |    89 |     0 |     1 |     0 |</div></pre></td></tr></table></figure></p>
+<p><strong>显示400或更高返回状态码</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">[root@bhqa logs]# ngxtop -l passport-access.log --no-follow -n 5 -i &apos;status &gt;=400&apos; print remote_addr status </div><div class="line">running for 4 seconds, 3744 records processed: 972.38 req/sec</div><div class="line"></div><div class="line">remote_addr, status:</div><div class="line">| remote_addr     |   status |</div><div class="line">|-----------------+----------|</div><div class="line">| 1.188.172.188   |      401 |</div><div class="line">| 101.226.227.95  |      404 |</div><div class="line">| 101.226.33.201  |      404 |</div><div class="line">| 101.226.33.216  |      404 |</div><div class="line">| 101.226.33.219  |      404 |</div><div class="line">| 101.226.51.226  |      404 |</div><div class="line">| 101.226.64.174  |      404 |</div><div class="line">| 101.226.65.104  |      499 |</div><div class="line">| 101.226.66.191  |      404 |</div><div class="line">| 101.229.17.2    |      404 |</div><div class="line">| 101.229.195.1   |      401 |</div><div class="line">| 101.229.30.8    |      404 |</div><div class="line">| 103.240.124.89  |      401 |</div><div class="line">| 107.191.53.74   |      401 |</div><div class="line">| 107.191.53.74   |      404 |</div><div class="line">| 108.61.200.226  |      404 |</div><div class="line">| 111.206.36.13   |      401 |</div><div class="line">| 112.224.67.54   |      400 |</div><div class="line">| 112.64.189.74   |      401 |</div><div class="line">| 112.64.235.247  |      500 |</div><div class="line">| 112.64.235.91   |      404 |</div></pre></td></tr></table></figure></p>
+<p>另外一些变量可以在分析时用到，名字含义同日志格式里的设置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">remote_addr、remote_user、time_local、request、request_path、status、body_bytes_sent、http_referer、http_user_agent</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/09/17/ngxtop/" data-id="ciu2e80fp000l7rhpkpi43w7p" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/09/25/php-cgi/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          使用Spawn-FCGI管理php-cgi
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/09/04/conntrack/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">系统内核参数--nf_conntrack</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/10/09/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

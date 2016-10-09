@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>小米开源监控open-falcon | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="小米开源监控open-falcon最近一段时间都在研究小米开源的监控项目open-falcon，为什么要研究它，当然是要用到它才回去学习它。做为一款国内开源的监控项目，在某些功能细节还有待完善，但还是有其自己特点所在。
+具体安装我这里就不啰嗦了，详细请参考官方文档。
+体系架构了解一款软件，我们先从它的体系架构入手，下面这个就是open-falcon的体积结构图
+
+falcon-agent：agen">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小米开源监控open-falcon">
+<meta property="og:url" content="http://yoursite.com/2016/06/19/open_falcon/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="小米开源监控open-falcon最近一段时间都在研究小米开源的监控项目open-falcon，为什么要研究它，当然是要用到它才回去学习它。做为一款国内开源的监控项目，在某些功能细节还有待完善，但还是有其自己特点所在。
+具体安装我这里就不啰嗦了，详细请参考官方文档。
+体系架构了解一款软件，我们先从它的体系架构入手，下面这个就是open-falcon的体积结构图
+
+falcon-agent：agen">
+<meta property="og:image" content="http://image20.it168.com/201510_0x0/2342/78d0080e1afb0674.png">
+<meta property="og:updated_time" content="2016-10-09T08:53:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="小米开源监控open-falcon">
+<meta name="twitter:description" content="小米开源监控open-falcon最近一段时间都在研究小米开源的监控项目open-falcon，为什么要研究它，当然是要用到它才回去学习它。做为一款国内开源的监控项目，在某些功能细节还有待完善，但还是有其自己特点所在。
+具体安装我这里就不啰嗦了，详细请参考官方文档。
+体系架构了解一款软件，我们先从它的体系架构入手，下面这个就是open-falcon的体积结构图
+
+falcon-agent：agen">
+<meta name="twitter:image" content="http://image20.it168.com/201510_0x0/2342/78d0080e1afb0674.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-open_falcon" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/19/open_falcon/" class="article-date">
+  <time datetime="2016-06-18T16:00:00.000Z" itemprop="datePublished">2016-06-19</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      小米开源监控open-falcon
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="小米开源监控open-falcon"><a href="#小米开源监控open-falcon" class="headerlink" title="小米开源监控open-falcon"></a>小米开源监控open-falcon</h2><p>最近一段时间都在研究小米开源的监控项目open-falcon，为什么要研究它，当然是要用到它才回去学习它。做为一款国内开源的监控项目，在某些功能细节还有待完善，但还是有其自己特点所在。</p>
+<p>具体安装我这里就不啰嗦了，详细请参考<a href="http://book.open-falcon.org/zh/index.html" target="_blank" rel="external">官方文档</a>。</p>
+<h3 id="体系架构"><a href="#体系架构" class="headerlink" title="体系架构"></a>体系架构</h3><p>了解一款软件，我们先从它的体系架构入手，下面这个就是open-falcon的体积结构图<br><img src="http://image20.it168.com/201510_0x0/2342/78d0080e1afb0674.png" alt=""></p>
+<ul>
+<li>falcon-agent：agent用于采集机器负载监控指标，自动收集200多项指标，每隔60秒push到tranfer组件，只要安装了agent，就会自动采集数据，主动上报，不需要在server端做任何配置。</li>
+<li>transfer：transfer是数据转发服务，它接收agent上传的数据，然后通过一次性哈希对数据分片，然后将分片后的数据push到judge和graph组件。</li>
+<li>judge：judge会对transfer上传上来的数据都会进行告警判断，如果数据量比较大，一台机器肯定抗不住，所以在transfer层就对数据进行了分片，后端配置多个judge，每个judge处理一小部分数据。</li>
+<li>alarm ：judge产生的报警event会存放到redis队列，alarm会去redis队列里面拿数据，并选择告警方式。alarm并不自己发送邮件短信，是由sender模块来完成的。</li>
+<li>graph ：graph接收transfer上传上来的数据，做为绘图数据的组件，参考rrdtool的理念，在数据每次存入的时候，会自动进行采样、归档。</li>
+<li>query ：query组件，提供统一的绘图数据查询入口。query组件接收查询请求，根据一致性哈希算法去相应的graph实例查询不同metric的数据，然后汇总拿到的数据，最后统一返回给用户。</li>
+<li>dashboard ：dashboard是面向用户的查询界面。在这里，用户可以看到push到graph中的所有数据，并查看其趋势图。</li>
+<li>portal ：这个是用来配置报警策略的，数据存在mysql里面</li>
+<li>Heartbeat Server： 心跳服务器，公司所有agent都会连到HBS，每分钟发一次心跳请求。</li>
+</ul>
+<p>以上这些，就是open-falcon的主要模块，了解了这些模块，部署起来就很方便了。</p>
+<p><strong>重点</strong><br>我们知道portal用来配置监控策略的，但是portal数据库中有一个host表，用来记录公司所有机器信息，这些信息都是HBS在维护。agent在连接HBS的同时，会把hostname、ip、agent version、plugin version等信息告诉HBS，HBS负责更新host表。还有一点就是，agent虽然能收集200多项指标，但是类似与端口进程监控，agent不可能全部上传，这也不太现实。open-falcon换了另外一种思路，只对portal配置了的端口进行数据上报。那agent如何知道portal里面配置了哪些监控端口了。还是HBS，HBS会去读portal数据库，然后告诉agent。</p>
+<p>除了falcon-agent采集的数据可以push到监控系统，我们还可以自己自定义的一些数据指标，也可以push到open-falcon中。agent提供了一个http接口/v1/push用于接收用户手工push的一些数据，然后通过长连接迅速转发给Transfer。</p>
+<p><strong>特点</strong><br>1、自动发现，支持falcon-agent、snmp、支持用户主动push、用户自定义插件支持<br>2、支持每个周期上亿次的数据采集、告警判定、历史数据存储和查询<br>3、高效的portal、支持策略模板、模板继承和覆盖、多种告警方式、支持callback调用<br>4、单机支撑200万metric的上报、归档、存储<br>5、采用rrdtool的数据归档策略，秒级返回上百个metric一年的历史数据<br>6、多维度的数据展示，用户自定义Screen<br>7、通过各种插件目前支持Linux、Windows、Mysql、Redis、Memache、RabbitMQ和交换机监控。</p>
+<p><strong>缺点</strong><br>由于发布时间较短，很多基础的服务监控插件(如Tomcat、apache等)还不支持，很多功能还在不断完善中，另外由于缺少专门的支持，虽然有开放社区，但是解决问题的效率相对较低。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/19/open_falcon/" data-id="ciu2e80fu000m7rhpqqjqazpj" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/06/26/awk/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          linux实用工具之--AWK
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/05/29/nginx_upgrade/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">nginx 平滑升级</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/10/09/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

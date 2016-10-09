@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://yoursite.com/page/4/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-docker-02" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/01/31/docker-02/" class="article-date">
+  <time datetime="2016-01-30T16:00:00.000Z" itemprop="datePublished">2016-01-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/01/31/docker-02/">Docker 入门系列之--容器</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>对于Docker的安装，我这里就不专门细说了，官方有详细的安装说明，各个系统都有示例，<a href="https://docs.docker.com/" target="_blank" rel="external">Docker安装</a></p>
+<p>上一遍文章我有讲到，容器主要是用来运行进程实例的，那么我们如何来运行容器，管理容器了，请您接着往下读。</p>
+<p>首先我们查看Docker是否成功安装，我们在命令行界面输入<br>docker info<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# docker info</div><div class="line">Containers: 8</div><div class="line">Images: 58</div><div class="line">Storage Driver: devicemapper</div><div class="line"> Pool Name: docker-253:0-67837516-pool</div><div class="line"> Pool Blocksize: 65.54 kB</div><div class="line"> Backing Filesystem: xfs</div><div class="line"> Data file: /dev/loop0</div><div class="line"> Metadata file: /dev/loop1</div><div class="line"> Data Space Used: 3.963 GB</div><div class="line"> Data Space Total: 107.4 GB</div><div class="line"> Data Space Available: 35.1 GB</div><div class="line"> Metadata Space Used: 4.977 MB</div><div class="line"> Metadata Space Total: 2.147 GB</div><div class="line"> Metadata Space Available: 2.143 GB</div><div class="line"> Udev Sync Supported: true</div><div class="line"> Deferred Removal Enabled: false</div><div class="line"> Data loop file: /var/lib/docker/devicemapper/devicemapper/data</div><div class="line"> Metadata loop file: /var/lib/docker/devicemapper/devicemapper/metadata</div><div class="line"> Library Version: 1.02.107-RHEL7 (2015-10-14)</div><div class="line">Execution Driver: native-0.2</div><div class="line">Logging Driver: json-file</div><div class="line">Kernel Version: 3.10.0-327.el7.x86_64</div><div class="line">...</div></pre></td></tr></table></figure></p>
+<p>从信息中我们可以看到容器和镜像的数量，以及docker的基本配置等。如果你在输入docker info的时候出现下面的情况<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm06 ~]$ docker info</div><div class="line">Get http:///var/run/docker.sock/v1.19/info: dial unix /var/run/docker.sock: permission denied. Are you trying to connect to a TLS-enabled daemon without TLS?</div></pre></td></tr></table></figure></p>
+<p>说明你不是root用户；docker的守护进程是用root身份运行的，因为他要来处理普通用户无法完成的操作（如文件系统的挂载）。docker命令是Docker守护进程的客户端程序，同样也需要root身份运行。</p>
+<p>###接下来我们来运行第一个容器</p>
+<p>首先来看一下我的宿主机操作系统以及内核版本<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# uname -r</div><div class="line">3.10.0-327.el7.x86_64</div><div class="line">[root@gy-vm06 ~]# cat /etc/redhat-release </div><div class="line">CentOS Linux release 7.2.1511 (Core) </div><div class="line">[root@gy-vm06 ~]#</div></pre></td></tr></table></figure></p>
+<p>我的操作系统是centos 7.2 内核版本是3.10，均达到了Docker官方的推荐要求</p>
+<p>然后，运行我们的第一个容器<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# docker run -i -t centos /bin/bash</div><div class="line">Unable to find image &apos;centos:latest&apos; locally</div><div class="line">Trying to pull repository docker.io/library/centos ... latest: Pulling from library/centos</div><div class="line">838c1c5c4f83: Pull complete </div><div class="line">5764f0a31317: Pull complete </div><div class="line">60e65a8e4030: Pull complete </div><div class="line">60e65a8e4030: Pulling fs layer </div><div class="line">library/centos:latest: The image you are pulling has been verified. Important: image verification is a tech preview feature and should not be relied on to provide security.</div><div class="line"></div><div class="line"></div><div class="line">Digest: sha256:8072bc7c66c3d5b633c3fddfc2bf12d5b4c2623f7004d9eed6aae70e0e99fbd7</div><div class="line">Status: Downloaded newer image for docker.io/centos:latest</div><div class="line"></div><div class="line">[root@1ab6fed17c56 /]#</div></pre></td></tr></table></figure></p>
+<p>关于docker的参数说明，你可以查看<a href="https://docs.docker.com/engine/reference/commandline/cli/" target="_blank" rel="external">官方文档</a>，你也可以使用docker help获取命令帮助，你还可以执行man docker-run。</p>
+<p>刚刚的命令行的内容以及输出内容，我们来一一分析下。<br>docker run命令是用来创建容器的，-i 和-t是两个命令行参数。-i是表示容器中的标准输入STDIN是开启的，-t则是告诉Docker为要创建的容器分配一个伪tty终端。这样，新创建的容器才能提供一个交互式的shell。紧接着后面的参数是告诉Docker基于什么镜像来创建容器，例子中使用的centos镜像。像 ubuntu、centos这类镜像叫做基础（base）镜像，由Docker公司提供，保存在<a href="https://hub.docker.com/" target="_blank" rel="external">Docker Hub</a> Registry上。</p>
+<p>当我们执行了这条命令，Docker首先会检查本地是否有centos镜像存在，如果没有，就去直接去Docker Hub Registry上面去找，一旦找到，就会下载该镜像，并保存到本地。<br>随后，Docker在文件系统内部用这个镜像创建了一个容器，还记得上一篇文章里面有说过，创建容器，实际上是在该镜像的最上层加了一层可读写层，更具体的细节，会在后面讲镜像的时候来细致分析。该容器拥有自己的网络、IP地址，以及一个用来和宿主机进行通信的桥接网络接口。最后，我们告诉Docker要在容器中运行/bin/bash命令。</p>
+<p>###使用第一个容器</p>
+<p>创建容器之后我们就已经进入到了容器里面，我们运行hostname看看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@1ab6fed17c56 /]# hostname</div><div class="line">1ab6fed17c56</div></pre></td></tr></table></figure></p>
+<p>1ab6fed17c56就是我们的主机名。<br>再查看一下ip<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@1ab6fed17c56 /]# ip a</div><div class="line">bash: ip: command not found</div></pre></td></tr></table></figure></p>
+<p>发现没有这条命令，看来需要自己安装了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@1ab6fed17c56 /]# yum install iproute</div></pre></td></tr></table></figure></p>
+<p>安装完成之后再次查看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">[root@1ab6fed17c56 /]# ip a</div><div class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN </div><div class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</div><div class="line">    inet 127.0.0.1/8 scope host lo</div><div class="line">       valid_lft forever preferred_lft forever</div><div class="line">    inet6 ::1/128 scope host </div><div class="line">       valid_lft forever preferred_lft forever</div><div class="line">18: eth0@if19: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP </div><div class="line">    link/ether 02:42:ac:11:00:03 brd ff:ff:ff:ff:ff:ff link-netnsid 0</div><div class="line">    inet 172.17.0.3/16 scope global eth0</div><div class="line">       valid_lft forever preferred_lft forever</div><div class="line">    inet6 fe80::42:acff:fe11:3/64 scope link </div><div class="line">       valid_lft forever preferred_lft forever</div></pre></td></tr></table></figure></p>
+<p>我们看到容器的内网ip是172.17.0.3，关于容器之间的ip以及通讯，我在后面会详细讲解。<br>完成操作之后，输入exit，就可以退出容器，回到我们的宿主机上面来。当我们退出容器之后，容器也就停止了运行，只有在指定的/bin/bash命令处于运行状态的时候，我们容器才会相应的处于运行状态。一旦退出容器，bash命令也就结束了，这时容器也随之停止了。<br>我们可以通过docker ps -a 查看当前系统中所有创建了的容器。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# docker ps -a</div><div class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                        PORTS               NAMES</div><div class="line">d8de2a7f00c9        centos              &quot;/bin/bash&quot;         41 minutes ago      Exited (127) 41 minutes ago                       sleepy_yalow</div><div class="line">3b99bef09208        ubuntu              &quot;/bin/bash&quot;         48 minutes ago      Exited (127) 46 minutes ago                       happy_lalande</div><div class="line">1ab6fed17c56        centos              &quot;/bin/bash&quot;         2 hours ago         Up 38 minutes                                     berserk_fermi</div><div class="line">0da6c3122510        ubuntu              &quot;/bin/bash&quot;         2 hours ago         Exited (0) 2 hours ago                            ecstatic_aryabhata</div><div class="line">97c208baae8f        715dfae8b624        &quot;/bin/bash&quot;         2 days ago          Exited (137) 35 hours ago     8080/tcp            adoring_swartz</div></pre></td></tr></table></figure></p>
+<p>可以看到容器ID 1ab6fed17c56，其实hostname也就是容器ID，由于我没有退出容器，我是在另外一个terminal上面运行的docker ps -a，所以可以看到当前容器是UP状态。其他的都是Exited的状态。默认docker ps是显示正在运行的容器列表：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# docker ps</div><div class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</div><div class="line">1ab6fed17c56        centos              &quot;/bin/bash&quot;         2 hours ago         Up 43 minutes                           berserk_fermi</div></pre></td></tr></table></figure></p>
+<p>通过docker ps我们可以看到容器的id，来至哪个镜像，运行什么命令，创建时间，状态，打开了哪些端口，以及容器的名称。<br>有两种方式可以指定唯一容器，CONTAINER ID和NAMES。在这里，容器ID就是1ab6fed17c56，容器的名称就是berserk_fermi。这里由于我们在创建容器的时候没有指定容器的名字，Docker随机分配了一个名字，我们也可以在创建容器的时候加上 –name test<em>name 这样来给容器命名。容器的命名规则只能是一下字符：小写字母a-z、大写A-Z、数字0-9、下划线、点、横线，也就是[a-zA-Z0-9</em>.-]。</p>
+<p>我们可以使用docker start 和docker stop来启动，停止容器。还可以用docker kill快速停止容器。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# docker stop 1ab6fed17c56</div><div class="line">1ab6fed17c56</div><div class="line">[root@gy-vm06 ~]# docker start 1ab6fed17c56</div><div class="line">1ab6fed17c56</div><div class="line">[root@gy-vm06 ~]# docker ps</div><div class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</div><div class="line">1ab6fed17c56        centos              &quot;/bin/bash&quot;         3 hours ago         Up 4 seconds                            berserk_fermi</div></pre></td></tr></table></figure></p>
+<p>启动容器之后，我们可以使用docker attach附着到容器上去<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# docker attach 1ab6fed17c56</div><div class="line"></div><div class="line">[root@1ab6fed17c56 /]#</div></pre></td></tr></table></figure></p>
+<p>这里有个细节需要注意一下，需要敲一下回车，才可以进入该会话。</p>
+<p>如果想要创建守护式进程，则是运行docker run -d来创建<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# docker run -di --name ggyy centos /bin/bash</div><div class="line">a6171f4f68a5afc7dba12f4b88c04d78b816f12c3f5ccd005989e5531e309777</div><div class="line">[root@gy-vm06 ~]# </div><div class="line">[root@gy-vm06 ~]# docker ps</div><div class="line">CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS               NAMES</div><div class="line">a6171f4f68a5        centos              &quot;/bin/bash&quot;         6 seconds ago        Up 5 seconds                            ggyy</div></pre></td></tr></table></figure></p>
+<p>这样就创建了一个后台运行的容器ggyy<br>我们还可以通过docker top ggyy来查看容器内部运行的进程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# docker top ggyy</div><div class="line">UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD</div><div class="line">root                4400                3819                0                   21:25               ?                   00:00:00            /bin/bash</div></pre></td></tr></table></figure></p>
+<p>如果我们想要在后台运行的容器里面再启动其他进程，或者执行一些操作命令，该怎么办了，在Docker1.3之后，我们可以通过docker exec命令来操作。<br>比如说我需要进行一个交互式的shell，那就这样<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# docker exec -it ggyy /bin/bash</div><div class="line">[root@a6171f4f68a5 /]# ps</div><div class="line">  PID TTY          TIME CMD</div><div class="line">    6 ?        00:00:00 bash</div><div class="line">   17 ?        00:00:00 ps</div></pre></td></tr></table></figure></p>
+<p>这样当你退出这个容器的时候，容器还是运行的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@a6171f4f68a5 /]# exit</div><div class="line">exit</div><div class="line">[root@gy-vm06 ~]# </div><div class="line">[root@gy-vm06 ~]# docker ps</div><div class="line">CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES</div><div class="line">a6171f4f68a5        centos              &quot;/bin/bash&quot;         9 minutes ago       Up 9 minutes                            ggyy</div><div class="line">52ab3bc1a050        centos              &quot;/bin/bash&quot;         11 minutes ago      Up 11 minutes                           furious_mahavira</div></pre></td></tr></table></figure></p>
+<p>你也可以执行一些后台任务<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# docker exec -d ggyy touch /etc/ggyy.conf</div><div class="line">[root@gy-vm06 ~]# docker exec -it ggyy /bin/bash</div><div class="line">[root@a6171f4f68a5 /]# ls /etc/ggyy.conf </div><div class="line">/etc/ggyy.conf</div></pre></td></tr></table></figure></p>
+<p>有了docker exec，我们可以在正在运行的容器中进行维护、监控以及任务管理。</p>
+<p>在有些情况下面，由于某种错误导致容器的停止运行，我么还可以添加参数–restart让容器自动重启，–restart标志会检查容器的退出代码，并据此来决定是否要重启容器。默认情况下Docker是不会重启容器的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker run  --restart=always --name=gy-ban -di centos /bin/bash</div></pre></td></tr></table></figure></p>
+<p>在上面的代码中，–restart的标志设置为always。无论容器的退出代码是什么（容器的退出代码可以通过docker ps -a 中STATUS一栏查看），Docker都会自动重启该容器。除了always，我们还可以使用on-failure，这样，只有当容器的退出代码为非0值的时候，才会自动重启（0是正常退出）。而且on-failure还可以加参数，表示重启的次数，如下面的代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">--restart=on-failure:5</div></pre></td></tr></table></figure></p>
+<p>这样，当容器的退出代码为非0时，Docker会尝试自动重启最多5次。</p>
+<p>更多的容器信息可以使用docker inspect来查看，加上参数–format或者-f可以选定查看结果<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm06 ~]# docker inspect -f &apos;&#123;&#123; .NetworkSettings.IPAddress &#125;&#125;&apos; ggyy</div><div class="line">172.17.0.7</div></pre></td></tr></table></figure></p>
+<p>-f 后面的参数是Go语言模版。</p>
+<p>最后，删除某个容器使用docker rm 就可以了，但是需要注意一下的就是，运行中的容器是不能删除的，你可以stop或者kill来停止之后，才能删除。<br>如果想要一次删除多个容器可以使用如下代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker rm `docker ps -a -q`</div></pre></td></tr></table></figure></p>
+<p>好了关于docker容器的使用，就先讲到这里。</p>
+<p>由于博客系统刚刚搭建，评论功能还没有时间去弄，所以大家对于我的博客中有什么错误的地方，或者写得不好的地方，可以往我的邮箱里面提，我的邮箱是<br>gongyang314@163.com<br>海纳百川，有容乃大！希望有什么不足的，大伙帮我来改进。</p>
+<hr>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/01/31/docker-02/" data-id="ciu2e80f100087rhpmynkovr1" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-docker-01" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/01/30/docker-01/" class="article-date">
+  <time datetime="2016-01-29T16:00:00.000Z" itemprop="datePublished">2016-01-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/01/30/docker-01/">Docker 入门系列之---认识Docker</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p> 最近有一项很火的技术，身边很多人都在讨论他，很多技术交流会上也会提到他，没错，他就是Docker。<br> Docker为什么会这么火了，我们还是先来说说另一个技术，容器。</p>
+<h3 id="容器简介"><a href="#容器简介" class="headerlink" title="容器简介"></a>容器简介</h3><p> 容器技术其实已经出来很久了，其中比较成熟有Linux的LXC、FreeBSD的Jail、Solaris的Solaris Containers。容器与管理程序虚拟化（hypervisor virtualization，HV）有所不同，管理程序的虚拟化一般都是通过中间层将一台或多台独立的机器虚拟化运行于物理硬件之上，而容器则是直接运行在操作系统内核之上的用户空间。因此，容器虚拟化也被称为“操作系统级虚拟化”，容器技术可以让多个独立的用户空间运行在同一台宿主机之上。</p>
+<p> 容器有效地将由单个操作系统管理的资源划分到孤立的组中，以更好的在孤立的组之间平衡有冲突的资源使用需求。与虚拟化相比，这样既不需要指令级模拟，也不需要即时编译。容器可以在核心CPU本地运行指令，而不需要任何专门的解释机制。此外，也避免了准虚拟化和系统调用替换中的复杂性。 通过提供一种创建和进入容器的方式，操作系统让应用程序就像在独立的机器上运行一样，但又能共享很多底层资源。例如，可以有效的共享公共文件（如glibc）的页缓存，因为所有容器都使用相同的内核，所以容器还常常共享相同的libc库（取决于容器配置）。这种共享常常可以扩展到目录中其他不需要写入内容的文件。 容器在提供隔离的同时，还通过共享这些资源节省开销，这意味着容器比真正的虚拟化开销要小很多。和传统的虚拟化以及版虚拟化相比，容器运行不需要模拟层和管理层，而是使用操作系统的系统调用接口，这降低了运行单个容器所需的开销，也使得宿主机中可以运行更多的容器。</p>
+<p> 尽管有着这么多优秀技术，但是容器一直没有得到广泛使用和认可。一方面和起安全有关系，另一个很重要的原因就是容器技术的复杂性，容器本身比较复杂，不易安装，管理和自动化也很困难。而Docker就是为改变这一切而生。</p>
+<h3 id="Docker-简介"><a href="#Docker-简介" class="headerlink" title="Docker 简介"></a>Docker 简介</h3><p> Docker 是一个开源项目，于2013年由dotCloud（现改名为Docker）公司推出，一开始其实只是公司内部的一个业余项目。他是用Go语言写的，基于Apache 2.0开源授权协议发行。项目代码在<a href="https://github.com/docker/docker" target="_blank" rel="external">GitHub</a>上进行维护。基于 <a href="https://zh.wikipedia.org/wiki/LXC" target="_blank" rel="external">LXC</a>技术之上构建的Container容器引擎。<br>Docker可以轻松的为任何应用创建一个轻量级的、可移植的、自给自足的容器。开发者在笔记本上编译测试通过的容器可以批量地在生产环境中部署，包括VMs（虚拟机）、bare metal、OpenStack 集群和其他的基础应用平台。</p>
+<p>###Docker 组件<br> <strong>Docker的核心组件：</strong><br>        客户端和服务器；<br>        Docker镜像；<br>        Registry；<br>        Docker容器。</p>
+<p><strong>Docker客户端和服务器</strong><br>Docker是一个客户-服务器（C/S）架构的程序。Docker客户端只需香Docker服务器发出请求，服务器或守护进程将完成所有工作并返回结果。Docker提供了一个命令行工具docker以及一整套<a href="https://docs.docker.com/engine/reference/api/docker_remote_api/" target="_blank" rel="external">RESTfulAPI</a>。你可以在同一台宿主机上运行Docker守护进程和客户端，也可以从本地的Docker客户端连接到运行在另一台宿主机上的远程Docker守护进程。</p>
+<p><strong>Docker镜像</strong><br>镜像是构建Docker世界的基石。用户基于镜像来运行自己的容器。镜像也是Docker生命周期中的构建部分。镜像是基于联合文件系统的一种层式的结构，由一系列指令一步一步构建出来。比如说：添加一个文件；执行一个命令；打开一个端口。<br>也可以把镜像当作容器的“源代码”。镜像体积很小，非常“便携”，易于分享、存储和更新。</p>
+<p><strong>Registry</strong><br>Docker用Registry来保存用户构建的镜像。Registry分为公共和私有两种。Docker公司运营的公共Registry叫做Docker Hub。我们可以在Docker Hub上注册帐号，分享并保存自己的镜像。当然，我们也可以架设自己的私有Registry，私有的Registry可以受到防火墙的保护，将镜像保存在防火墙的后面，就像我们私有的gitlab一样。</p>
+<p><strong>容器</strong><br>前面说镜像是Docker世界的基石，而容器，则是组成Docker世界的最小组件。容器是基于镜像启动的，他的主要作用是来运行应用实例的,Docker官方推荐一个容器里面只运行一个进程，当然你要运行多个进程也是可以的。容器可以被启动、开始、停止、删除。每个容器都是相互隔离的、保证安全的平台。我们可以把容器看做是一个简易版的能跑应用程序的linux环境。镜像是只读的，容器的创建是在只读的镜像最上面创建一层可写层。</p>
+<p>###Do what<br>前面花了那么多时间来介绍Docker，那么我们到底能用他来做什么。</p>
+<p><strong>快速开发和部署</strong><br>在实际的的工作当中，我们的环境至少分为开发、测试、生产等多个环境，环境的不同，往往导致一个程序运行结果不一样。并且配置这些环境也是相当麻烦的一件事情（因为各个部门，所使用的操作系统还不一样）<br>，这样就导致了一个矛盾链的产生，开发说是测试的问题，测试说是运维的问题，运维说是运行环境的问题，最后运维只能背锅。有了Docker，开发者可以使用一个标准的镜像来构建一套开发容器，开发完成之后，交给测试人员测试，运维人员可以直接使用这个容器来部署代码。Docker 可以快速创建容器，快速迭代应用程序，并让整个过程全程可见，使团队中的其他成员更容易理解应用程序是如何创建和工作的。 Docker 容器很轻很快！容器的启动时间是秒级的，大量地节约开发、测试、部署的时间。</p>
+<p><strong>简单高效的虚拟化</strong><br>现在我们使用虚拟化，都是在自己的宿主机上面安装虚拟机软件，然后运行虚拟主机，一般只能运行几个虚拟主机，开多了，宿主机会很卡，就算你把内存加到16G、32G,你也只能跑几个虚拟主机，毕竟你是中间加了一层中间件。Docker 容器的运行不需要额外的 hypervisor 支持，它是内核级的虚拟化，因此可以实现更高的性能和效率。</p>
+<p><strong>快速的迁移和扩展</strong><br>Docker 容器几乎可以在任意的平台上运行，包括物理机、虚拟机、公有云、私有云、个人电脑、服务器等。 这种兼容性可以让用户把一个应用程序从一个平台直接迁移到另外一个。</p>
+<p><strong>轻松的运维</strong><br>使用 Docker，只需要小小的修改，就可以替代以往大量的更新工作。所有的修改都以增量的方式被分发和更新，从而实现自动化并且高效的管理。</p>
+<p><strong>对比传统虚拟机总结</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">特性</th>
+<th style="text-align:left">容器</th>
+<th style="text-align:left">虚拟机</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">启动</td>
+<td style="text-align:left">秒级</td>
+<td style="text-align:left">分钟级</td>
+</tr>
+<tr>
+<td style="text-align:left">硬盘使用</td>
+<td style="text-align:left">一般为 MB</td>
+<td style="text-align:left">一般为 GB</td>
+</tr>
+<tr>
+<td style="text-align:left">性能</td>
+<td style="text-align:left">接近原生</td>
+<td style="text-align:left">弱于</td>
+</tr>
+<tr>
+<td style="text-align:left">系统支持量</td>
+<td style="text-align:left">单机支持上千个容器</td>
+<td style="text-align:left">一般几十个</td>
+</tr>
+</tbody>
+</table>
+<p>好了，关于Docker的介绍就到这里，接下来我们就开始Docker的详细操作使用</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/01/30/docker-01/" data-id="ciu2e80f000077rhp6zufiq2o" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+
+  <nav id="page-nav">
+    <a class="extend prev" rel="prev" href="/page/3/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
+  </nav>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/10/09/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
