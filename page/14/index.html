@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-open_falcon" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-awk" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/06/19/open_falcon/" class="article-date">
-  <time datetime="2016-06-18T16:00:00.000Z" itemprop="datePublished">2016-06-19</time>
+    <a href="/2016/06/26/awk/" class="article-date">
+  <time datetime="2016-06-25T16:00:00.000Z" itemprop="datePublished">2016-06-26</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/19/open_falcon/">小米开源监控open-falcon</a>
+      <a class="article-title" href="/2016/06/26/awk/">linux实用工具之--AWK</a>
     </h1>
   
 
@@ -90,30 +90,26 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="小米开源监控open-falcon"><a href="#小米开源监控open-falcon" class="headerlink" title="小米开源监控open-falcon"></a>小米开源监控open-falcon</h2><p>最近一段时间都在研究小米开源的监控项目open-falcon，为什么要研究它，当然是要用到它才回去学习它。做为一款国内开源的监控项目，在某些功能细节还有待完善，但还是有其自己特点所在。</p>
-<p>具体安装我这里就不啰嗦了，详细请参考<a href="http://book.open-falcon.org/zh/index.html" target="_blank" rel="external">官方文档</a>。</p>
-<h3 id="体系架构"><a href="#体系架构" class="headerlink" title="体系架构"></a>体系架构</h3><p>了解一款软件，我们先从它的体系架构入手，下面这个就是open-falcon的体积结构图<br><img src="http://image20.it168.com/201510_0x0/2342/78d0080e1afb0674.png" alt=""></p>
-<ul>
-<li>falcon-agent：agent用于采集机器负载监控指标，自动收集200多项指标，每隔60秒push到tranfer组件，只要安装了agent，就会自动采集数据，主动上报，不需要在server端做任何配置。</li>
-<li>transfer：transfer是数据转发服务，它接收agent上传的数据，然后通过一次性哈希对数据分片，然后将分片后的数据push到judge和graph组件。</li>
-<li>judge：judge会对transfer上传上来的数据都会进行告警判断，如果数据量比较大，一台机器肯定抗不住，所以在transfer层就对数据进行了分片，后端配置多个judge，每个judge处理一小部分数据。</li>
-<li>alarm ：judge产生的报警event会存放到redis队列，alarm会去redis队列里面拿数据，并选择告警方式。alarm并不自己发送邮件短信，是由sender模块来完成的。</li>
-<li>graph ：graph接收transfer上传上来的数据，做为绘图数据的组件，参考rrdtool的理念，在数据每次存入的时候，会自动进行采样、归档。</li>
-<li>query ：query组件，提供统一的绘图数据查询入口。query组件接收查询请求，根据一致性哈希算法去相应的graph实例查询不同metric的数据，然后汇总拿到的数据，最后统一返回给用户。</li>
-<li>dashboard ：dashboard是面向用户的查询界面。在这里，用户可以看到push到graph中的所有数据，并查看其趋势图。</li>
-<li>portal ：这个是用来配置报警策略的，数据存在mysql里面</li>
-<li>Heartbeat Server： 心跳服务器，公司所有agent都会连到HBS，每分钟发一次心跳请求。</li>
-</ul>
-<p>以上这些，就是open-falcon的主要模块，了解了这些模块，部署起来就很方便了。</p>
-<p><strong>重点</strong><br>我们知道portal用来配置监控策略的，但是portal数据库中有一个host表，用来记录公司所有机器信息，这些信息都是HBS在维护。agent在连接HBS的同时，会把hostname、ip、agent version、plugin version等信息告诉HBS，HBS负责更新host表。还有一点就是，agent虽然能收集200多项指标，但是类似与端口进程监控，agent不可能全部上传，这也不太现实。open-falcon换了另外一种思路，只对portal配置了的端口进行数据上报。那agent如何知道portal里面配置了哪些监控端口了。还是HBS，HBS会去读portal数据库，然后告诉agent。</p>
-<p>除了falcon-agent采集的数据可以push到监控系统，我们还可以自己自定义的一些数据指标，也可以push到open-falcon中。agent提供了一个http接口/v1/push用于接收用户手工push的一些数据，然后通过长连接迅速转发给Transfer。</p>
-<p><strong>特点</strong><br>1、自动发现，支持falcon-agent、snmp、支持用户主动push、用户自定义插件支持<br>2、支持每个周期上亿次的数据采集、告警判定、历史数据存储和查询<br>3、高效的portal、支持策略模板、模板继承和覆盖、多种告警方式、支持callback调用<br>4、单机支撑200万metric的上报、归档、存储<br>5、采用rrdtool的数据归档策略，秒级返回上百个metric一年的历史数据<br>6、多维度的数据展示，用户自定义Screen<br>7、通过各种插件目前支持Linux、Windows、Mysql、Redis、Memache、RabbitMQ和交换机监控。</p>
-<p><strong>缺点</strong><br>由于发布时间较短，很多基础的服务监控插件(如Tomcat、apache等)还不支持，很多功能还在不断完善中，另外由于缺少专门的支持，虽然有开放社区，但是解决问题的效率相对较低。</p>
+        <p>AWK是由 Alfred Aho、Peter Weinberger、Brian Kernighan三人创造出来的一款非常棒的数据处理工具。<br>相比于sed作用于一整行的数据处理方式，awk则是将一行数据分成数个“字段”来处理，而默认的字段分隔符为空格键或[tab]键。</p>
+<p><strong>使用语法：</strong></p>
+<blockquote>
+<p>awk ‘条件类型1{动作1} 条件类型2{动作2}…’ filename</p>
+</blockquote>
+<p><strong>实例 1</strong><br>使用last查看最后10条登录记录，并只查看登录用户名和IP<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ last -n10 |awk &apos;&#123;print $1 &quot;\t&quot; $3&#125;&apos;</div><div class="line">ggyy	192.168.168.1</div><div class="line">reboot	boot</div><div class="line">ggyy	192.168.168.1</div><div class="line">ggyy	192.168.168.1</div><div class="line">reboot	boot</div><div class="line">ggyy	192.168.168.1</div><div class="line">reboot	boot</div><div class="line">ggyy	192.168.168.1</div><div class="line">ggyy	192.168.168.1</div><div class="line">reboot	boot</div></pre></td></tr></table></figure></p>
+<p>print是awk最常使用的动作，通过print的功能将字段数据列出来。其中的<figure class="highlight plain"><figcaption><span>的意思是```$1``` 和 ```$3``` 之间用[tab]隔开。</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">awk的处理数据的流程如下；</div><div class="line">1、读入第一行，并将第一行的数据填入 ```$0,$1,$2``` 等变量中；</div><div class="line">2、依据条件类型的限制，判断是否需要进行后面的动作；</div><div class="line">3、做完所有的动作与条件类型；</div><div class="line">4、若还有后续的数据，则重复上面的1-3的步骤，直到所有的数据都读完为止。</div><div class="line"></div><div class="line">通过上面的讲叙，我们知道awk是以行为一次的处理单位，以字段为最小的处理单位。那么awk怎么知道到底这个数据有几行几列？我们来了解一下awk内置的变量</div><div class="line">&gt; NF：每一行（$0）拥有的字段总数</div><div class="line">&gt; NR：目前awk所处理的是“第几行”数据</div><div class="line">&gt; FS：目前的分隔字符，默认是空格键</div><div class="line"></div><div class="line">**tips：**</div><div class="line">由于单引号是awk的固定用法，awk后续的所有动作都是以单引号括住的，所以使用print打印时，非变量的文字部分，包括 \t ，都需要使用双引号括起来。</div><div class="line"></div><div class="line">#### AWK的逻辑运算符</div><div class="line">逻辑运算符是作用在条件里面，awk主要有的逻辑运算符有：</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>大于<br> &lt; 小于<br>= 大于等于<br> &lt;= 小于等于<br> == 等于<br> != 不等于<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">**实例2**</div><div class="line">查看/etc/password里面UID小于5，且只显示用户名和UID</div></pre></td></tr></table></figure></p>
+</blockquote>
+<p>[ggyy@gy-vm02 ~]$ awk ‘{FS=”:”}$3&lt;5{print $1 “\t” $3}’ /etc/passwd<br>root:x:0:0:root:/root:/bin/bash<br>bin    1<br>daemon    2<br>adm    3<br>lp    4<br>[ggyy@gy-vm02 ~]$<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">我们可以看到第一行数据并没有按照我们的想法输出，这是因为我们定义的```FS=“:”``` 动作要从第二行才开始生效，第一行还是按照原来的方式输出了，所以这个时候需要加上BEGIN关键字：</div></pre></td></tr></table></figure></p>
+<p>[ggyy@gy-vm02 ~]$ awk ‘BEGIN{FS=”:”}$3&lt;5{print $1 “\t” $3}’ /etc/passwd<br>root    0<br>bin    1<br>daemon    2<br>adm    3<br>lp    4<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">**实例3**</div><div class="line">awk还可以像grep去匹配数据</div></pre></td></tr></table></figure></p>
+<p>[ggyy@gy-vm02 ~]$ awk ‘$6 ~ /FIN|TIME/ {print NR,$4,$5,$6}’ 1.txt<br>5 coolshell.cn:80 124.205.5.146:18245 TIME_WAIT<br>6 coolshell.cn:80 61.140.101.185:37538 FIN_WAIT2<br>9 coolshell.cn:80 116.234.127.77:11502 FIN_WAIT2<br>11 coolshell.cn:80 183.60.215.36:36970 TIME_WAIT<br>13 coolshell.cn:80 124.152.181.209:26825 FIN_WAIT1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">还可以取反</div></pre></td></tr></table></figure></p>
+<p>[ggyy@gy-vm02 ~]$ awk ‘$6 !~ /FIN|TIME/ {print NR,$4,$5,$6}’ 1.txt<br>1 Local-Address Foreign-Address State<br>2 0.0.0.0:3306 0.0.0.0:<em> LISTEN<br>3 0.0.0.0:80 0.0.0.0:</em> LISTEN<br>4 127.0.0.1:9000 0.0.0.0:<em> LISTEN<br>7 coolshell.cn:80 110.194.134.189:103 ESTABLISHED<br>8 coolshell.cn:80 123.169.124.111:49809 ESTABLISHED<br>10 coolshell.cn:80 123.169.124.111:49829 ESTABLISHED<br>12 coolshell.cn:80 61.148.242.38:30901 ESTABLISHED<br>14 :::22 :::</em> LISTEN<br>```</p>
+<p>除此之外，AWK还有很多高级语法，这里就不详细讲叙了，了解基础就可以应付大部分的操作了。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/06/19/open_falcon/" data-id="ciu2ftola000mw5hpl3tvnavs" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/06/26/awk/" data-id="ciuchoghb0002oihpl7nbkwl3" class="article-share-link">Share</a>
       
       
     </footer>
@@ -126,7 +122,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/13/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/15/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/13/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><a class="extend next" rel="next" href="/page/15/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -144,7 +140,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -155,6 +151,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
         
           <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
@@ -170,10 +170,6 @@
         
           <li>
             <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>

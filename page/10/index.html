@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-mysql2" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-unicorn" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/07/17/mysql2/" class="article-date">
-  <time datetime="2016-07-16T16:00:00.000Z" itemprop="datePublished">2016-07-17</time>
+    <a href="/2016/07/24/unicorn/" class="article-date">
+  <time datetime="2016-07-23T16:00:00.000Z" itemprop="datePublished">2016-07-24</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/07/17/mysql2/">rails项目mysql编码由utf8改成utf8mb4</a>
+      <a class="article-title" href="/2016/07/24/unicorn/">使用unicorn-worker-killer限制unicorn使用内存大小</a>
     </h1>
   
 
@@ -90,26 +90,20 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="rails项目mysql编码由utf8改成utf8mb4"><a href="#rails项目mysql编码由utf8改成utf8mb4" class="headerlink" title="rails项目mysql编码由utf8改成utf8mb4"></a>rails项目mysql编码由utf8改成utf8mb4</h2><h3 id="为什么要改编码"><a href="#为什么要改编码" class="headerlink" title="为什么要改编码"></a>为什么要改编码</h3><p>因为utf8编码的mysql不能保存含有4个字节的emoji表情，为了能让客户端支持输入保存emoji表情，数据库必须升级并把编码改成utf8mb4。mysql从5.5.3版本开始支持utf8mb4 字符集。</p>
-<p>首先确保mysql server端支持utf8mb4 字符集。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">mysql&gt; SHOW CHAR SET WHERE Charset LIKE &quot;%utf8%&quot;;</div><div class="line">+---------+---------------+--------------------+--------+</div><div class="line">| Charset | Description   | Default collation  | Maxlen |</div><div class="line">+---------+---------------+--------------------+--------+</div><div class="line">| utf8    | UTF-8 Unicode | utf8_general_ci    |      3 |</div><div class="line">| utf8mb4 | UTF-8 Unicode | utf8mb4_general_ci |      4 |</div><div class="line">+---------+---------------+--------------------+--------+</div><div class="line">2 rows in set (0.00 sec)</div></pre></td></tr></table></figure></p>
-<p>然后升级部署应用的服务器上的mysql client版本也得大于5.5.3。我这边是用rpm包单独升级。先卸载掉低版本的rpm包，然后再进行安装。</p>
-<ul>
-<li>MySQL-client：包含最少的访问mysql服务器所需要的客户端命令。里面包含的是像mysql，mysqladmin这样的工具。</li>
-<li>MySQL-devel：包含开发mysql客户端所需要的库。里面没有包含工具，都是包含.a这样的库链接文件</li>
-<li>MySQL-server：包含安装mysql所需要的所有工具。里面包含的像是mysqld_safe，mysqld_multi这样的服务器启动安装工具。里面并不包含mysql这样的客户端工具。</li>
-<li>Mysql-shared：包含开发mysql客户端所需要的动态链接库。里面并没有工具，都是像libmysqlclient.so*这样的动态库文件。</li>
-<li>Mysql-shared-compact：上面动态链接库的以前各个版本的文件。就是进行这个安装会在lib64中放上之前所有release版本的libmysqlclient.so</li>
-</ul>
-<h3 id="mysql2支持utf8mb4"><a href="#mysql2支持utf8mb4" class="headerlink" title="mysql2支持utf8mb4"></a>mysql2支持utf8mb4</h3><p>当mysql server端和client端都支持utf8mb4之后，我们需要对mysql2<br>进行重新安装。这里需要注意的是，mysql2的版本必须大于0.3.11，不然是不支持utf8mb4字符集的。</p>
-<p>进入到应用部署目录，使用bundle exec gem uninstall mysql2，选择当前应用使用的mysql2版本，然后再bundler重新安装mysql2<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[bhuser@bhqa current]$ bundle show | grep mysql2</div><div class="line">  * mysql2 (0.4.3)</div><div class="line">[bhuser@bhqa current]$ bundle exec gem uninstall mysql2</div><div class="line">Successfully uninstalled mysql2-0.4.3</div><div class="line">[bhuser@bhqa current]$ bundle</div></pre></td></tr></table></figure></p>
-<h3 id="检验"><a href="#检验" class="headerlink" title="检验"></a>检验</h3><p>使用下面代码在rails 下进行检验<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Mysql2::Client.new(</div><div class="line"> :host =&gt; &apos;host&apos;,</div><div class="line"> :username =&gt; &apos;user&apos;,</div><div class="line"> :password =&gt; &apos;passwd&apos;,</div><div class="line"> :encoding =&gt; &apos;utf8mb4&apos;</div><div class="line">)</div></pre></td></tr></table></figure></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">2.3.0 :007 &gt; Mysql2::Client.new(</div><div class="line">2.3.0 :008 &gt;      :host =&gt; &apos;x.x.x.x&apos;,</div><div class="line">2.3.0 :009 &gt;      :username =&gt; &apos;user&apos;,</div><div class="line">2.3.0 :010 &gt;      :password =&gt; &apos;passwd&apos;,</div><div class="line">2.3.0 :011 &gt;      :encoding =&gt; &apos;utf8mb4&apos;</div><div class="line">2.3.0 :012?&gt;   )</div><div class="line"> =&gt; #&lt;Mysql2::Client:0x000000040c17b0 @read_timeout=nil, @query_options=&#123;:as=&gt;:hash, :async=&gt;false, :cast_booleans=&gt;false, :symbolize_keys=&gt;false, :database_timezone=&gt;:local, :application_timezone=&gt;nil, :cache_rows=&gt;true, :connect_flags=&gt;2147525125, :cast=&gt;true, :default_file=&gt;nil, :default_group=&gt;nil, :host=&gt;&quot;host&quot;, :username=&gt;&quot;user&quot;, :password=&gt;&quot;passwd&quot;, :encoding=&gt;&quot;utf8mb4&quot;&#125;&gt; </div><div class="line">2.3.0 :013 &gt;</div></pre></td></tr></table></figure>
-<p>上面结果表示成功升级<br>下面的提示是没有升级mysql2的错误信息。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Character set &apos;utf8mb4&apos; is not a compiled character set and is not specified in the &apos;/path/mysql/charsets/Index.xml&apos; file</div><div class="line">rake aborted!</div><div class="line">Mysql2::Error: Can&apos;t initialize character set utf8mb4 (path: /path/mysql/charsets/)</div></pre></td></tr></table></figure></p>
+        <h2 id="使用unicorn-worker-killer限制unicorn使用内存大小"><a href="#使用unicorn-worker-killer限制unicorn使用内存大小" class="headerlink" title="使用unicorn-worker-killer限制unicorn使用内存大小"></a>使用unicorn-worker-killer限制unicorn使用内存大小</h2><p>unicorn是<a href="https://en.wikipedia.org/wiki/Rack_(web_server_interface" target="_blank" rel="external">rack</a>)应用广泛使用的http server。不过unicorn有一个缺点，就是可能会无限的增加内存使用，<br>unicorn-worker-killer gem提供基于unicorn进程使用最大内存和最大请求数自动重启的功能。并且不会影响正常的连接请求，这对于网站应用的稳定性提供了保障。</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>unicorn-worker-killer使用很简单，只需要在Gemfile中添加该gem就可以了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">gem &apos;unicorn-worker-killer&apos;</div></pre></td></tr></table></figure></p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>在config.ru添加以下内容，这里注意一点，配置要添加在“require ::File.expand_path(‘../config/environment’,  <strong>FILE</strong>)”之上。</p>
+<p>限制内存大小<br><strong>Unicorn::WorkerKiller::Oom(memory_limit_min=(1024**3), memory_limit_max=(2*(1024**3)), check_cycle = 16, verbose = false)</strong></p>
+<p>memory_limit_min和memory_limit_max指定了最大内存的一个范围值。实际值是由 rand()从memory_limit_min和memory_limit_max中间取一个值，这样做的好处就是为了防止所有work在同一个时间重启。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"># Unicorn self-process killer</div><div class="line">require &apos;unicorn/worker_killer&apos;</div><div class="line"></div><div class="line"># Max memory size (RSS) per worker</div><div class="line">use Unicorn::WorkerKiller::Oom, (300*(1024**2)), (350*(1024**2))</div></pre></td></tr></table></figure></p>
+<p>unicorn-worker-killer还支持基于请求数来重启进程<br><strong>Unicorn::WorkerKiller::MaxRequests(max_requests_min=3072, max_requests_max=4096, verbose=false)</strong></p>
+<p>max_requests_min和max_requests_max指定了最大请求数的一个范围值。实际值是由 rand()从max_requests_min和max_requests_max中间取一个值，同样这样也是为了防止所有work在同一个时间重启。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"># Unicorn self-process killer</div><div class="line">require &apos;unicorn/worker_killer&apos;</div><div class="line"></div><div class="line"># Max requests per worker</div><div class="line">use Unicorn::WorkerKiller::MaxRequests, 3000, 4000</div></pre></td></tr></table></figure>
+<p>如果verbose设置为true，每一次的检查都会写到日志里面，日志级别为info。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/07/17/mysql2/" data-id="ciu2ftol4000jw5hpoktn8kr2" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/07/24/unicorn/" data-id="ciuchogji000voihpytfaq3xs" class="article-share-link">Share</a>
       
       
     </footer>
@@ -122,7 +116,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/9/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/11/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/9/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><a class="extend next" rel="next" href="/page/11/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -140,7 +134,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -151,6 +145,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
         
           <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
@@ -166,10 +164,6 @@
         
           <li>
             <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>

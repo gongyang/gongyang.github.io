@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-nginx_upgrade" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-open_falcon" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/05/29/nginx_upgrade/" class="article-date">
-  <time datetime="2016-05-28T16:00:00.000Z" itemprop="datePublished">2016-05-29</time>
+    <a href="/2016/06/19/open_falcon/" class="article-date">
+  <time datetime="2016-06-18T16:00:00.000Z" itemprop="datePublished">2016-06-19</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/05/29/nginx_upgrade/">nginx 平滑升级</a>
+      <a class="article-title" href="/2016/06/19/open_falcon/">小米开源监控open-falcon</a>
     </h1>
   
 
@@ -90,31 +90,30 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="nginx-平滑升级"><a href="#nginx-平滑升级" class="headerlink" title="nginx 平滑升级"></a>nginx 平滑升级</h2><p>由于公司需要使用HTTP/2，以及IPv6等新特性，需要在nginx层添加相对应的模块。我们使用的是淘宝开源的tengine，需要下载最新的版本才能支持HTTP/2，<a href="http://tengine.taobao.org/download_cn.html" target="_blank" rel="external">下载地址</a>。</p>
-<h4 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h4><p>升级之前，我们还是先把配置文件copy一份。然后使用nginx -V查看nginx的版本和编译了哪些模块<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@bhqa nginx]# /usr/local/nginx/sbin/nginx -V</div><div class="line">Tengine version: Tengine/2.1.0 (nginx/1.6.2)</div><div class="line">built by gcc 4.4.7 20120313 (Red Hat 4.4.7-11) (GCC) </div><div class="line">TLS SNI support enabled</div><div class="line">configure arguments: --with-http_ssl_module --with-http_gzip_static_module --with-http_stub_status_module</div></pre></td></tr></table></figure></p>
-<p>解压下载的新版本，进入到解压后的目录，编译安装新版本。这里需要注意的一点是，我们原来在编译的时候，使用的默认安装路径，没有特别指定安装路径。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@bhqa tengine-2.1.2]# ./configure --with-http_ssl_module --with-http_gzip_static_module --with-http_stub_status_module --with-ipv6 --with-http_v2_module &amp;&amp; make &amp;&amp; make install</div></pre></td></tr></table></figure></p>
-<h4 id="升级"><a href="#升级" class="headerlink" title="升级"></a>升级</h4><p>首先检查新的nginx二进制文件是否可用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[bhuser@bhqa conf]$ sudo /usr/local/nginx/sbin/nginx -t -c /usr/local/nginx/conf/nginx.conf</div><div class="line">the configuration file /usr/local/nginx/conf/nginx.conf syntax is ok</div><div class="line">configuration file /usr/local/nginx/conf/nginx.conf test is successful</div></pre></td></tr></table></figure></p>
-<p>接下来我们使用kill -USR2给当前的nginx主进程发送一个信号<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">kill -USR2 `cat /usr/local/nginx/logs/nginx.pid`</div></pre></td></tr></table></figure></p>
-<p>我们来看下此时的nginx进程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@bhqa tengine-2.1.2]# ps aux | grep nginx</div><div class="line">root      2073  0.0  0.0  71056  2056 ?        Ss   May19   0:00 nginx: master process /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf</div><div class="line">nobody    2076  0.0  0.0 101300  9396 ?        S    May19   7:07 nginx: worker process                                          </div><div class="line">nobody    2077  0.0  0.1 101756 10972 ?        S    May19   7:15 nginx: worker process                                          </div><div class="line">root     12857  0.6  0.0  71640  7696 ?        S    15:49   0:00 nginx: master process /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf</div><div class="line">nobody   12858  0.4  0.3  99288 32396 ?        S    15:49   0:00 nginx: worker process                                          </div><div class="line">nobody   12859  0.2  0.3  99288 32396 ?        S    15:49   0:00 nginx: worker process</div></pre></td></tr></table></figure></p>
-<p>此时的新老进程会同时存在，都会接受并处理请求，并且原来/usr/local/nginx/logs/nginx.pid会改为/usr/local/nginx/logs/nginx.pid.oldbin。</p>
-<p>这个时候，我们可以使用kill -WINCH这个信号来让老的worker进程不再接受新的请求并退出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">kill -WINCH `cat /usr/local/nginx/logs/nginx.pid.oldbin`</div></pre></td></tr></table></figure></p>
-<p>此时我们再来看下这个时候nginx进程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@bhqa tengine-2.1.2]# ps aux | grep nginx</div><div class="line">root      2073  0.0  0.0  71056  2084 ?        Ss   May19   0:00 nginx: master process /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf</div><div class="line">root     12857  0.0  0.0  71640  7696 ?        S    15:49   0:00 nginx: master process /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf</div><div class="line">nobody   12858  0.2  0.3  99288 33780 ?        S    15:49   0:00 nginx: worker process                                          </div><div class="line">nobody   12859  0.2  0.3  99288 33820 ?        S    15:49   0:00 nginx: worker process</div></pre></td></tr></table></figure></p>
-<p>我们发现老的worker都退出了，只剩下一个master进程。此时如果我们由于其他原因，不想升级到新版本了，还是可以回退到旧版本的，具体步骤如下：</p>
+        <h2 id="小米开源监控open-falcon"><a href="#小米开源监控open-falcon" class="headerlink" title="小米开源监控open-falcon"></a>小米开源监控open-falcon</h2><p>最近一段时间都在研究小米开源的监控项目open-falcon，为什么要研究它，当然是要用到它才回去学习它。做为一款国内开源的监控项目，在某些功能细节还有待完善，但还是有其自己特点所在。</p>
+<p>具体安装我这里就不啰嗦了，详细请参考<a href="http://book.open-falcon.org/zh/index.html" target="_blank" rel="external">官方文档</a>。</p>
+<h3 id="体系架构"><a href="#体系架构" class="headerlink" title="体系架构"></a>体系架构</h3><p>了解一款软件，我们先从它的体系架构入手，下面这个就是open-falcon的体积结构图<br><img src="http://image20.it168.com/201510_0x0/2342/78d0080e1afb0674.png" alt=""></p>
 <ul>
-<li>发送HUP 信号给旧的master process；</li>
-<li>发送QUIT 信号给新的master process，从容关闭它的worker processes；</li>
-<li>发送TERM 信号给新的master process, 强迫关闭；</li>
-<li>如果一些原因新的worker process没有关闭，发送KILL 信号给它；</li>
-<li>新的master process 关闭后，旧的master process 删除.oldbin后缀，这样就恢复到升级前的状态了。</li>
+<li>falcon-agent：agent用于采集机器负载监控指标，自动收集200多项指标，每隔60秒push到tranfer组件，只要安装了agent，就会自动采集数据，主动上报，不需要在server端做任何配置。</li>
+<li>transfer：transfer是数据转发服务，它接收agent上传的数据，然后通过一次性哈希对数据分片，然后将分片后的数据push到judge和graph组件。</li>
+<li>judge：judge会对transfer上传上来的数据都会进行告警判断，如果数据量比较大，一台机器肯定抗不住，所以在transfer层就对数据进行了分片，后端配置多个judge，每个judge处理一小部分数据。</li>
+<li>alarm ：judge产生的报警event会存放到redis队列，alarm会去redis队列里面拿数据，并选择告警方式。alarm并不自己发送邮件短信，是由sender模块来完成的。</li>
+<li>graph ：graph接收transfer上传上来的数据，做为绘图数据的组件，参考rrdtool的理念，在数据每次存入的时候，会自动进行采样、归档。</li>
+<li>query ：query组件，提供统一的绘图数据查询入口。query组件接收查询请求，根据一致性哈希算法去相应的graph实例查询不同metric的数据，然后汇总拿到的数据，最后统一返回给用户。</li>
+<li>dashboard ：dashboard是面向用户的查询界面。在这里，用户可以看到push到graph中的所有数据，并查看其趋势图。</li>
+<li>portal ：这个是用来配置报警策略的，数据存在mysql里面</li>
+<li>Heartbeat Server： 心跳服务器，公司所有agent都会连到HBS，每分钟发一次心跳请求。</li>
 </ul>
-<p>如果我们不需要回退，那现在就剩下最后一步升级就完成了，使用kill -QUIT信号，让老的master进程也退出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">kill -QUIT `cat /usr/local/nginx/logs/nginx.pid.oldbin`</div></pre></td></tr></table></figure></p>
-<p>到此，整个升级我们就完成了，我们来看下当前的nginx版本<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@bhqa tengine-2.1.2]# /usr/local/nginx/sbin/nginx -V</div><div class="line">Tengine version: Tengine/2.1.2 (nginx/1.6.2)</div><div class="line">built by gcc 4.4.7 20120313 (Red Hat 4.4.7-16) (GCC) </div><div class="line">TLS SNI support enabled</div><div class="line">configure arguments: --with-http_ssl_module --with-http_gzip_static_module --with-http_stub_status_module --with-ipv6 --with-http_v2_module</div></pre></td></tr></table></figure></p>
-<p>版本已是最新的2.1.2，IPv6和HTTP/2相应的模块也编译进去了。</p>
+<p>以上这些，就是open-falcon的主要模块，了解了这些模块，部署起来就很方便了。</p>
+<p><strong>重点</strong><br>我们知道portal用来配置监控策略的，但是portal数据库中有一个host表，用来记录公司所有机器信息，这些信息都是HBS在维护。agent在连接HBS的同时，会把hostname、ip、agent version、plugin version等信息告诉HBS，HBS负责更新host表。还有一点就是，agent虽然能收集200多项指标，但是类似与端口进程监控，agent不可能全部上传，这也不太现实。open-falcon换了另外一种思路，只对portal配置了的端口进行数据上报。那agent如何知道portal里面配置了哪些监控端口了。还是HBS，HBS会去读portal数据库，然后告诉agent。</p>
+<p>除了falcon-agent采集的数据可以push到监控系统，我们还可以自己自定义的一些数据指标，也可以push到open-falcon中。agent提供了一个http接口/v1/push用于接收用户手工push的一些数据，然后通过长连接迅速转发给Transfer。</p>
+<p><strong>特点</strong><br>1、自动发现，支持falcon-agent、snmp、支持用户主动push、用户自定义插件支持<br>2、支持每个周期上亿次的数据采集、告警判定、历史数据存储和查询<br>3、高效的portal、支持策略模板、模板继承和覆盖、多种告警方式、支持callback调用<br>4、单机支撑200万metric的上报、归档、存储<br>5、采用rrdtool的数据归档策略，秒级返回上百个metric一年的历史数据<br>6、多维度的数据展示，用户自定义Screen<br>7、通过各种插件目前支持Linux、Windows、Mysql、Redis、Memache、RabbitMQ和交换机监控。</p>
+<p><strong>缺点</strong><br>由于发布时间较短，很多基础的服务监控插件(如Tomcat、apache等)还不支持，很多功能还在不断完善中，另外由于缺少专门的支持，虽然有开放社区，但是解决问题的效率相对较低。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/05/29/nginx_upgrade/" data-id="ciu2ftol6000kw5hprq409zm4" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/06/19/open_falcon/" data-id="ciuchogj2000noihplzadkwph" class="article-share-link">Share</a>
       
       
     </footer>
@@ -127,7 +126,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/14/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/16/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/14/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><a class="extend next" rel="next" href="/page/16/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -145,7 +144,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -156,6 +155,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
         
           <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
@@ -171,10 +174,6 @@
         
           <li>
             <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>

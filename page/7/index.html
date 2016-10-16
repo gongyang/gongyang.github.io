@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-dstat" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-08-13" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/08/07/dstat/" class="article-date">
-  <time datetime="2016-08-06T16:00:00.000Z" itemprop="datePublished">2016-08-07</time>
+    <a href="/2016/08/13/08-13/" class="article-date">
+  <time datetime="2016-08-12T16:00:00.000Z" itemprop="datePublished">2016-08-13</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/07/dstat/">dstat--多功能系统资源统计生成工具</a>
+      <a class="article-title" href="/2016/08/13/08-13/">在nginx层配置某段逻辑按照时间段生效</a>
     </h1>
   
 
@@ -90,19 +90,18 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="dstat–多功能系统资源统计生成工具"><a href="#dstat–多功能系统资源统计生成工具" class="headerlink" title="dstat–多功能系统资源统计生成工具"></a>dstat–多功能系统资源统计生成工具</h2><p>dstat是一个用来替换vmstat、iostat、netstat、nfsstat和ifstat这些命令的工具，是一个全能系统信息统计工具，而且还可以通过使用插件扩展其功能。</p>
-<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>centos系统上直接使用yum安装<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum install dstat</div></pre></td></tr></table></figure></p>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>使用语法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dstat [-afv] [options..] [delay [count]]</div></pre></td></tr></table></figure></p>
-<p>安装完成之后，我们就可以直接使用dstat了，默认参数是-cdngy，分别代表显示cpu、disk、net、page、system信息，还可以在命令后面加上输出间隔时间(delay)以及输出次数(count)。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">[root@bhqa ~]# dstat 3 5</div><div class="line">----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system--</div><div class="line">usr sys idl wai hiq siq| read  writ| recv  send|  in   out | int   csw </div><div class="line"> 10   4  85   1   0   0|  46k   40k|   0     0 |5085B 3034B| 599  2316 </div><div class="line">  8   4  85   3   0   1|  24k  105k| 493B  965B|   0     0 |1744  2630 </div><div class="line"> 11   4  86   0   0   0|   0    23k|4642B 5476B|   0     0 |1653  2086 </div><div class="line">  7   3  90   0   0   0|   0     0 | 551B  738B|   0     0 |1523  1969 </div><div class="line">  7   3  90   0   0   0|   0    12k|1421B 1211B|   0     0 |1590  2010 </div><div class="line">  8   3  88   0   0   1|  67k 1365B|1607B 1008B|   0     0 |1592  1975</div></pre></td></tr></table></figure></p>
-<p>其中cpu一栏中的hiq、siq分别为硬中断和软中断次数。<br>system一栏的int、csw分别为系统的中断次数（interrupt）和上下文切换（context switch）。<br>其他常用选项<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">-c：显示CPU系统占用，用户占用，空闲，等待，中断，软件中断等信息。 </div><div class="line">-C：当有多个CPU时候，此参数可按需分别显示cpu状态，例：-C 0,1 是显示cpu0和cpu1的信息。 </div><div class="line">-d：显示磁盘读写数据大小。 </div><div class="line">-D  和-C类似，默认是显示所有磁盘信息，使用-D可以指定查看单个磁盘的信息</div><div class="line">-n：显示网络状态。 </div><div class="line">-N eth1,total：有多块网卡时，指定要显示的网卡。 </div><div class="line">-l：显示系统负载情况。 </div><div class="line">-m：显示内存使用情况。 </div><div class="line">-g：显示页面使用情况。 </div><div class="line">-p：显示进程状态。 </div><div class="line">-s：显示交换分区使用情况。 </div><div class="line">-S：类似D/N。 </div><div class="line">-r：I/O请求情况。 </div><div class="line">-y：系统状态。 </div><div class="line">--ipc：显示ipc消息队列，信号等信息。 </div><div class="line">--socket：用来显示tcp udp端口状态。 </div><div class="line">-a：此为默认选项，等同于-cdngy。 </div><div class="line">-v：等同于 -pmgdsc -D total。 </div><div class="line">--output 文件：此选项也比较有用，可以把状态信息以csv的格式重定向到指定的文件中，以便日后查看。例：dstat --output /tmp/dstat.csv</div></pre></td></tr></table></figure></p>
-<p>更多的参数请查看<a href="http://linux.die.net/man/1/dstat" target="_blank" rel="external">man dstat</a> 或者使用dstat -h来查看</p>
-<p>除了常用的功能，dstat还支持插件提供而外功能。<br>通过输入命令dstat –list查看所有参数<br>上面internal是dstat本身自带的一些监控参数；<br>下面/usr/share/dstat中是dstat的插件，这些插件可以扩展dstat的功能，如可以监控电源（battery）、mysql等。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">[root@bhqa ~]# dstat --list</div><div class="line">internal:</div><div class="line">	aio, cpu, cpu24, disk, disk24, disk24old, epoch, fs, int, int24, io, ipc, load, lock, mem, net, page, page24, </div><div class="line">	proc, raw, socket, swap, swapold, sys, tcp, time, udp, unix, vm</div><div class="line">/usr/share/dstat:</div><div class="line">	battery, battery-remain, cpufreq, dbus, disk-util, fan, freespace, gpfs, gpfs-ops, helloworld, innodb-buffer, </div><div class="line">	innodb-io, innodb-ops, lustre, memcache-hits, mysql-io, mysql-keys, mysql5-cmds, mysql5-conn, mysql5-io, </div><div class="line">	mysql5-keys, net-packets, nfs3, nfs3-ops, nfsd3, nfsd3-ops, ntp, postfix, power, proc-count, rpc, rpcd, </div><div class="line">	sendmail, snooze, thermal, top-bio, top-cpu, top-cputime, top-cputime-avg, top-io, top-latency, </div><div class="line">	top-latency-avg, top-mem, top-oom, utmp, vm-memctl, vmk-hba, vmk-int, vmk-nic, vz-cpu, vz-io, vz-ubc, wifi</div></pre></td></tr></table></figure></p>
-<p>例如通过–top-(io|bio|cpu|cputime|cputime-avg|mem) 这几个选项，可以看到具体是那个用户那个进程占用了相关系统资源，对系统调优非常有效。如查看当前占用I/O、cpu、内存等最高的进程信息可以使用dstat –top-mem –top-io –top-cpu。</p>
+        <h2 id="在nginx层配置某段逻辑按照时间段生效"><a href="#在nginx层配置某段逻辑按照时间段生效" class="headerlink" title="在nginx层配置某段逻辑按照时间段生效"></a>在nginx层配置某段逻辑按照时间段生效</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近遇到一个比较棘手的问题，发现每到零点的时候，有个应用的请求量飙升，导致后端服务器压力很大，CPU几乎耗尽。后面查到原因，是由于客户端造成的，虽然在后面的版本中修正了这个bug，但是还是有很多老用户，没有更新版本，导致问题一直持续。后面和客户端工程师沟通，对于晚上这些大量的请求，其实是可以在nginx直接应对的，只要返回一个200的状态码就可以了。当时的第一想法就是在nginx写一个策略，晚上0-4点对于那部分请求，直接在nginx返回一个200的状态码。<br>想要完成这个策略，需要解决两个问题，在nginx怎么获取时间值？多条件的判断怎么写？接下来，我们来一一解决。</p>
+<h3 id="nginx获取时间信息"><a href="#nginx获取时间信息" class="headerlink" title="nginx获取时间信息"></a>nginx获取时间信息</h3><p>官方版本的nginx是没有可以直接用来获取时间的变量，不过淘宝开源的<a href="http://tengine.taobao.org/index_cn.html" target="_blank" rel="external">tengine</a>增加了相关的变量。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">$unix_time    #当前时间戳，其值为1970年1月1日以来的秒数</div><div class="line">$year   #当前4位年（如2011）</div><div class="line">$year2   #当前2位年（如11）</div><div class="line">$month    #当前月份，有前导0（如12）</div><div class="line">$day    #当前日，有前导0（如22）</div><div class="line">$hour    #当前24小时制的小时，有前导0（如21）</div><div class="line">$hour12    #当前12小时制的小时，有前导0（如09）</div><div class="line">$minute    #当前分钟，有前导0（如55）</div><div class="line">$second    #当前秒，有前导0（如12）</div></pre></td></tr></table></figure></p>
+<p>更多相关变量请<a href="http://tengine.taobao.org/document_cn/variables_cn.html" target="_blank" rel="external">点击查看</a></p>
+<h3 id="nginx-如何支持与-amp-amp-和或-运算"><a href="#nginx-如何支持与-amp-amp-和或-运算" class="headerlink" title="nginx 如何支持与&amp;&amp;和或|| 运算"></a>nginx 如何支持与&amp;&amp;和或|| 运算</h3><p>nginx的配置中不支持if条件的逻辑与&amp;&amp; 逻辑或|| 运算 ，而且不支持if的嵌套语法，否则会报下面的错误：nginx: [emerg] invalid condition。<br>不如下面的写法是错误的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">location ^~ /api/v2/step &#123;</div><div class="line">   if ($http_user_agent ~* &quot;Android/Volley&quot; &amp;&amp; $hour =&quot;00&quot;)</div><div class="line">   return 400;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>正确写法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">location ^~ /api/v2/step &#123;</div><div class="line">      set $flag 0;</div><div class="line">         if ($http_user_agent ~* &quot;Android/Volley&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;1&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($hour ~ &quot;00&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;2&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($flag = &quot;012&quot;) &#123;</div><div class="line">           return 401;</div><div class="line">         &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>那如何设置0-4点这个时间段，只需要把($hour ~ “00”)改一下就可以了，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">($hour ~ &quot;(00|01|02|03|04|20)&quot;)</div></pre></td></tr></table></figure></p>
+<p>不过对于上面的逻辑，还有一个小问题，我们只是针对0-4点这个时间段，其他时间我们是没有进行任何处理的，这样的话会报错，所以最终配置是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">location ^~ /api/v2/step &#123;</div><div class="line">      set $flag 0;</div><div class="line">         if ($http_user_agent ~* &quot;Android/Volley&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;1&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($hour ~ &quot;(00|01|02|03|04|20)&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;2&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($flag = &quot;012&quot;) &#123;</div><div class="line">           return 401;</div><div class="line">         &#125;</div><div class="line">         proxy_pass  $app_server;</div><div class="line">      &#125;</div></pre></td></tr></table></figure></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/08/07/dstat/" data-id="ciu2ftoka0008w5hp9x8hwgcw" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/08/13/08-13/" data-id="ciuchogh00000oihphp6lc85u" class="article-share-link">Share</a>
       
       
     </footer>
@@ -115,7 +114,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/6/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/8/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/6/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><a class="extend next" rel="next" href="/page/8/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -133,7 +132,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -144,6 +143,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
         
           <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
@@ -159,10 +162,6 @@
         
           <li>
             <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>

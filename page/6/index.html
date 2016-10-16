@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-08-13" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-puppet" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/08/13/08-13/" class="article-date">
-  <time datetime="2016-08-12T16:00:00.000Z" itemprop="datePublished">2016-08-13</time>
+    <a href="/2016/08/21/puppet/" class="article-date">
+  <time datetime="2016-08-20T16:00:00.000Z" itemprop="datePublished">2016-08-21</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/13/08-13/">在nginx层配置某段逻辑按照时间段生效</a>
+      <a class="article-title" href="/2016/08/21/puppet/">puppet 安装</a>
     </h1>
   
 
@@ -90,18 +90,34 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="在nginx层配置某段逻辑按照时间段生效"><a href="#在nginx层配置某段逻辑按照时间段生效" class="headerlink" title="在nginx层配置某段逻辑按照时间段生效"></a>在nginx层配置某段逻辑按照时间段生效</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近遇到一个比较棘手的问题，发现每到零点的时候，有个应用的请求量飙升，导致后端服务器压力很大，CPU几乎耗尽。后面查到原因，是由于客户端造成的，虽然在后面的版本中修正了这个bug，但是还是有很多老用户，没有更新版本，导致问题一直持续。后面和客户端工程师沟通，对于晚上这些大量的请求，其实是可以在nginx直接应对的，只要返回一个200的状态码就可以了。当时的第一想法就是在nginx写一个策略，晚上0-4点对于那部分请求，直接在nginx返回一个200的状态码。<br>想要完成这个策略，需要解决两个问题，在nginx怎么获取时间值？多条件的判断怎么写？接下来，我们来一一解决。</p>
-<h3 id="nginx获取时间信息"><a href="#nginx获取时间信息" class="headerlink" title="nginx获取时间信息"></a>nginx获取时间信息</h3><p>官方版本的nginx是没有可以直接用来获取时间的变量，不过淘宝开源的<a href="http://tengine.taobao.org/index_cn.html" target="_blank" rel="external">tengine</a>增加了相关的变量。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">$unix_time    #当前时间戳，其值为1970年1月1日以来的秒数</div><div class="line">$year   #当前4位年（如2011）</div><div class="line">$year2   #当前2位年（如11）</div><div class="line">$month    #当前月份，有前导0（如12）</div><div class="line">$day    #当前日，有前导0（如22）</div><div class="line">$hour    #当前24小时制的小时，有前导0（如21）</div><div class="line">$hour12    #当前12小时制的小时，有前导0（如09）</div><div class="line">$minute    #当前分钟，有前导0（如55）</div><div class="line">$second    #当前秒，有前导0（如12）</div></pre></td></tr></table></figure></p>
-<p>更多相关变量请<a href="http://tengine.taobao.org/document_cn/variables_cn.html" target="_blank" rel="external">点击查看</a></p>
-<h3 id="nginx-如何支持与-amp-amp-和或-运算"><a href="#nginx-如何支持与-amp-amp-和或-运算" class="headerlink" title="nginx 如何支持与&amp;&amp;和或|| 运算"></a>nginx 如何支持与&amp;&amp;和或|| 运算</h3><p>nginx的配置中不支持if条件的逻辑与&amp;&amp; 逻辑或|| 运算 ，而且不支持if的嵌套语法，否则会报下面的错误：nginx: [emerg] invalid condition。<br>不如下面的写法是错误的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">location ^~ /api/v2/step &#123;</div><div class="line">   if ($http_user_agent ~* &quot;Android/Volley&quot; &amp;&amp; $hour =&quot;00&quot;)</div><div class="line">   return 400;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>正确写法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">location ^~ /api/v2/step &#123;</div><div class="line">      set $flag 0;</div><div class="line">         if ($http_user_agent ~* &quot;Android/Volley&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;1&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($hour ~ &quot;00&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;2&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($flag = &quot;012&quot;) &#123;</div><div class="line">           return 401;</div><div class="line">         &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>那如何设置0-4点这个时间段，只需要把($hour ~ “00”)改一下就可以了，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">($hour ~ &quot;(00|01|02|03|04|20)&quot;)</div></pre></td></tr></table></figure></p>
-<p>不过对于上面的逻辑，还有一个小问题，我们只是针对0-4点这个时间段，其他时间我们是没有进行任何处理的，这样的话会报错，所以最终配置是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">location ^~ /api/v2/step &#123;</div><div class="line">      set $flag 0;</div><div class="line">         if ($http_user_agent ~* &quot;Android/Volley&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;1&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($hour ~ &quot;(00|01|02|03|04|20)&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;2&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($flag = &quot;012&quot;) &#123;</div><div class="line">           return 401;</div><div class="line">         &#125;</div><div class="line">         proxy_pass  $app_server;</div><div class="line">      &#125;</div></pre></td></tr></table></figure></p>
+        <h2 id="puppet-安装"><a href="#puppet-安装" class="headerlink" title="puppet 安装"></a>puppet 安装</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>puppet是一个开源的软件自动化配置和部署工具，它使用简单且功能强大，现在很多大型IT公司均在使用puppet对集群中的软件进行管理和部署。</p>
+<p>puppet是基于c/s架构的。服务器端保存着所有对客户端服务器的配置代码，在puppet里面叫做manifest. 客户端下载manifest之后，可以根据manifest对服务器进行配置，例如软件包管理，用户管理和文件管理等等。</p>
+<p>puppet的工作流程分为以下10个步骤：<br>1.客户端通过facter收集客户端信息并发送至服务端。<br>2.连接服务端并请求catalog日志。</p>
+<ol>
+<li>请求节点（node）的信息.</li>
+<li>从服务器端接收节点（node)的实例</li>
+<li>编译代码（包括语法检查等工作）<br>6.查询是否有exported 虚拟资源</li>
+<li>如有，则从数据库接收虚拟资源</li>
+<li>接收完整的catalog日志</li>
+<li>存储catalog日志到数据库<br>10.客户端接收完整的catalog日志。</li>
+</ol>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p><strong>环境说明：</strong><br>server：gy-vm02  ip：192,168.1.81<br>client：gy-vm03   ip：192.168.1.124</p>
+<p>配置epel源，直接使用yum进行安装</p>
+<p>server端：<br>yum -y install puppet puppet-server<br>安装目录默认存为/etc/puppet，该目录下的manifests存放manifest文件。<br>puppet.conf是主要的配置文件</p>
+<p>client端：<br>yum -y install puppet</p>
+<p>安装完成之后，我们在server端启动puppetmaster服务，并打开8140端口。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 puppet]# /etc/init.d/puppetmaster start</div></pre></td></tr></table></figure></p>
+<h3 id="client端进行认证"><a href="#client端进行认证" class="headerlink" title="client端进行认证"></a>client端进行认证</h3><p>首先在在server和client服务器的/etc/hosts里面添加对应hostname和ip。<br>然后在client上输入一下命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm03 ~]# puppetd --test --server gy-vm02</div><div class="line">info: Creating a new SSL key for gy-vm03</div><div class="line">info: Caching certificate for ca</div><div class="line">info: Creating a new SSL certificate request for gy-vm03</div><div class="line">info: Certificate Request fingerprint (SHA256): B1:E1:35:DB:28:D4:80:4A:F6:DF:CA:26:F1:F8:7C:53:71:D9:DB:B0:4C:C8:B9:EC:D1:77:FF:6F:C8:3C:8E:A7</div><div class="line">Exiting; no certificate found and waitforcert is disabled</div><div class="line">[root@gy-vm03 ~]#</div></pre></td></tr></table></figure></p>
+<p>我们可以看到client发了一个认证</p>
+<h3 id="服务器确认认证"><a href="#服务器确认认证" class="headerlink" title="服务器确认认证"></a>服务器确认认证</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 puppet]# puppetca -a --list</div><div class="line">  &quot;gy-vm03&quot; (F6:D4:44:EE:D6:02:B4:51:F3:7F:F0:26:EE:89:28:8B)</div></pre></td></tr></table></figure>
+<p>使用puppetca可以查看认证信息，我们可以看到有来至gy-vm03的认证信息<br>使用下面命令确认信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 puppet]# puppetca -s gy-vm03</div><div class="line">notice: Signed certificate request for gy-vm03</div><div class="line">notice: Removing file Puppet::SSL::CertificateRequest gy-vm03 at &apos;/var/lib/puppet/ssl/ca/requests/gy-vm03.pe</div></pre></td></tr></table></figure></p>
+<p>再次查看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 puppet]# puppetca -a --list</div><div class="line">+ &quot;gy-vm03&quot; (E5:5E:A0:48:AC:BC:14:A4:60:66:E3:11:6C:03:CE:DF)</div></pre></td></tr></table></figure></p>
+<p>注意前面的+号，说明已经签名</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>puppet的安装，使用 yum安装比较方便，puppet的配置也比较清楚，puppet语法可以<br>参阅ruby语法，总之来说，puppet安装与配置简单，但是puppet有很多资源模块需要化<br>时间去阅读</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/08/13/08-13/" data-id="ciu2ftojo0000w5hpn632p8pd" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/08/21/puppet/" data-id="ciuchogja000roihp7n8alujf" class="article-share-link">Share</a>
       
       
     </footer>
@@ -114,7 +130,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/5/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/7/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/5/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><a class="extend next" rel="next" href="/page/7/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -132,7 +148,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -143,6 +159,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
         
           <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
@@ -158,10 +178,6 @@
         
           <li>
             <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>
