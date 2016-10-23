@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-rsync" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-nginx" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/03/13/rsync/" class="article-date">
-  <time datetime="2016-03-12T16:00:00.000Z" itemprop="datePublished">2016-03-13</time>
+    <a href="/2016/03/20/nginx/" class="article-date">
+  <time datetime="2016-03-19T16:00:00.000Z" itemprop="datePublished">2016-03-20</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/13/rsync/">rsync实现机制原理</a>
+      <a class="article-title" href="/2016/03/20/nginx/">nginx防止DDOS攻击配置</a>
     </h1>
   
 
@@ -90,27 +90,24 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="为什么要使用rsync"><a href="#为什么要使用rsync" class="headerlink" title="为什么要使用rsync"></a>为什么要使用rsync</h3><p>在linux文件系统下面，我们通常使用scp来进行两台机器之间传输文件，大部分情况下，这是一个简单好用的方式。然而，对于大数据文件的拷贝，或者是文件的同步，使用scp就会出现问题，因为scp不支持断点续传。什么是断点续传，就是在拷贝文件的过程中，因为某些原因，同步失败了，如果使用scp，那么你得重新开始进行同步。这个时候，使用rsync，就方便多了。</p>
-<h3 id="什么是rsync"><a href="#什么是rsync" class="headerlink" title="什么是rsync"></a>什么是rsync</h3><p>rsync（remote synchronize）是Liunx/Unix下的一个远程数据同步工具。它可通过LAN/WAN快速同步多台主机间的文件和目录，并适当利用rsync算法（差分编码）以减少数据的传输。rsync算法并不是每一次都整份传输，而是只传输两个文件的不同部分，因此其传输速度相当快。</p>
-<h3 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h3><p>首先， 我们先来想一下rsync要解决的问题，如果我们要同步的文件只想传不同的部分，我们就需要对两边的文件做diff，但是这两个问题在两台不同的机器上， 无法做diff。如果我们做diff，就要把一个文件传到另一台机器上做diff，但这样一来，我们就传了整个文件，这与我们只想传输不同部的初衷相背。于是我们就要想一个办法，让这两边的文件见不到面，但还能知道它们间有什么不同。这就出现了rsync的算法。<br><strong>分块Checksum算法</strong><br>假设我们同步源文件名为fileSrc，同步目的文件叫fileDst<br>首先，我们会把fileDst的文件平均切分成若干个小块，比如每块512个字节（最后一块会小于这个数），然后对每块计算两个checksum</p>
+        <p>最近查看服务器nginx日志，看到很多类似DDos攻击的IP被nginx拦截了。<br>DDos全称分布式拒绝服务(DDoS:Distributed Denial of Service)攻击指借助于客户/服务器技术，将多个计算机联合起来作为攻击平台，对一个或多个目标发动DDoS攻击，从而成倍地提高拒绝服务攻击的威力。<br>DDOS的特点是分布式，针对带宽和服务攻击，也就是四层流量攻击和七层应用攻击，相应的防御瓶颈四层在带宽，七层的多在架构的吞吐量。对于七层的应用攻击，我们还是可以做一些配置来防御的，例如前端是Nginx，主要使用nginx的http_limit_conn和http_limit_req模块来防御。<br>ngx_http_limit_conn_module 可以限制单个IP的连接数，ngx_http_limit_req_module 可以限制单个IP每秒请求数，通过限制连接数和请求数能相对有效的防御CC攻击。</p>
+<h3 id="限制每秒请求数"><a href="#限制每秒请求数" class="headerlink" title="限制每秒请求数"></a>限制每秒请求数</h3><p>ngx_http_limit_req_module模块通过漏桶原理来限制单位时间内的请求数，一旦单位时间内请求数超过限制，就会返回503错误。配置需要在两个地方设置：</p>
 <ul>
-<li>一个叫rolling checksum，是弱checksum，32位的checksum，其使用的是Mark Adler发明的adler-32算法，</li>
-<li>另一个是强checksum，128位的，以前用md4，现在用md5 hash算法。</li>
+<li>nginx.conf的http段内定义触发条件，可以有多个条件</li>
+<li>在location内定义达到触发条件时nginx所要执行的动作</li>
 </ul>
-<p>为什么要这样？因为若干年前的硬件上跑md4的算法太慢了，所以，我们需要一个快算法来鉴别文件块的不同，但是弱的adler32算法碰撞概率太高了，所以我们还要引入强的checksum算法以保证两文件块是相同的。也就是说，弱的checksum是用来区别不同，而强的是用来确认相同。</p>
-<p><strong>传输文件</strong><br>同步目标端会把fileDst的一个checksum列表传给同步源，这个列表里包括了三个东西，rolling checksum(32bits)，md5 checksume(128bits)，文件块编号。同步源机器拿到了这个列表后，会对fileSrc做同样的checksum，然后和fileDst的checksum做对比，这样就知道哪些文件块改变了。<br>然而，事情并没有那么简单</p>
-<ul>
-<li>如果我fileSrc这边在文件中间加了一个字符，这样后面的文件块都会位移一个字符，这样就完全和fileDst这边的不一样了，但理论上来说，我应该只需要传一个字符就好了。这个怎么解决？</li>
-<li>如果这个checksum列表特别长，而我的两边的相同的文件块可能并不是一样的顺序，那就需要查找，线性的查找起来应该特别慢吧。这个怎么解决？</li>
-</ul>
-<p><strong>checksum查找算法</strong><br>同步源端拿到fileDst的checksum数组后，会把这个数据存到一个 hash table中，用rolling checksum做hash，以便获得O(1)时间复杂度的查找性能。这个hash table是16bits的，所以，hash table的尺寸是2的16次方，对rolling checksum的hash会被散列到0 到 2^16 – 1中的某个整数值。</p>
-<p><strong>比对算法</strong><br>这是最关键的部分<br>1、取fileSrc的第一个文件块（我们假设的是512个长度），也就是从fileSrc的第1个字节到第512个字节，取出来后做rolling checksum计算。计算好的值到hash表中查。<br>2、如果查到了，说明发现在fileDst中有潜在相同的文件块，于是就再比较 md5的checksum，因为rolling checksume太弱了，可能发生碰撞。于是还要算md5的128bits的checksum。如果rolling checksum和md5 checksum都相同，这说明在fileDst中有相同的块，我们需要记下这一块在fileDst下的文件编号。<br>3、如果fileSrc的rolling checksum 没有在hash table中找到，那就不用算md5 checksum了。表示这一块中有不同的信息。总之，只要rolling checksum 或 md5 checksum 其中有一个在fileDst的checksum hash表中找不到匹配项，那么就会触发算法对fileSrc的rolling动作。于是，算法会住后step 1个字节，取fileSrc中字节2-513的文件块要做checksum，重复第一步，所以我们叫做rolling checksum。<br>这样，我们就可以找出fileSrc相邻两次匹配中的那些文本字符，这些就是我们要往同步目标端传的文件内容了。</p>
-<p>上面的文字有些同学可能已经看晕了，下面这张是我在网上找的一张非常经典的图，很好的描述了上面的步骤。<br><img src="http://coolshell.cn/wp-content/uploads/2012/05/rsync-algorithm.jpg" alt="1"></p>
+<p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">http &#123;</div><div class="line">    limit_req_zone $limit zone=one:10m rate=20r/s; //触发条件，所有访问ip 限制每秒10个请求</div><div class="line">    ...</div><div class="line">    server &#123;</div><div class="line">        ...</div><div class="line">        location  ~ \.php$ &#123;</div><div class="line">            limit_req zone=one burst=5 nodelay;   //执行的动作,通过zone名字对应</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">     &#125;</div></pre></td></tr></table></figure></p>
+<p><strong>参数说明</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$binary_remote_addr  二进制远程地址</div><div class="line">zone=one:10m    定义zone名字叫one，并为这个zone分配10M内存，用来存储会话（二进制远程地址），1m内存可以保存16000会话</div><div class="line">rate=20r/s;     限制频率为每秒20个请求</div><div class="line">burst=5         允许超过频率限制的请求数不多于5个，假设1、2、3、4秒请求为每秒9个，那么第5秒内请求15个是允许的，反之，如果第一秒内请求15个，会将5个请求放到第二秒，第二秒内超过10的请求直接503，类似多秒内平均速率限制。</div><div class="line">nodelay         超过的请求不被延迟处理，设置后15个请求在1秒内处理。</div></pre></td></tr></table></figure></p>
+<h3 id="限制IP连接数"><a href="#限制IP连接数" class="headerlink" title="限制IP连接数"></a>限制IP连接数</h3><p>ngx_http_limit_conn_module的配置方法和参数与http_limit_req模块很像，参数少，要简单很多<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">http &#123;</div><div class="line">    limit_conn_zone $binary_remote_addr zone=addr:10m; //触发条件</div><div class="line">    ...</div><div class="line">    server &#123;</div><div class="line">        ...</div><div class="line">        location /download/ &#123;</div><div class="line">            limit_conn addr 1;    // 限制同一时间内1个连接，超出的连接返回503</div><div class="line">                &#125;</div><div class="line">           &#125;</div><div class="line">     &#125;</div></pre></td></tr></table></figure></p>
+<h3 id="白名单设置"><a href="#白名单设置" class="headerlink" title="白名单设置"></a>白名单设置</h3><p>http_limit_conn和http_limit_req模块限制了单ip单位时间内的并发和请求数，但是如果Nginx前面有lvs或者haproxy之类的负载均衡或者反向代理，nginx获取的都是来自负载均衡的连接或请求，这时不应该限制负载均衡的连接和请求，就需要geo和map模块设置白名单：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">geo $boohee &#123;</div><div class="line">   default 1;</div><div class="line">   127.0.0.1 0;</div><div class="line">   192.168.1.0/24 0;</div><div class="line">&#125;</div><div class="line">map $boohee $limit &#123;</div><div class="line">   1 $binary_remote_addr;</div><div class="line">   0 &quot;&quot;;</div><div class="line">&#125;</div><div class="line">limit_req_zone $limit zone=one:10m rate=20r/s;</div><div class="line">limit_conn_zone $limit zone=addr:10m;</div></pre></td></tr></table></figure></p>
+<p>geo模块定义了一个默认值是1的变量boohee，当在ip在白名单中，变量boohee的值为0，反之为1</p>
+<p>如果ip在白名单中，boohee=0，$limit=””，则不受到限制</p>
+<p>如果ip不在白名单中，boohee=1，$limit=$binary_remote_addr，受到限制。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/03/13/rsync/" data-id="ciumll24r000rm8hp3v2br4ww" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/03/20/nginx/" data-id="ciumlvi2o000juxhpk3p8irt8" class="article-share-link">Share</a>
       
       
     </footer>
@@ -123,7 +120,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/26/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="page-number current">27</span><a class="page-number" href="/page/28/">28</a><a class="page-number" href="/page/29/">29</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><a class="extend next" rel="next" href="/page/28/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/26/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="page-number current">27</span><a class="page-number" href="/page/28/">28</a><a class="page-number" href="/page/29/">29</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="extend next" rel="next" href="/page/28/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -154,6 +151,10 @@
       <ul>
         
           <li>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+          </li>
+        
+          <li>
             <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
           </li>
         
@@ -167,10 +168,6 @@
         
           <li>
             <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
           </li>
         
       </ul>

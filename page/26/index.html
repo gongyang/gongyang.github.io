@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-nginx" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-linux-file" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/03/20/nginx/" class="article-date">
-  <time datetime="2016-03-19T16:00:00.000Z" itemprop="datePublished">2016-03-20</time>
+    <a href="/2016/03/27/linux-file/" class="article-date">
+  <time datetime="2016-03-26T16:00:00.000Z" itemprop="datePublished">2016-03-27</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/20/nginx/">nginx防止DDOS攻击配置</a>
+      <a class="article-title" href="/2016/03/27/linux-file/">linux 文件时间atime、mtime、ctime</a>
     </h1>
   
 
@@ -90,24 +90,34 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>最近查看服务器nginx日志，看到很多类似DDos攻击的IP被nginx拦截了。<br>DDos全称分布式拒绝服务(DDoS:Distributed Denial of Service)攻击指借助于客户/服务器技术，将多个计算机联合起来作为攻击平台，对一个或多个目标发动DDoS攻击，从而成倍地提高拒绝服务攻击的威力。<br>DDOS的特点是分布式，针对带宽和服务攻击，也就是四层流量攻击和七层应用攻击，相应的防御瓶颈四层在带宽，七层的多在架构的吞吐量。对于七层的应用攻击，我们还是可以做一些配置来防御的，例如前端是Nginx，主要使用nginx的http_limit_conn和http_limit_req模块来防御。<br>ngx_http_limit_conn_module 可以限制单个IP的连接数，ngx_http_limit_req_module 可以限制单个IP每秒请求数，通过限制连接数和请求数能相对有效的防御CC攻击。</p>
-<h3 id="限制每秒请求数"><a href="#限制每秒请求数" class="headerlink" title="限制每秒请求数"></a>限制每秒请求数</h3><p>ngx_http_limit_req_module模块通过漏桶原理来限制单位时间内的请求数，一旦单位时间内请求数超过限制，就会返回503错误。配置需要在两个地方设置：</p>
+        <h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>对于linux文件系统中的文件和目录，有三种时间状态atime、mtime和ctime，他们分别代表的意思是：<br><strong><em>atime：access time</em></strong><br>访问时间，读一次这个文件的内容，这个时间就会更新。比如对这个文件运用 more、cat等命令。ls、stat命令都不会修改文件的访问时间。<br><strong><em>mtime：modified time</em></strong><br>修改时间，修改时间是文件内容最后一次被修改时间。比如：vi后保存文件。ls -l列出的时间就是这个时间。<br><strong><em>ctime：change time</em></strong><br>状态改动时间。是该文件的inode节点最后一次被修改的时间，通过chmod、chown命令修改一次文件属性，这个时间就会更新。</p>
+<p><strong>如何查看atime、mtime和ctime</strong><br>ls -lu filename         列出文件的 atime<br>ls -l  filename          列出文件的 mtime<br>ls -lc filename         列出文件的 ctime<br>也可以使用stat filename来同时查看三个时间<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm03 ~]$ stat 1.txt </div><div class="line">  File: `1.txt&apos;</div><div class="line">  Size: 11        	Blocks: 8          IO Block: 4096   regular file</div><div class="line">Device: 802h/2050d	Inode: 394206      Links: 1</div><div class="line">Access: (0664/-rw-rw-r--)  Uid: (  500/    ggyy)   Gid: (  500/    ggyy)</div><div class="line">Access: 2016-03-27 00:09:04.196004991 +0800</div><div class="line">Modify: 2016-03-27 00:08:48.150005058 +0800</div><div class="line">Change: 2016-03-27 00:08:48.150005058 +0800</div></pre></td></tr></table></figure></p>
+<p>在linux中stat函数中，用st_atime表示文件数据最近的存取时间(last accessed time)；用st_mtime表示文件数据最近的修改时间(last modified time)；使用st_ctime表示文件i节点数据最近的修改时间(last i-node’s status changed time)。</p>
+<p> 字段           说明                  例子           ls(-l)<br> st_atime  文件数据的最后存取时间       read            -u<br> st_mtime  文件数据的最后修改时间       write           缺省<br> st_ctime  文件数据的最后更改时间       chown,chmod     -c</p>
+<h4 id="实例-1"><a href="#实例-1" class="headerlink" title="实例 1"></a>实例 1</h4><p>有时候我们会发现，即是访问了文件，该文件的访问时间也不会变，例如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm03 ~]$ stat 1.txt </div><div class="line">  File: `1.txt&apos;</div><div class="line">  Size: 5         	Blocks: 8          IO Block: 4096   regular file</div><div class="line">Device: 802h/2050d	Inode: 394206      Links: 1</div><div class="line">Access: (0664/-rw-rw-r--)  Uid: (  500/    ggyy)   Gid: (  500/    ggyy)</div><div class="line">Access: 2016-03-27 00:01:09.379005522 +0800</div><div class="line">Modify: 2016-03-26 23:27:18.032007859 +0800</div><div class="line">Change: 2016-03-26 23:27:18.032007859 +0800</div><div class="line">[ggyy@gy-vm03 ~]$ cat 1.txt </div><div class="line">test</div><div class="line">[ggyy@gy-vm03 ~]$ stat 1.txt </div><div class="line">  File: `1.txt&apos;</div><div class="line">  Size: 5         	Blocks: 8          IO Block: 4096   regular file</div><div class="line">Device: 802h/2050d	Inode: 394206      Links: 1</div><div class="line">Access: (0664/-rw-rw-r--)  Uid: (  500/    ggyy)   Gid: (  500/    ggyy)</div><div class="line">Access: 2016-03-27 00:01:09.379005522 +0800</div><div class="line">Modify: 2016-03-26 23:27:18.032007859 +0800</div><div class="line">Change: 2016-03-26 23:27:18.032007859 +0800</div><div class="line">[ggyy@gy-vm03 ~]$</div></pre></td></tr></table></figure></p>
+<p>其原因是kernel更新文件访问时间是有策略的，其策略经过了三个发展阶段</p>
 <ul>
-<li>nginx.conf的http段内定义触发条件，可以有多个条件</li>
-<li>在location内定义达到触发条件时nginx所要执行的动作</li>
+<li><p>初始阶段<br>linux总是实时更新访问时间的，但这会涉及到大量的写磁盘操作，严重影响到linux性能。</p>
+</li>
+<li><p>第二阶段<br>考虑到1的缺陷，可以在挂载文件系统时使用noatime属性来停止更新atime。但这会对许多应用程序造成影响，比如邮箱，备份软件，时间同步工具</p>
+</li>
+<li><p>第三阶段<br>综合1,2，现在的linux使用了折中方案，挂载文件系统时使用的默认属性为relatime。其更新策略为：当满足以下任一条件时才更新访问时间，<br>1、访问时间早于修改时间或改变状态时间<br>2、距离上次更新时间间隔大于24h</p>
+</li>
 </ul>
-<p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">http &#123;</div><div class="line">    limit_req_zone $limit zone=one:10m rate=20r/s; //触发条件，所有访问ip 限制每秒10个请求</div><div class="line">    ...</div><div class="line">    server &#123;</div><div class="line">        ...</div><div class="line">        location  ~ \.php$ &#123;</div><div class="line">            limit_req zone=one burst=5 nodelay;   //执行的动作,通过zone名字对应</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">     &#125;</div></pre></td></tr></table></figure></p>
-<p><strong>参数说明</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$binary_remote_addr  二进制远程地址</div><div class="line">zone=one:10m    定义zone名字叫one，并为这个zone分配10M内存，用来存储会话（二进制远程地址），1m内存可以保存16000会话</div><div class="line">rate=20r/s;     限制频率为每秒20个请求</div><div class="line">burst=5         允许超过频率限制的请求数不多于5个，假设1、2、3、4秒请求为每秒9个，那么第5秒内请求15个是允许的，反之，如果第一秒内请求15个，会将5个请求放到第二秒，第二秒内超过10的请求直接503，类似多秒内平均速率限制。</div><div class="line">nodelay         超过的请求不被延迟处理，设置后15个请求在1秒内处理。</div></pre></td></tr></table></figure></p>
-<h3 id="限制IP连接数"><a href="#限制IP连接数" class="headerlink" title="限制IP连接数"></a>限制IP连接数</h3><p>ngx_http_limit_conn_module的配置方法和参数与http_limit_req模块很像，参数少，要简单很多<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">http &#123;</div><div class="line">    limit_conn_zone $binary_remote_addr zone=addr:10m; //触发条件</div><div class="line">    ...</div><div class="line">    server &#123;</div><div class="line">        ...</div><div class="line">        location /download/ &#123;</div><div class="line">            limit_conn addr 1;    // 限制同一时间内1个连接，超出的连接返回503</div><div class="line">                &#125;</div><div class="line">           &#125;</div><div class="line">     &#125;</div></pre></td></tr></table></figure></p>
-<h3 id="白名单设置"><a href="#白名单设置" class="headerlink" title="白名单设置"></a>白名单设置</h3><p>http_limit_conn和http_limit_req模块限制了单ip单位时间内的并发和请求数，但是如果Nginx前面有lvs或者haproxy之类的负载均衡或者反向代理，nginx获取的都是来自负载均衡的连接或请求，这时不应该限制负载均衡的连接和请求，就需要geo和map模块设置白名单：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">geo $boohee &#123;</div><div class="line">   default 1;</div><div class="line">   127.0.0.1 0;</div><div class="line">   192.168.1.0/24 0;</div><div class="line">&#125;</div><div class="line">map $boohee $limit &#123;</div><div class="line">   1 $binary_remote_addr;</div><div class="line">   0 &quot;&quot;;</div><div class="line">&#125;</div><div class="line">limit_req_zone $limit zone=one:10m rate=20r/s;</div><div class="line">limit_conn_zone $limit zone=addr:10m;</div></pre></td></tr></table></figure></p>
-<p>geo模块定义了一个默认值是1的变量boohee，当在ip在白名单中，变量boohee的值为0，反之为1</p>
-<p>如果ip在白名单中，boohee=0，$limit=””，则不受到限制</p>
-<p>如果ip不在白名单中，boohee=1，$limit=$binary_remote_addr，受到限制。</p>
+<p>综上所叙：当访问时间大于修改时间和改变时间时，且距离上次更新时间小于24h时，访问时间不再更新，这就是造成上述访问时间不变的原因。</p>
+<h4 id="实例-2"><a href="#实例-2" class="headerlink" title="实例 2"></a>实例 2</h4><p>有时候，我们会发现某一文件的访问时间甚至比修改时间还要早，如下所示，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm03 ~]$ stat 1.txt </div><div class="line">  File: `1.txt&apos;</div><div class="line">  Size: 11        	Blocks: 8          IO Block: 4096   regular file</div><div class="line">Device: 802h/2050d	Inode: 394206      Links: 1</div><div class="line">Access: (0664/-rw-rw-r--)  Uid: (  500/    ggyy)   Gid: (  500/    ggyy)</div><div class="line">Access: 2016-03-27 00:09:04.196004991 +0800</div><div class="line">Modify: 2016-03-27 00:08:48.150005058 +0800</div><div class="line">Change: 2016-03-27 00:08:48.150005058 +0800</div><div class="line">[ggyy@gy-vm03 ~]$ echo &quot;1122&quot; &gt;&gt; 1.txt </div><div class="line">[ggyy@gy-vm03 ~]$ stat 1.txt </div><div class="line">  File: `1.txt&apos;</div><div class="line">  Size: 16        	Blocks: 8          IO Block: 4096   regular file</div><div class="line">Device: 802h/2050d	Inode: 394206      Links: 1</div><div class="line">Access: (0664/-rw-rw-r--)  Uid: (  500/    ggyy)   Gid: (  500/    ggyy)</div><div class="line">Access: 2016-03-27 00:09:04.196004991 +0800</div><div class="line">Modify: 2016-03-27 00:35:04.421003193 +0800</div><div class="line">Change: 2016-03-27 00:35:04.421003193 +0800</div><div class="line">[ggyy@gy-vm03 ~]$</div></pre></td></tr></table></figure></p>
+<p>这是因为在修改文件的操作中，有的会访问到该文件，有的不会。</p>
+<ul>
+<li><p>比如，使用命令vim file修改文件,同时也访问了该文件。所以，修改完后首先更新文件的修改时间，接着更新访问时间。由于此时的访问时间已经小于新的修改时间，所以更新访问时间到与修改时间相同。</p>
+</li>
+<li><p>使用命令echo “1122” &gt;&gt; 1.txt，此命令仅仅修改了文件，并没有访问，故仅更新修改时间，访问时间因为没变而晚于修改时间，此即上述现象产生的原因。</p>
+</li>
+</ul>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/03/20/nginx/" data-id="ciumll23z000jm8hpxes2dn27" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/03/27/linux-file/" data-id="ciumlvi27000euxhpzcy29w4w" class="article-share-link">Share</a>
       
       
     </footer>
@@ -120,7 +130,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/25/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="page-number current">26</span><a class="page-number" href="/page/27/">27</a><a class="page-number" href="/page/28/">28</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><a class="extend next" rel="next" href="/page/27/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/25/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="page-number current">26</span><a class="page-number" href="/page/27/">27</a><a class="page-number" href="/page/28/">28</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="extend next" rel="next" href="/page/27/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -151,6 +161,10 @@
       <ul>
         
           <li>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+          </li>
+        
+          <li>
             <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
           </li>
         
@@ -164,10 +178,6 @@
         
           <li>
             <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
           </li>
         
       </ul>

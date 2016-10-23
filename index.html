@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-nginx_limit" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-nginx_config" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/10/16/nginx_limit/" class="article-date">
-  <time datetime="2016-10-15T16:00:00.000Z" itemprop="datePublished">2016-10-16</time>
+    <a href="/2016/10/23/nginx_config/" class="article-date">
+  <time datetime="2016-10-22T16:00:00.000Z" itemprop="datePublished">2016-10-23</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+      <a class="article-title" href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
     </h1>
   
 
@@ -90,21 +90,31 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="nginx-limit-conn-limit-req模块讲解"><a href="#nginx-limit-conn-limit-req模块讲解" class="headerlink" title="nginx limit_conn  limit_req模块讲解"></a>nginx limit_conn  limit_req模块讲解</h2><p>nginx针对于限流，提供了两个模块：连接数限流模块 ngx_http_limit_conn_module 和漏桶算法实现的请求限流模块 ngx_http_limit_req_module 。</p>
-<p>limit_conn 用来对某个 KEY 对应的总的网络连接数进行限流，可以按照如 IP 、域名维度进行限流。 limit_req 用来对某个 KEY 对应的请求的平均速率进行限流，并有两种用法：平滑模式（ delay ）和允许突发模式 (nodelay) 。</p>
-<h3 id="ngx-http-limit-conn-module"><a href="#ngx-http-limit-conn-module" class="headerlink" title="ngx_http_limit_conn_module"></a>ngx_http_limit_conn_module</h3><p>limit_conn 是对某个 KEY 对应的总的网络连接数进行限流。可以按照 IP 来限制 IP 维度的总连接数，或者按照服务域名来限制某个域名的总连接数。但是记住不是每一个请求连接都会被计数器统计，只有那些被 Nginx 处理的且已经读取了整个请求头的请求连接才会被计数器统计。</p>
-<p><strong>配置示例</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">http &#123;  </div><div class="line">    log_format mylogformat [$time_local] [$msec] &apos;$status&apos;;</div><div class="line">    limit_req_zone $binary_remote_addr zone=ggyy:10m rate=2r/s;</div><div class="line">    server &#123;</div><div class="line">    listen 80;</div><div class="line">    server_name abc.gongyang.com;</div><div class="line">    root /var/www/html;     </div><div class="line">    location /a.txt &#123;</div><div class="line">    limit_req zone=ggyy burst=3 nodelay;</div><div class="line">    access_log logs/abc.log mylogformat;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p><strong>配置说明</strong><br>limit_conn ：要配置存放 KEY 和计数器的共享内存区域和指定 KEY 的最大连接数；此处指定的最大连接数是 1 ，表示 Nginx 最多同时并发处理 1 个连接；<br>limit_conn_zone ：用来配置限流 KEY 、及存放 KEY 对应信息的共享内存区域大小；此处的 KEY 是“ \$binary_remote_addr ”其表示 IP 地址，也可以使用如 \$server_name 作为 KEY 来限制域名级别的最大连接数；<br>limit_conn_status ：配置被限流后返回的状态码，默认返回 503 ；<br>limit_conn_log_level ：配置记录被限流后的日志级别，默认 error 级别。</p>
-<p><strong>limit_conn 的主要执行过程如下所示：</strong><br>1 、请求进入后首先判断当前 limit_conn_zone 中相应 KEY 的连接数是否超出了配置的最大连接数；<br>2.1 、如果超过了配置的最大大小，则被限流，返回 limit_conn_status 定义的错误状态码；<br>2.2 、否则相应 KEY 的连接数加 1 ，并注册请求处理完成的回调函数；<br>3 、进行请求处理；<br>4 、在结束请求阶段会调用注册的回调函数对相应 KEY 的连接数减 1 。<br>limt_conn 可以限流某个 KEY 的总并发 / 请求数， KEY 可以根据需要变化。</p>
-<h3 id="ngx-http-limit-rep-module"><a href="#ngx-http-limit-rep-module" class="headerlink" title="ngx_http_limit_rep_module"></a>ngx_http_limit_rep_module</h3><p>limit_req 是令牌桶算法实现，用于对指定 KEY 对应的请求进行限流，比如按照 IP 维度限制请求速率。</p>
-<p><strong>配置示例</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">http &#123;</div><div class="line">    include       mime.types;</div><div class="line">    default_type  application/octet-stream;</div><div class="line">    sendfile        on;</div><div class="line">    keepalive_timeout  65;</div><div class="line">  </div><div class="line">    log_format mylogformat [$time_local] [$msec] &apos;$status&apos;;</div><div class="line">    limit_req_zone $binary_remote_addr zone=ggyy:10m rate=2r/s;</div><div class="line">    server &#123;</div><div class="line">    listen 80;</div><div class="line">    server_name abc.gongyang.com;</div><div class="line">    root /var/www/html;     </div><div class="line"></div><div class="line">    location /a.txt &#123;</div><div class="line">    limit_req zone=ggyy burst=3 nodelay;</div><div class="line">    access_log logs/abc.log mylogformat;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p><strong>配置说明</strong><br>limit_req ：配置限流区域、桶容量（突发容量，默认 0 ）、是否延迟模式（默认延迟）；<br>limit_req_zone ：配置限流 KEY 、及存放 KEY 对应信息的共享内存区域大小、固定请求速率；此处指定的 KEY 是“\$binary_remote_addr ”表示 IP 地址；固定请求速率使用 rate 参数配置，支持 10r/s 和 60r/m ，即每秒 10 个请求和每分钟 60 个请求，不过最终都会转换为每秒的固定请求速率（ 10r/s 为每 100 毫秒处理一个请求； 60r/m ，即每 1000 毫秒处理一个请求）。<br>limit_conn_status ：配置被限流后返回的状态码，默认返回 503 ；<br>limit_conn_log_level ：配置记录被限流后的日志级别，默认 error 级别。</p>
-<p><strong>limit_req 的主要执行过程如下所示：</strong><br>1 、请求进入后首先判断最后一次请求时间相对于当前时间（第一次是 0 ）是否需要限流，如果需要限流则执行步骤 2 ，否则执行步骤 3 ；<br>2.1 、如果没有配置桶容量（ burst ），则桶容量为 0 ；按照固定速率处理请求；如果请求被限流，则直接返回相应的错误码（默认 503 ）；<br>2.2 、如果配置了桶容量（ burst&gt;0 ）且延迟模式 ( 没有配置 nodelay) ；如果桶满了，则新进入的请求被限流；如果没有满则请求会以固定平均速率被处理（按照固定速率并根据需要延迟处理请求，延迟使用休眠实现）；<br>2.3 、如果配置了桶容量（ burst&gt;0 ）且非延迟模式（配置了 nodelay ）；不会按照固定速率处理请求，而是允许突发处理请求；如果桶满了，则请求被限流，直接返回相应的错误码；<br>3 、如果没有被限流，则正常处理请求；<br>4 、 Nginx 会在相应时机进行选择一些（ 3 个节点）限流 KEY 进行过期处理，进行内存回收。</p>
+        <h2 id="Nginx-配置文件详解"><a href="#Nginx-配置文件详解" class="headerlink" title="Nginx 配置文件详解"></a>Nginx 配置文件详解</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">main</div><div class="line">events &#123;</div><div class="line">  .... &#125; http &#123;   upstream myproject_svr &#123;     .....   &#125; </div><div class="line">  server &#123; </div><div class="line">    location &#123; </div><div class="line">      .... </div><div class="line">    &#125;</div><div class="line">  &#125;    </div><div class="line">  server &#123; </div><div class="line">    location &#123; </div><div class="line">       .... </div><div class="line">    &#125; </div><div class="line">  &#125;</div><div class="line">    .... </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>nginx配置文件主要分为六个区域：<br>main (全局设置)、 events (nginx工作模式)、 http (http设置)、 server (主机设置)、 location (URL匹配)、 upstream (负载均衡服务器设置)。</p>
+<p>###main全局设置模块<br>这一块区域主要设置一些全局的属性，比如用户组、进程数、错误日志等。我们来看一下具体配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">user www www;  </div><div class="line">worker_processes 8;  </div><div class="line">error_log /data1/logs/apps/nginx/nginx_error.log  crit;  </div><div class="line">pid /usr/local/run/nginx.pid;  </div><div class="line">worker_rlimit_nofile 131070;</div></pre></td></tr></table></figure></p>
+<p>user 指定nginx worker进程的运行用户以及用户组，默认由nobody账号运行。<br>worker_processes 指定nginx要开启的子进程数。每个nginx进程平均耗费10M~12M内存。根据经验，一般指定1个进程就足够了，如果是多核CPU，建议指定和CPU的数量一样的进程数即可。这里写2，那么就会开启2个子进程。<br>error_log 定义全局错误日志文件。日志输出级别有debug、info、notice、warn、error、crit可供选择，其中，debug输出日志最为最详细，而crit输出日志最少。<br>pid 指定进程id的存储文件位置。<br>worker_rlimit_nofile 指定一个nginx进程可以打开的最多文件描述符数目。</p>
+<h3 id="events模块"><a href="#events模块" class="headerlink" title="events模块"></a>events模块</h3><p>events模块用于指定nginx的工作模式和连接数上限，一般是这样：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">events &#123;  </div><div class="line">    use epoll;</div><div class="line">    worker_connections 131070;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>use 指定nginx的工作模式。nginx支持的工作模式有 select 、 poll 、 kqueue、 epoll 、 rtsig 和 /dev/poll 。其中 select 和 poll 都是标准的工作模式， kqueue 和 epoll 是高效的工作模式，不同的是 epoll 用在Linux平台上，而 kqueue 用在BSD系统中，因为Mac基于BSD,所以Mac也得用这个模式，对于Linux系统，epoll工作模式是首选。<br><figure class="highlight plain"><figcaption><span>定义nginx每个进程的最大连接数，即接收前端的最大请求数，默认是1024。最大客户端连接数由 ```worker_processes``` 和 ```worker_connections``` 决定，即 ```max_clients=worker_processes*worker_connections``` 。</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">### http模块</div><div class="line">http模块可以说是最核心的模块了，它负责HTTP服务器相关属性的配置，它里面的server和upstream子模块，至关重要，后面会仔细说。</div></pre></td></tr></table></figure></p>
+<p>http {<br>    include       mime.types;<br>    default_type  application/octet-stream;<br>    log_format  main  ‘$remote_addr - $remote_user [$time_local] “$request” ‘<br>                      ‘$status $body_bytes_sent “$http_referer” ‘<br>                      ‘“$http_user_agent” “$http_x_forwarded_for”‘;<br>    access_log  /usr/local/var/log/nginx/access.log  main;<br>    sendfile        on;<br>    tcp_nopush      on;<br>    tcp_nodelay     on;<br>    keepalive_timeout  10;<br>    gzip  on;<br>    upstream myproject {<br>        …..<br>    }<br>    server {<br>        ….<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">下面详细介绍下这段代码中每个配置选项的含义。 include 设定文件的mime类型，类型在配置文件目录下的mime.types文件定义，来告诉nginx来识别文件类型。</div><div class="line">default_type 设定了默认的类型为二进制流，也就是当文件类型未定义时使用这种方式了。</div><div class="line">log_format 设置日志的格式，这里的 main 用于access_log来纪录这种类型。</div><div class="line">main的类型日志如下：也可以增删部分参数。</div></pre></td></tr></table></figure></p>
+<p>127.0.0.1 - - [21/Apr/2015:18:09:54 +0800] “GET /index.php HTTP/1.1” 200 87151 “-“ “Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.76 Safari/537.36”<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">access_log 纪录每次的访问日志的文件地址，后面的main是日志的格式样式，对应于log_format的main。</div><div class="line">sendfile 开启高效文件传输模式。将 tcp_nopush 和 tcp_nodelay 两个指令设置为on用于防止网络阻塞。</div><div class="line">keepalive_timeout 设置客户端连接保持活动的超时时间。在超过这个时间之后，服务器会关闭该连接。</div><div class="line">gzip 设置是否开启gzip压缩。</div><div class="line">upstream 负载均衡设置。</div><div class="line">server 虚拟主机设置。</div><div class="line">还有很多各种配置，以后等用到来再说。</div><div class="line">### server模块</div><div class="line">sever模块是http的子模块，它用来定一个虚拟主机，我们先讲最基本的配置，这些在后面再讲。</div><div class="line">我们看一下一个简单的server 是如何做的？</div></pre></td></tr></table></figure></p>
+<p>server {<br>        listen       8080;<br>        server_name  fanxing.kugou.com www.fanxing.com fanxing.com;</p>
+<pre><code># 全局定义，如果都是这一个目录，这样定义最简单。
+root   /data1/htdocs/fanxing.com;
+index  index.php index.html index.htm; 
+charset utf-8;
+access_log  usr/local/var/log/host.access.log  main;
+error_log  usr/local/var/log/host.error.log  error;
+....
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">server 标志定义虚拟主机开始。</div><div class="line">listen 用于指定虚拟主机的服务端口。</div><div class="line">server_name 用来指定IP地址或者域名，多个域名之间用空格分开。</div><div class="line">root 用于配置项目的根目录。</div><div class="line">index 全局定义访问的默认首页地址。</div><div class="line">charset 用于设置网页的默认编码格式。</div><div class="line">access_log 用来指定此虚拟主机的访问日志存放路径，最后的main用于指定访问日志的输出格式。</div><div class="line">error_log 用来指定此虚拟主机的错误日志存放路径，最后的error用于指定错误日志的输出格式。</div><div class="line">### location模块</div><div class="line">location 模块是nginx中用的最多的，也是最重要的模块了。什么负载均衡啊、反向代理啊、虚拟域名啊都与它相关。</div><div class="line">location 根据它字面意思就知道是来定位的，定位URL，解析URL，所以，它也提供了强大的正则匹配功能，也支持条件判断匹配，用户可以通过location指令实现Nginx对动、静态网页进行过滤处理。</div><div class="line">location 支持路径匹配也支持正则匹配，我们可以通过 location 强大的匹配功能来定位我们的web服务。我们在这里只介绍一下基本的用法：</div><div class="line"></div><div class="line">	* 路径匹配 我们先来看这个，设定默认首页和虚拟机目录。</div></pre></td></tr></table></figure></p>
+<p>location / {<br>    root   html;<br>    index  index.html index.htm;<br>    proxy_set_header X-Real-IP $remote_addr;<br>    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;<br>    proxy_set_header Host $http_host;<br>    proxy_set_header X-NginX-Proxy true;<br>    proxy_pass <a href="http://127.0.0.1:3000/" target="_blank" rel="external">http://127.0.0.1:3000/</a>;<br>    proxy_redirect off;<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">location / 表示匹配访问根目录。</div><div class="line">root 指令用于指定访问根目录时，虚拟主机的web目录，这个目录可以是相对路径（相对路径是相对于nginx的安装目录）。也可以是绝对路径。</div><div class="line">index 用于设定我们只输入域名后访问的默认首页地址，有个先后顺序：index.html index.htm，如果没有开启目录浏览权限，又找不到这些默认首页，就会报403错误。</div><div class="line">proxy_set_header 设置http请求头。</div><div class="line">proxy_pass 指定匹配访问的服务；</div><div class="line">...</div><div class="line"></div><div class="line"> 正则匹配 location 还有一种方式就是正则匹配，开启正则匹配这样： location ~ ，也就是后面加个 ~ 。</div><div class="line"></div><div class="line">看一看我们开发服的php配置：</div></pre></td></tr></table></figure></p>
+<p>location ~.*.(php|php5)?$ {<br>    fastcgi_pass 127.0.0.1:9000;<br>    fastcgi_index index.php;<br>    include fcgi.conf;<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">这个正则的意思就是匹配以php或者php5结尾的访问路径。里面的fastcgi_pass是用来表示虚拟主机php-fpm服务地址。</div><div class="line">location 还有很多其他用法，想要详细的童鞋可以继续阅读我的下一篇博文：</div><div class="line">### upstream模块</div><div class="line">upstream 模块负责 负载均衡 模块，通过简单的调度算法来实现客户端IP到后端服务器的负载均衡。</div><div class="line">我们先看一份配置：</div></pre></td></tr></table></figure></p>
+<p>upstream myproject_svr {<br>    weight;<br>    server 10.1.2.1:80 weight=8 max_fails=5 fail_timeout=10s;<br>    server 10.1.2.2:80 weight=8 max_fails=5 fail_timeout=10s;<br>    server 10.1.2.3:80 weight=8 max_fails=5 fail_timeout=10s;down;<br>    check interval=3000 rise=2 fall=5 timeout=3000 type=tcp;<br>    keepalive 16;<br>}<br>```<br>在上面的例子中，通过 upstream 指令指定了一个负载均衡器的名称myproject_svr 。这个名称可以任意指定，在后面需要的地方直接调用即可。<br>weight 这是其中的一种负载均衡调度算法，nginx的负载均衡模块目前支持4种调度算法:<br>weight 轮询（默认）。每个请求按时间顺序逐一分配到不同的后端服务器，如果后端某台服务器宕机，故障系统被自动剔除，使用户访问不受影响。server中的 weight指定轮询权值， weight 值越大，分配到的访问机率越高，主要用于后端每个服务器性能不均的情况下。<br>ip_hash 每个请求按访问IP的hash结果分配，这样来自同一个IP的访客固定访问一个后端服务器，有效解决了动态网页存在的session共享问题。<br>fair 比上面两个更加智能的负载均衡算法。此种算法可以依据页面大小和加载时间长短智能地进行负载均衡，也就是根据后端服务器的响应时间来分配请求，响应时间短的优先分配。nginx本身是不支持fair的，如果需要使用这种调度算法，必须下载nginx的 upstream_fair 模块。<br>url_hash 按访问url的hash结果来分配请求，使每个url定向到同一个后端服务器，可以进一步提高后端缓存服务器的效率。nginx本身是不支持 url_hash 的，如果需要使用这种调度算法，必须安装nginx的hash软件包。<br>紧接着就是各种服务器配置了。在 upstream 模块中，可以通过 server 指令指定后端服务器的IP地址和端口，同时还可以设定每个后端服务器在负载均衡调度中的状态。 常用的状态 有：<br>down 表示当前的server暂时不参与负载均衡。<br>backup 预留的备份机器。当其他所有的非backup机器出现故障或者忙的时候，才会请求backup机器，因此这台机器的压力最轻。<br>max_fails 允许请求失败的次数，默认为1。<br>fail_timeout 在经历了 max_fails 次失败后，暂停服务的时间。 max_fails 可以和 fail_timeout 一起使用。<br>注意当负载调度算法为 ip_hash 时，后端服务器在负载均衡调度中的状态不能是weight和backup。<br>check 指令可以打开后端服务器的健康检查功能。指令后面的参数意义是：<br>interval ：向后端发送的健康检查包的间隔。<br>fall(fall_count) : 如果连续失败次数达到fall<br>count，服务器就被认为是down。<br>rise(rise_count) count，服务器就被认为是up。<br>timeout : 后端健康请求的超时时间。<br>keepalive 表示活动连接最大数量。<br>至此， nginx.conf 基本的配置就差不多分析完了。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/10/16/nginx_limit/" data-id="ciumll241000km8hphf4b0ewa" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/10/23/nginx_config/" data-id="ciumlvi36000puxhp0l5t2kid" class="article-share-link">Share</a>
       
       
     </footer>
@@ -117,7 +127,7 @@
 
 
   <nav id="page-nav">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><a class="extend next" rel="next" href="/page/2/">__('next') &raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="extend next" rel="next" href="/page/2/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -148,6 +158,10 @@
       <ul>
         
           <li>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+          </li>
+        
+          <li>
             <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
           </li>
         
@@ -161,10 +175,6 @@
         
           <li>
             <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
           </li>
         
       </ul>
