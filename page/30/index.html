@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-ftp" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-mongodb" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/02/27/ftp/" class="article-date">
-  <time datetime="2016-02-26T16:00:00.000Z" itemprop="datePublished">2016-02-27</time>
+    <a href="/2016/03/06/mongodb/" class="article-date">
+  <time datetime="2016-03-05T16:00:00.000Z" itemprop="datePublished">2016-03-06</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/27/ftp/">记一次关于ftp使用的那些事</a>
+      <a class="article-title" href="/2016/03/06/mongodb/">mongodb 在复制集上创建修改索引</a>
     </h1>
   
 
@@ -90,17 +90,21 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>FTP，是一个相当古老的文件传输协议之一，相比大家伙都不会陌生，它的主要功能是在服务器和客户端之间进行文件的传输。由于比较古老，在安全方面比较落后，所以在实际应用当中，一般都会使用vsftp这个软件。</p>
-<p>今天我为什么要讲一讲这个大家都很熟悉的软件了，自然是我们也在使用它，并且和它也发生了那么些事。<br>关于如何安装和使用，我在这里就不具体详解了，网上资料一大把。今天我们主要来讲讲实际应用当中，遇到的那些事。</p>
-<p>我把vsftp服务搭建好了之后，创建了虚拟用户，并使用TLS协议加密登录，在公司稳稳当当的使用了一段时间，后来断断续续有人来跟我说，vsftp连接不上去；这里注明一下，我们是使用filezilla客户端进行连接的。我跑到安装vsftp的服务器上面查看，发现虽然客户端那边断开了，但是还是有进程在，开始以为是客户端的问题，我把进程kill之后，就能正常连接了。但是后来，一直都有类似的问题出现，我把服务端这边的配置都重新清理了一遍，实在是找不到原因。直到有一次，ftp又出现不能连接的问题之后，我是用netstat查看ftp端口发现是close_wait状态，我仿佛像是抓到了救命稻草一样，发现了问题的所在，虽然我不知道这是什么意思，但我敢肯定，问题就在这。</p>
-<p>首先我们知道，如果我们的服务器程序处于CLOSE_WAIT状态的话，说明套接字是被动关闭的！<br>因为如果是CLIENT端主动断掉当前连接的话，那么双方关闭这个TCP连接共需要四个packet：</p>
-<p>Client –-&gt; FIN  –-&gt; Server<br>Client &lt;–- ACK  &lt;–- Server<br>这时候Client端处于FIN_WAIT_2状态；而Server 程序处于CLOSE_WAIT状态。<br>Client &lt;–- FIN  &lt;–- Server<br>这时Server 发送FIN给Client，Server 就置为LAST_ACK状态。<br>Client –-&gt; ACK  –-&gt; Server<br>Client回应了ACK，那么Server 的套接字才会真正置为CLOSED状态。</p>
-<p>Server 程序处于CLOSE_WAIT状态，而不是LAST_ACK状态，说明还没有发FIN给Client，那么可能是在关闭连接之前还有许多数据要发送或者其他事要做，导致没有发这个FIN packet。<br>通常来说，一个CLOSE_WAIT会维持至少2个小时的时间（这个时间外网服务器通常会做调整，要不然太危险了）。如果有个流氓特地写了个程序，给你造成一堆的CLOSE_WAIT，消耗你的资源，那么通常是等不到释放那一刻，系统就已经解决崩溃了。<br>只能通过修改一下TCP/IP的参数，来缩短这个时间：修改tcp<em>keepalive</em>*系列参数有助于解决这个问题。<br>其实一个close_wait并不会导致ftp服务不可用，问题就在于我们是使用ftp被动连接模式，并且只对外打开了一个端口。如果产生了一个close_wait，那么相应的端口也被占用了，那么这个时候，其他人就连接不上去了，或者等两个小时之后等服务器自动断开。<br>解决方法，要么修改TCP/IP参数，这个比较麻烦，所以采用第二种方式，增加一个端口，由于是被动模式，我们是可以在配置文件里面定义对外的端口范围。我在原来的基础上增加了一个对外的端口，如果有一个端口处于close_wait状态，至少还有一个可以使用，果然到现在只出现过一次连接不上的问题了。</p>
+        <p>在讲mongodb如何在复制集上创建或修改索引的操作步骤前，我们先来了解一下mongodb在创建索引时会产生什么影响。<br>mongodb在默认情况下，创建索引会阻塞数据库中所有其他操作。当在一个集合上创建索引时，存储了这个集合的数据库变成不可读不可写的状态直到索引建立完毕。任何需要所有数据库中读或者写锁的操作(例如 listDatabases )将会等待，直到索引创建完成。<br>对于可能需要长时间运行的索引创建操作，可以考虑 background 选项，这样MongoDB数据库在索引创建期间仍然是可用的。<br>例如，在 people 集合的 zipcode 键上创建一个索引，这个过程在后台运行，可以使用如下方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">db.people.createIndex( &#123; zipcode: 1&#125;, &#123;background: true&#125; )</div></pre></td></tr></table></figure></p>
+<p>默认地，MongoDB索引创建的 background 是 false 。索引在创建过程中,查询将不会使用部分建立的索引：索引只有在建立完毕之后才是可用的。</p>
+<p><strong>tips：</strong><br>使用后台索引的方式，虽然可以保证数据库可用，但是会影响mongodb的性能，后台索引创建操作使用的是一种增量的方式，这会比普通的 “前台” 创建过程慢。如果索引大于现有的内存，那么这个增量处理过程将会比前台创建过程 久得多 。<br>如果MongoDB在后台创建一个索引，您不能执行其他会涉及到该集合的管理操作，包括 repairDatabase 命令，删除集合(例如 db.collection.drop() )，和 compact 命令。当后台创建索引时，这些操作会返回一个错误。<br>If your application includes createIndex() operations, and an index doesn’t exist for other operational concerns, building the index can have a severe impact on the performance of the database.<br>为了避免性能问题，请确保您的应用在启动时就使用 getIndexes() 方法或者其他 equivalent method for your driver 检查索引是否存在，如果不存在请退出应用。或者在生产实例上使用不同的应用代码在指定的维护时间窗口期间创建索引。</p>
+<p>处于以上考虑，对于mongodb复制集的索引创建和修改，mongodb官方建议使用下面步骤</p>
+<p><strong>停止一个从节点</strong><br>停止一个从节点上的 mongod 进程。重启 mongod 进程， 不要 带 –replSet 选项且指定一个不同的端口。限制这个实例是运行在 “standalone” 模式下的。</p>
+<p><strong>创建索引</strong><br>在 mongo shell 里通过 ensureIndex() 方法创建新索引（mongodb3.2版本，“ensureIndex() ”方法已经停用，使用createIndex()方法来创建索引 ）<br>例如，为了在 records 集合的 username 键上创建一个递增索引，可以使用如下 mongo shell 操作：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">db.records.createIndex( &#123; username: 1 &#125; )</div></pre></td></tr></table></figure></p>
+<p><strong>重启 mongod 进程</strong><br>当索引创建完毕，在原有端口上用选项 –replSet 重启 mongod 实例，让其加入到复制集中，同步数据。</p>
+<p><strong>在所有从节点上创建索引</strong><br>对于复制集中的每个从节点，按如下步骤创建索引：</p>
+<p>停止一个从节点<br>创建索引<br>重启 mongod 进程</p>
+<p><strong>主节点</strong><br>使用 mongo shell 中的 rs.stepDown() 方法让主节点下台(step down)，这样主节点平滑地过渡为从节点，且允许复制集选举其他成员为主节点。<br>然后重启上述索引创建步骤，在(原)主节点上创建索引:<br>停止一个从节点<br>创建索引<br>重启 mongod 进程<br>在后台创建索引会比前台方式耗时更久，且会生成不够紧凑的索引 结构。此外，后台创建索引可能会影响主节点的写性能。但是，在后台建立索引允许复制集在MongoDB建立索引期间持续写操作。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/02/27/ftp/" data-id="ciumnd3n2000bzshpsbph3vyb" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/03/06/mongodb/" data-id="ciusdmiko000fo0hpvntyetr8" class="article-share-link">Share</a>
       
       
     </footer>
@@ -113,7 +117,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/29/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="page-number" href="/page/29/">29</a><span class="page-number current">30</span><a class="page-number" href="/page/31/">31</a><a class="page-number" href="/page/32/">32</a><a class="page-number" href="/page/33/">33</a><a class="extend next" rel="next" href="/page/31/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/29/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="page-number" href="/page/29/">29</a><span class="page-number current">30</span><a class="page-number" href="/page/31/">31</a><a class="page-number" href="/page/32/">32</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/31/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -144,6 +148,10 @@
       <ul>
         
           <li>
+            <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
+          </li>
+        
+          <li>
             <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
           </li>
         
@@ -157,10 +165,6 @@
         
           <li>
             <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
           </li>
         
       </ul>

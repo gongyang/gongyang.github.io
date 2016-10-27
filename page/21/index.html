@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-grep" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-command" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/05/08/grep/" class="article-date">
-  <time datetime="2016-05-07T16:00:00.000Z" itemprop="datePublished">2016-05-08</time>
+    <a href="/2016/05/15/command/" class="article-date">
+  <time datetime="2016-05-14T16:00:00.000Z" itemprop="datePublished">2016-05-15</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/05/08/grep/">linux 基础的正则表达式 -- grep</a>
+      <a class="article-title" href="/2016/05/15/command/">command中单双引的区别</a>
     </h1>
   
 
@@ -90,42 +90,39 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>正则表达式（Regular Expression）是通过一些特殊字符的排序，用以查找、替换、删除一行或多行文字字符串，简单的说，正则表达式就是用在字符串的处理上面的一项“表示试”。<br><strong>tips</strong><br>正则表达式并不是一个工具程序，而是一种字符串处理的标准依据，如果你想要以正则表达式的方式处理字符串，就得要使用支持正则表达式的工具程序才行，例如grep、sed、awk等。</p>
-<h3 id="grep"><a href="#grep" class="headerlink" title="grep"></a>grep</h3><p>grep 是一个很常见也很常用的命令，它最重要的功能就是进行字符串数据的对比，然后将符合用户需求的字符串打印出来。需要说明的是grep在数据中查找一个字符串，是以整行为单位来进行数据的选取的。也就是说，假如一个文件内有10行，其中有两行具有你所查找的字符串，则将那两行显示在屏幕上，其他的就丢弃了。</p>
-<p>-n和–color=auto 是grep常用的两个参数，如果每次使用的时候都要去敲这两个参数又太麻烦。可以在~/.bash_profile中假如这行：alias grep=”grep –color -n”。</p>
-<h4 id="查找特定的字符串"><a href="#查找特定的字符串" class="headerlink" title="查找特定的字符串"></a>查找特定的字符串</h4><p>1、从文件中查找good字符串，用如下方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep good regular.txt </div><div class="line">1:&quot;Open Source&quot; is a good mechanism to develop programs.</div><div class="line">9:Oh! The soup taste good.</div></pre></td></tr></table></figure></p>
-<p>加上-v参数则是取相反的结果，-i是不区分大小写</p>
-<p>2、使用[]中括号来查找集合字符<br>如果要查找test和tast这两个单词时，可以使用如下表达式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;t[ea]st&apos; regular.txt </div><div class="line">8:I can&apos;t finish the test.</div><div class="line">9:Oh! The soup taste good.</div></pre></td></tr></table></figure></p>
-<p>[]中括号表示不论里面几个字符，都自会选则一个字符。</p>
-<p>如果想要找到oo字符，但是前面没有g字符，可以使用如下表达式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;[^g]oo&apos; regular.txt </div><div class="line">2:apple is my favorite food.</div><div class="line">3:Football game is not use feet only.</div><div class="line">18:google is the best tools for search keyword.</div><div class="line">19:goooooogle yes!</div></pre></td></tr></table></figure></p>
-<p>如果oo前面不想有小写字符，可以使用如下表达式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;[^a-z]oo&apos; regular.txt </div><div class="line">3:Football game is not use feet only.</div></pre></td></tr></table></figure></p>
-<p>当在一组集合字符中，如果该字符组是连续的，例如大/小写英文，数字等，就可以使用[a-z]，[A-Z]，[0-9]这样来表达，那么如果是要求字符串是数字和英文，就就它们写在一起,[a-zA-Z0-9]。<br>例如，我们要找出如有带数字的行数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep [0-9] regular.txt </div><div class="line">5:However, this dress is about $ 3183 dollars.</div><div class="line">15:You are the best is mean you are the no. 1.</div></pre></td></tr></table></figure></p>
-<p>3、行首与行尾字符^$<br>如果我们要查找以the字符串开头的行，使用如下表达式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;^the&apos; regular.txt </div><div class="line">12:the symbol &apos;*&apos; is represented as start.</div></pre></td></tr></table></figure></p>
-<p>如果我们想要找开头是小写字符的那一行，可以这样<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;^[a-z]&apos; regular.txt </div><div class="line">2:apple is my favorite food.</div><div class="line">4:this dress doesn&apos;t fit me.</div><div class="line">10:motorcycle is cheap than car.</div><div class="line">12:the symbol &apos;*&apos; is represented as start.</div><div class="line">18:google is the best tools for search keyword.</div><div class="line">19:goooooogle yes!</div><div class="line">20:go! go! Let&apos;s go.</div></pre></td></tr></table></figure></p>
-<p>如我们不想开头是英文字符，可以使用如下表达式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;^[^a-zA-Z]&apos; regular.txt </div><div class="line">1:&quot;Open Source&quot; is a good mechanism to develop programs.</div><div class="line">21:# I am VBird</div></pre></td></tr></table></figure></p>
-<p><strong>tips</strong><br>^符号在字符集合[]之内表示反向选择，在[]之外，表示定位行首的意义，要区分清楚。</p>
-<p>那如果我们想要找出以小数点 . 结尾的那一行，则这样<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;\.$&apos; regular.txt </div><div class="line">1:&quot;Open Source&quot; is a good mechanism to develop programs.</div><div class="line">2:apple is my favorite food.</div><div class="line">3:Football game is not use feet only.</div><div class="line">4:this dress doesn&apos;t fit me.</div><div class="line">10:motorcycle is cheap than car.</div><div class="line">11:This window is clear.</div><div class="line">12:the symbol &apos;*&apos; is represented as start.</div><div class="line">15:You are the best is mean you are the no. 1.</div><div class="line">16:The world &lt;Happy&gt; is the same with &quot;glad&quot;.</div><div class="line">17:I like dog.</div><div class="line">18:google is the best tools for search keyword.</div><div class="line">20:go! go! Let&apos;s go.</div></pre></td></tr></table></figure></p>
-<p>我们经常查看一些配置文件，里面有大量的注释信息和一些空行，那么我们可以使用如下方式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep -v &apos;^$&apos; regular.txt | grep -v &apos;^#&apos; </div><div class="line">1:1:&quot;Open Source&quot; is a good mechanism to develop programs.</div><div class="line">2:2:apple is my favorite food.</div><div class="line">3:3:Football game is not use feet only.</div><div class="line">4:4:this dress doesn&apos;t fit me.</div><div class="line">5:5:However, this dress is about $ 3183 dollars.</div><div class="line">6:6:GNU is free air not free beer.</div><div class="line">7:7:Her hair is very beauty.</div></pre></td></tr></table></figure></p>
-<p>4、任意字符 . 和重复字符*</p>
+        <p>在讲今天的主题之前，我们先来了解一下shell中一些基础知识。<br>当我们在shell prompt后面敲打键盘, 直到按下Enter键的时候，你输入的文字就是command line了， 然后shell才会以进程的方式执行你所交给它的命令。 但是，你又可知道：你在command line中输入的每一个文字， 对shell来说，是有类别之分的呢？</p>
+<p>简单而言，command line的每一个charactor， 分为如下两种：</p>
 <ul>
-<li>.（小数点）：代表一定有一个任意字符的意思</li>
-<li>*（星号）：代表重复前一个字符0到无穷多次的意思。<br>例如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;g..d&apos; regular.txt </div><div class="line">1:&quot;Open Source&quot; is a good mechanism to develop programs.</div><div class="line">9:Oh! The soup taste good.</div><div class="line">16:The world &lt;Happy&gt; is the same with &quot;glad&quot;.</div></pre></td></tr></table></figure>
-</li>
+<li>literal：也就是普通的纯文字，对shell来说没特殊功能；</li>
+<li>meta: 对shell来说，具有特定功能的特殊保留元字符。</li>
 </ul>
-<p>上面的表达式是强调g与d之间一定要有两个字符，所以如果只有一个字符或者没有字符或者超过两个字符的都不会匹配。</p>
-<p>再看如下例子：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;ooo*&apos; regular.txt </div><div class="line">1:&quot;Open Source&quot; is a good mechanism to develop programs.</div><div class="line">2:apple is my favorite food.</div><div class="line">3:Football game is not use feet only.</div><div class="line">9:Oh! The soup taste good.</div><div class="line">18:google is the best tools for search keyword.</div><div class="line">19:goooooogle yes!</div></pre></td></tr></table></figure></p>
-<p>我们知道 <em> 表示重复前面一个字符0到无穷次个，因此，o</em> 代表具有空字符或一个以上的字符，特别注意，<em> 为0时表示空字符串，“[ggyy@gy-vm02 ~]$ grep  ‘o</em>‘ regular.txt”会把所有的数据都输出出来。<br>如果是“oo<em> ”，则第一个o肯定必须存在，第二个o则是可有可无的多个o，同理，当我们需要至少两个o以上的字符串时，就需要ooo</em> </p>
-<p>那如果我们想要字符串开头与结尾都是g，但是两个g之间仅能存在至少一个o，即gog、goog、gooog等<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep  &apos;goo*g&apos; regular.txt </div><div class="line">18:google is the best tools for search keyword.</div><div class="line">19:goooooogle yes!</div></pre></td></tr></table></figure></p>
-<p>那如果我们想要找到g开头和g结尾的字符串，中间可有可无，如何表达了?<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;g.*g&apos; regular.txt </div><div class="line">1:&quot;Open Source&quot; is a good mechanism to develop programs.</div><div class="line">14:The gd software is a library for drafting programs.</div><div class="line">18:google is the best tools for search keyword.</div><div class="line">19:goooooogle yes!</div><div class="line">20:go! go! Let&apos;s go.</div></pre></td></tr></table></figure></p>
-<p>5、限定连续的字符范围<br>我们在上面的例子中利用 . * 来设置0到无限个重复字符，那如何限定一个范围了。<br>比如说，我想找出2-4个o的连续字符串，这个时候，就得使用到限定范围的字符｛｝了。但是因为｛｝符号在shell里面是有特殊意义的，因此我们需要用上转义字符\来让他失去特殊意义才行。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;o\&#123;2,4\&#125;&apos; regular.txt </div><div class="line">1:&quot;Open Source&quot; is a good mechanism to develop programs.</div><div class="line">2:apple is my favorite food.</div><div class="line">3:Football game is not use feet only.</div><div class="line">9:Oh! The soup taste good.</div><div class="line">18:google is the best tools for search keyword.</div><div class="line">19:goooooogle yes!</div></pre></td></tr></table></figure></p>
-<p>如果我们想要找到g后面有2个o以上，并且是g结尾的字符<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ grep &apos;go\&#123;2,\&#125;g&apos; regular.txt </div><div class="line">18:google is the best tools for search keyword.</div><div class="line">19:goooooogle yes!</div></pre></td></tr></table></figure></p>
-<p>这样就好了。</p>
-<p>最后强调一下，正则表达式的特殊字符与一般在命令行的“通配符”并不相同，例如，在通配符中的* 代表的是零到无限多个字符的意思，但是在正则表达式中，则是重复0到无穷个前一个匹配字符的意思。</p>
+<p>literal就是我们正常输入的字符串， 像 abcd、123456 这些 “文字” 都是 literal，而常用的meta有：</p>
+<ul>
+<li>IFS（ Interchange Format Syntax ）：有space或者tab或者Enter三者之一组成 (我们常用 space)</li>
+<li>CR（回车键）: 由Enter产生；</li>
+</ul>
+<p>IFS是用来拆解command line中每一个词 (word) 用的， 因为shell command line是按词来处理的。 而CR则是用来结束command line用的，这也是为何我们敲Enter键， 命令就会运行的原因。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">除了常用的IFS与CR, 常用的 meta 还有：</div><div class="line">= ：  设定变量。</div><div class="line">$ ：  做变量或运算替换(请不要与 shell prompt 搞混了)。</div><div class="line">&gt; ：  重定向 stdout（标准输出standard out）。</div><div class="line">&lt; ：  重定向 stdin（标准输入standard in）。</div><div class="line">|：   管道命令。</div><div class="line">&amp; ：  重定向 file descriptor （文件描述符），或将命令置于后台执行。</div><div class="line">( )： 將其內的命令置于 nested subshell （嵌套的子shell）执行，或用于运算或命令替换。</div><div class="line">&#123; &#125;： 將其內的命令置于 non-named function（未命名函数） 中执行，或用在变量替换的界定范围。</div><div class="line">; ：  在前一个命令结束时，而忽略其返回值，继续执行下一個命令。</div><div class="line">&amp;&amp; ： 在前一個命令结束时，若返回值为 true，继续执行下一個命令。</div><div class="line">|| ： 在前一個命令结束时，若返回值为 false，继续执行下一個命令。</div><div class="line">!：   执行 history 列表中的命令</div></pre></td></tr></table></figure></p>
+<p>假如我们需要在command line中将这些保留元字符的功能关闭的话， 就需要 quoting 处理了。<br>在bash中，常用的 quoting 有以下三种方法：</p>
+<ul>
+<li>hard quote：’’(单引号)，凡在 hard quote 中的所有 meta 均被关闭；</li>
+<li>soft quote：””（双引号），在soft quote中的大部分meta都会被关闭，但某些保留（如$）。</li>
+<li>escape：\ （反斜线），只有紧接在escape（跳脱字符）之后的单一meta才被关闭。</li>
+</ul>
+<p>下面我们通过实验来对quote进一步的了解<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ A=B C</div><div class="line">-bash: C: command not found</div><div class="line">[ggyy@gy-vm02 ~]$ echo $A</div><div class="line"></div><div class="line">[ggyy@gy-vm02 ~]$ A=&quot;B C&quot;</div><div class="line">[ggyy@gy-vm02 ~]$ echo $A</div><div class="line">B C</div><div class="line">[ggyy@gy-vm02 ~]$</div></pre></td></tr></table></figure></p>
+<p>在给第一个A赋值的时候，由于空白符没有被关闭，command line 将被解释为： A=B 然后碰到<ifs>，接着执行C命令，所以会提示一个C命令没找到，并且A赋值也没有成功。<br>在第二次给 A 变量赋值时，由于空白符被置于 soft quote 中， 因此被关闭，不在作为IFS；<br>事实上，空白符无论在 soft quote 还是在 hard quote 中， 均被关闭。Enter 键字符亦然：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ A=&apos;B C&apos;</div><div class="line">[ggyy@gy-vm02 ~]$ echo $A</div><div class="line">B C</div></pre></td></tr></table></figure></ifs></p>
+<p>我们再来看一个例子：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ a=&apos;1</div><div class="line">&gt; 2</div><div class="line">&gt; 3</div><div class="line">&gt; &apos;</div><div class="line">[ggyy@gy-vm02 ~]$ echo &quot;$a&quot;</div><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line"></div><div class="line">[ggyy@gy-vm02 ~]$ echo $a</div><div class="line">1 2 3</div></pre></td></tr></table></figure></p>
+<p>在上例中，由于 <enter> 被置于 hard quote 当中，因此不再作为 CR 字符來处理。<br>这里的 <enter> 单纯只是一个断行符号(new-line)而已，由于 command line 并沒得到 CR 字符，<br>因此进入第二個 shell prompt (PS2，以 &gt; 符号表示)，command line 并不会结束，<br>直到第四行，我们输入的 <enter> 并不在  hard quote 里面，此时，command line 碰到 CR 字符，于是结束、交给 shell 來处理。<br>但是为什么<figure class="highlight plain"><figcaption><span>"$a" ``` 和 ```echo $a``` 会输出不一样的结果了。</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">这是因为 ```echo $a ```时的变量沒置于 soft quote 中，因此当变量替换完成后并作命令行重组时，&lt;enter&gt; 会被解释为 IFS ，而不是解释为 New Line 字符。</div><div class="line"></div><div class="line">其实我们可以用 escape 亦可关闭 CR 字符：</div></pre></td></tr></table></figure></enter></enter></enter></p>
+<p>[ggyy@gy-vm02 ~]$ a=1\</p>
+<blockquote>
+<p>2\<br>3<br>[ggyy@gy-vm02 ~]$ echo $a<br>123<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">上例中，第一个 &lt;enter&gt; 跟第二个 &lt;enter&gt; 均被 escape 字符关闭了，因此也不作为 CR 來处理，</div><div class="line">但第三个 &lt;enter&gt; 由于没有被转义，因此作为 CR 结束 command line 。</div><div class="line"></div><div class="line">至于 soft quote 跟 hard quote 的不同，主要是对于某些 meta 的关闭与否，以 $ 來作说明：</div></pre></td></tr></table></figure></p>
+</blockquote>
+<p>[ggyy@gy-vm02 ~]$ a=1<br>[ggyy@gy-vm02 ~]$ echo “$a”<br>1<br>[ggyy@gy-vm02 ~]$ echo ‘$a’<br>$a<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">在第一个echo命令行中，$ 被置于 soft quote 中，将不被关闭， 因此继续处理变量替换， 因此，echo将 a 的变量值输出到屏幕，也就是 1 的结果。</div><div class="line"></div><div class="line">在第二个echo命令行中，```$ ```被置于 hard quote 中，则被关闭， 因此，```$``` 只是一个 ```$``` 符号，并不会用来做变量替换处理， 因此结果是``` $``` 符号后面接一个 a 字母：```$a```。</div><div class="line"></div><div class="line">下面这个例子就能完美反映出他们的不同</div></pre></td></tr></table></figure></p>
+<p>[ggyy@gy-vm02 ~]$ a=b\ c<br>[ggyy@gy-vm02 ~]$ echo “$a”<br>b c<br>[ggyy@gy-vm02 ~]$ echo $a<br>b c<br>[ggyy@gy-vm02 ~]$ echo ‘“$a”‘<br>“$a”<br>[ggyy@gy-vm02 ~]$ echo “‘$a’”<br>‘b c’<br>```</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/05/08/grep/" data-id="ciumnd3n6000czshp1cpv08f4" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/05/15/command/" data-id="ciusdmijp0003o0hp3udggk1r" class="article-share-link">Share</a>
       
       
     </footer>
@@ -138,7 +135,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/20/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="page-number" href="/page/20/">20</a><span class="page-number current">21</span><a class="page-number" href="/page/22/">22</a><a class="page-number" href="/page/23/">23</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="extend next" rel="next" href="/page/22/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/20/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="page-number" href="/page/20/">20</a><span class="page-number current">21</span><a class="page-number" href="/page/22/">22</a><a class="page-number" href="/page/23/">23</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/22/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -169,6 +166,10 @@
       <ul>
         
           <li>
+            <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
+          </li>
+        
+          <li>
             <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
           </li>
         
@@ -182,10 +183,6 @@
         
           <li>
             <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
           </li>
         
       </ul>

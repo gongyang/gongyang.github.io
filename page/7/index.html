@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-puppet" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-tmpwatch" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/08/21/puppet/" class="article-date">
-  <time datetime="2016-08-20T16:00:00.000Z" itemprop="datePublished">2016-08-21</time>
+    <a href="/2016/08/28/tmpwatch/" class="article-date">
+  <time datetime="2016-08-27T16:00:00.000Z" itemprop="datePublished">2016-08-28</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/21/puppet/">puppet 安装</a>
+      <a class="article-title" href="/2016/08/28/tmpwatch/">tmpwatch</a>
     </h1>
   
 
@@ -90,34 +90,17 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="puppet-安装"><a href="#puppet-安装" class="headerlink" title="puppet 安装"></a>puppet 安装</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>puppet是一个开源的软件自动化配置和部署工具，它使用简单且功能强大，现在很多大型IT公司均在使用puppet对集群中的软件进行管理和部署。</p>
-<p>puppet是基于c/s架构的。服务器端保存着所有对客户端服务器的配置代码，在puppet里面叫做manifest. 客户端下载manifest之后，可以根据manifest对服务器进行配置，例如软件包管理，用户管理和文件管理等等。</p>
-<p>puppet的工作流程分为以下10个步骤：<br>1.客户端通过facter收集客户端信息并发送至服务端。<br>2.连接服务端并请求catalog日志。</p>
-<ol>
-<li>请求节点（node）的信息.</li>
-<li>从服务器端接收节点（node)的实例</li>
-<li>编译代码（包括语法检查等工作）<br>6.查询是否有exported 虚拟资源</li>
-<li>如有，则从数据库接收虚拟资源</li>
-<li>接收完整的catalog日志</li>
-<li>存储catalog日志到数据库<br>10.客户端接收完整的catalog日志。</li>
-</ol>
-<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p><strong>环境说明：</strong><br>server：gy-vm02  ip：192,168.1.81<br>client：gy-vm03   ip：192.168.1.124</p>
-<p>配置epel源，直接使用yum进行安装</p>
-<p>server端：<br>yum -y install puppet puppet-server<br>安装目录默认存为/etc/puppet，该目录下的manifests存放manifest文件。<br>puppet.conf是主要的配置文件</p>
-<p>client端：<br>yum -y install puppet</p>
-<p>安装完成之后，我们在server端启动puppetmaster服务，并打开8140端口。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 puppet]# /etc/init.d/puppetmaster start</div></pre></td></tr></table></figure></p>
-<h3 id="client端进行认证"><a href="#client端进行认证" class="headerlink" title="client端进行认证"></a>client端进行认证</h3><p>首先在在server和client服务器的/etc/hosts里面添加对应hostname和ip。<br>然后在client上输入一下命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm03 ~]# puppetd --test --server gy-vm02</div><div class="line">info: Creating a new SSL key for gy-vm03</div><div class="line">info: Caching certificate for ca</div><div class="line">info: Creating a new SSL certificate request for gy-vm03</div><div class="line">info: Certificate Request fingerprint (SHA256): B1:E1:35:DB:28:D4:80:4A:F6:DF:CA:26:F1:F8:7C:53:71:D9:DB:B0:4C:C8:B9:EC:D1:77:FF:6F:C8:3C:8E:A7</div><div class="line">Exiting; no certificate found and waitforcert is disabled</div><div class="line">[root@gy-vm03 ~]#</div></pre></td></tr></table></figure></p>
-<p>我们可以看到client发了一个认证</p>
-<h3 id="服务器确认认证"><a href="#服务器确认认证" class="headerlink" title="服务器确认认证"></a>服务器确认认证</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 puppet]# puppetca -a --list</div><div class="line">  &quot;gy-vm03&quot; (F6:D4:44:EE:D6:02:B4:51:F3:7F:F0:26:EE:89:28:8B)</div></pre></td></tr></table></figure>
-<p>使用puppetca可以查看认证信息，我们可以看到有来至gy-vm03的认证信息<br>使用下面命令确认信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 puppet]# puppetca -s gy-vm03</div><div class="line">notice: Signed certificate request for gy-vm03</div><div class="line">notice: Removing file Puppet::SSL::CertificateRequest gy-vm03 at &apos;/var/lib/puppet/ssl/ca/requests/gy-vm03.pe</div></pre></td></tr></table></figure></p>
-<p>再次查看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 puppet]# puppetca -a --list</div><div class="line">+ &quot;gy-vm03&quot; (E5:5E:A0:48:AC:BC:14:A4:60:66:E3:11:6C:03:CE:DF)</div></pre></td></tr></table></figure></p>
-<p>注意前面的+号，说明已经签名</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>puppet的安装，使用 yum安装比较方便，puppet的配置也比较清楚，puppet语法可以<br>参阅ruby语法，总之来说，puppet安装与配置简单，但是puppet有很多资源模块需要化<br>时间去阅读</p>
+        <h2 id="tmpwatch"><a href="#tmpwatch" class="headerlink" title="tmpwatch"></a>tmpwatch</h2><p>什么是tmpwatch？<br>tmpwatch - removes files which haven’t been accessed for a period of time<br>就是对一段时间内没有访问过的文件进行删除。</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>直接使用yum进行安装<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum install tmpwatch</div></pre></td></tr></table></figure></p>
+<p>安装完成之后，会在/etc/cron.daily/目录下生成一个tmpwatch的文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 cron.daily]# cat tmpwatch </div><div class="line">#! /bin/sh</div><div class="line">flags=-umc</div><div class="line">/usr/sbin/tmpwatch &quot;$flags&quot; -x /tmp/.X11-unix -x /tmp/.XIM-unix \</div><div class="line">	-x /tmp/.font-unix -x /tmp/.ICE-unix -x /tmp/.Test-unix \</div><div class="line">	-X &apos;/tmp/hsperfdata_*&apos; 10d /tmp</div><div class="line">/usr/sbin/tmpwatch &quot;$flags&quot; 30d /var/tmp</div><div class="line">for d in /var/&#123;cache/man,catman&#125;/&#123;cat?,X11R6/cat?,local/cat?&#125;; do</div><div class="line">    if [ -d &quot;$d&quot; ]; then</div><div class="line">	/usr/sbin/tmpwatch &quot;$flags&quot; -f 30d &quot;$d&quot;</div><div class="line">    fi</div><div class="line">done</div></pre></td></tr></table></figure></p>
+<p>/usr/sbin/tmpwatch <figure class="highlight plain"><figcaption><span>-f 30d "$d" ```这一行，就是说清理30天没有被访问过的文件或文件夹</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">### tmpwatch参数说明：</div></pre></td></tr></table></figure></p>
+<p>-u, –atime 基于访问时间来删除文件，默认的。<br>-m, –mtime 基于修改时间来删除文件。<br>-c, –ctime 基于创建时间来删除文件，对于目录，基于mtime。<br>-M, –dirmtime 删除目录基于目录的修改时间而不是访问时间。<br>-a, –all 删除所有的文件类型，不只是普通文件，符号链接和目录。<br>-d, –nodirs 不尝试删除目录，即使是空目录。<br>-d, –nosymlinks 不尝试删除符号链接。<br>-f, –force 强制删除。<br>-q, –quiet 只报告错误信息。<br>-s, –fuser 如果文件已经是打开状态在删除前，尝试使用“定影”命令。默认不启用。<br>-t, –test 仅作测试，并不真的删除文件或目录。<br>-U, –exclude-user=user 不删除属于谁的文件。<br>-v, –verbose 打印详细信息。<br>-x, –exclude=path 排除路径，如果路径是一个目录，它包含的所有文件被排除了。如果路径不存在，它必须是一个绝对路径不包含符号链接。<br>-X, –exclude-pattern=pattern 排除某规则下的路径。</p>
+<p>```</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/08/21/puppet/" data-id="ciumnd3ps000qzshpytj3wrqz" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/08/28/tmpwatch/" data-id="ciusdmilx000xo0hpb79oih4e" class="article-share-link">Share</a>
       
       
     </footer>
@@ -130,7 +113,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/6/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="extend next" rel="next" href="/page/8/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/6/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/8/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -161,6 +144,10 @@
       <ul>
         
           <li>
+            <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
+          </li>
+        
+          <li>
             <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
           </li>
         
@@ -174,10 +161,6 @@
         
           <li>
             <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
           </li>
         
       </ul>
