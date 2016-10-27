@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="ban">
 <meta property="og:description" content="linux内建命令之–ulimitulimit是linux内建指令之一，主要用于控制shell程序的资源，通过限制资源使用来改善系统性能。
 内部命令  外部命令可能有的同学对于内建命令这个概念有些陌生，我在这里简单的讲解下：linux命令分为内部命令（内建指令）和外部命令，内部命令是在系统启动的时候就加载到内存中，并常驻内存，执行效率高；外部命令是系统程序部分，用户使用的时候从硬盘中读入内存。如何">
-<meta property="og:updated_time" content="2016-10-27T13:22:53.000Z">
+<meta property="og:updated_time" content="2016-10-27T13:25:28.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="linux内建命令之--ulimit">
 <meta name="twitter:description" content="linux内建命令之–ulimitulimit是linux内建指令之一，主要用于控制shell程序的资源，通过限制资源使用来改善系统性能。
@@ -59,9 +59,9 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://gongyang.wiki"></form>
@@ -107,16 +107,25 @@
 <p><strong>在shell里面通过command配置的参数，只对当前的shell起作用，如果你这个时候退出，然后重新打开shell，你的这个设置就失效了。</strong></p>
 <p>这个时候我们打开另外一个shell测试一下；<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ ulimit -n</div><div class="line">1024</div><div class="line">[ggyy@gy-vm02 ~]$ ulimit -u</div><div class="line">1024</div></pre></td></tr></table></figure></p>
 <p>发现还是系统默认值。</p>
-<p>如果你想永久保存设置，对所有的 terminal都生效，你可以把配置写在 <figure class="highlight plain"><figcaption><span>或者是 ```</span><a href="/etc/security/limits.d/*.conf">``` 。</a></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">### ulimit配置文件</div><div class="line"></div><div class="line">limits.conf的格式如下：</div></pre></td></tr></table></figure></p>
-<p><domain>  <type>  <item>  <value><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">- domain ：设置需要被限制的用户名，组名前面加@和用户名区别。也可以用通配符*来做所有用户的限制。</div><div class="line">- type ： 有 soft，hard 和 -</div><div class="line">soft 指的是当前系统生效的设置值</div><div class="line">hard 表明系统中所能设定的最大值</div><div class="line">soft 的限制不能比har 限制高</div><div class="line">用 - 就表明同时设置了 soft 和 hard 的值。</div><div class="line">- resource ： </div><div class="line">core - 限制内核文件的大小</div><div class="line">date - 最大数据大小</div><div class="line">fsize - 最大文件大小</div><div class="line">memlock - 最大锁定内存地址空间</div><div class="line">nofile - 打开文件的最大数目</div><div class="line">rss - 最大持久设置大小</div><div class="line">stack - 最大栈大小</div><div class="line">cpu - 以分钟为单位的最多 CPU 时间</div><div class="line">noproc - 进程的最大数目</div><div class="line">as - 地址空间限制</div><div class="line">maxlogins - 此用户允许登录的最大数目</div><div class="line">- value ： 需要设置的值</div><div class="line"></div><div class="line">其中关于type我详细解释一下：</div><div class="line">type分为soft和hard，也就是软限制和硬限制。怎么理解：</div><div class="line">软限制：我们在shell中使用命令进行设置的就是软限制，它是可以通过命令设置动态调整的，但是不能超过硬限制设置的值。</div><div class="line">硬限制：就是该参数可设置的最大值</div><div class="line"></div><div class="line">我们举个例子，我们刚刚使用ulimit -n设置当前shell最大打开文件为2000，那我们那这个值改成10000试试：</div></pre></td></tr></table></figure></value></item></type></domain></p>
-<p>[ggyy@gy-vm02 ~]$ ulimit -n 10000<br>-bash: ulimit: open files: cannot modify limit: Operation not permitted<br>[ggyy@gy-vm02 ~]$ ulimit -n<br>2000<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">设置不成功，当前的值还是2000，之所以不能设置，是因为我们还有一个硬限制，使用 -H 参数查看硬限制的值</div></pre></td></tr></table></figure></p>
-<p>[ggyy@gy-vm02 ~]$ ulimit -H -n<br>4096<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">也就是说，软限制最大值不能超过4096。</div><div class="line"></div><div class="line">### 总结</div><div class="line">ulimit 作为对资源使用限制的一种工作，是有其作用范围的。ulimit 限制的是当前 shell 进程以及其派生的子进程。举例来说，如果用户同时运行了两个 shell 终端进程，只在其中一个环境中执行了 ulimit – s 100，则该 shell 进程里创建文件的大小收到相应的限制，而同时另一个 shell 终端包括其上运行的子程序都不会受其影响。</div><div class="line">我们可以查看 ```cat /proc/pid/limits``` 该进程的资源限制情况。</div><div class="line">如：</div></pre></td></tr></table></figure></p>
+<p>如果你想永久保存设置，对所有的 terminal都生效，你可以把配置写在 /etc/security/limits.conf 或者是 /etc/security/limits.d/*.conf。</p>
+<h3 id="ulimit配置文件"><a href="#ulimit配置文件" class="headerlink" title="ulimit配置文件"></a>ulimit配置文件</h3><p>limits.conf的格式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;domain&gt;  &lt;type&gt;  &lt;item&gt;  &lt;value&gt;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>domain ：设置需要被限制的用户名，组名前面加@和用户名区别。也可以用通配符*来做所有用户的限制。</li>
+<li>type ： 有 soft，hard 和 -<br>soft 指的是当前系统生效的设置值<br>hard 表明系统中所能设定的最大值<br>soft 的限制不能比har 限制高<br>用 - 就表明同时设置了 soft 和 hard 的值。</li>
+<li>resource ：<br>core - 限制内核文件的大小<br>date - 最大数据大小<br>fsize - 最大文件大小<br>memlock - 最大锁定内存地址空间<br>nofile - 打开文件的最大数目<br>rss - 最大持久设置大小<br>stack - 最大栈大小<br>cpu - 以分钟为单位的最多 CPU 时间<br>noproc - 进程的最大数目<br>as - 地址空间限制<br>maxlogins - 此用户允许登录的最大数目</li>
+<li>value ： 需要设置的值</li>
+</ul>
+<p>其中关于type我详细解释一下：<br>type分为soft和hard，也就是软限制和硬限制。怎么理解：<br>软限制：我们在shell中使用命令进行设置的就是软限制，它是可以通过命令设置动态调整的，但是不能超过硬限制设置的值。<br>硬限制：就是该参数可设置的最大值</p>
+<p>我们举个例子，我们刚刚使用ulimit -n设置当前shell最大打开文件为2000，那我们那这个值改成10000试试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ ulimit -n 10000</div><div class="line">-bash: ulimit: open files: cannot modify limit: Operation not permitted</div><div class="line">[ggyy@gy-vm02 ~]$ ulimit -n</div><div class="line">2000</div></pre></td></tr></table></figure></p>
+<p>设置不成功，当前的值还是2000，之所以不能设置，是因为我们还有一个硬限制，使用 -H 参数查看硬限制的值<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ ulimit -H -n</div><div class="line">4096</div></pre></td></tr></table></figure></p>
+<p>也就是说，软限制最大值不能超过4096。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>ulimit 作为对资源使用限制的一种工作，是有其作用范围的。ulimit 限制的是当前 shell 进程以及其派生的子进程。举例来说，如果用户同时运行了两个 shell 终端进程，只在其中一个环境中执行了 ulimit – s 100，则该 shell 进程里创建文件的大小收到相应的限制，而同时另一个 shell 终端包括其上运行的子程序都不会受其影响。<br>我们可以查看 <figure class="highlight plain"><figcaption><span>/proc/pid/limits``` 该进程的资源限制情况。</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">如：</div></pre></td></tr></table></figure></p>
 <p>[root@gy-vm02 ~]# cat /proc/2841/limits<br>Limit                     Soft Limit           Hard Limit           Units<br>Max cpu time              unlimited            unlimited            seconds<br>Max file size             unlimited            unlimited            bytes<br>Max data size             unlimited            unlimited            bytes<br>Max stack size            10485760             unlimited            bytes<br>Max core file size        0                    unlimited            bytes<br>Max resident set          unlimited            unlimited            bytes<br>Max processes             14779                14779                processes<br>Max open files            1024                 4096                 files<br>Max locked memory         65536                65536                bytes<br>Max address space         unlimited            unlimited            bytes<br>Max file locks            unlimited            unlimited            locks<br>Max pending signals       14779                14779                signals<br>Max msgqueue size         819200               819200               bytes<br>Max nice priority         0                    0<br>Max realtime priority     0                    0<br>Max realtime timeout      unlimited            unlimited            us<br>```</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/10/27/ulimit/" data-id="ciusdr3v3000wrkhp9ozsnvxl" class="article-share-link">Partager</a>
+      <a data-url="http://gongyang.wiki/2016/10/27/ulimit/" data-id="ciusdufty000wuyhpeypfhrkx" class="article-share-link">Share</a>
       
       
     </footer>
@@ -127,7 +136,7 @@
   
   
     <a href="/2016/10/23/nginx_config/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Ancien</strong>
+      <strong class="article-nav-caption">Older</strong>
       <div class="article-nav-title">Nginx 配置文件详解</div>
     </a>
   
@@ -160,7 +169,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Articles récents</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
@@ -197,7 +206,7 @@
   <div class="outer">
     <div id="footer-info" class="inner">
       &copy; 2016 ggyy<br>
-      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>
