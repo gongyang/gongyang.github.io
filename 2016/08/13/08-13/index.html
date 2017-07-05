@@ -1,95 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
+<!-- Head tag -->
 <head>
-  <meta charset="utf-8">
-  
-  <title>在nginx层配置某段逻辑按照时间段生效 | ban</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="在nginx层配置某段逻辑按照时间段生效前言最近遇到一个比较棘手的问题，发现每到零点的时候，有个应用的请求量飙升，导致后端服务器压力很大，CPU几乎耗尽。后面查到原因，是由于客户端造成的，虽然在后面的版本中修正了这个bug，但是还是有很多老用户，没有更新版本，导致问题一直持续。后面和客户端工程师沟通，对于晚上这些大量的请求，其实是可以在nginx直接应对的，只要返回一个200的状态码就可以了。当时">
-<meta property="og:type" content="article">
-<meta property="og:title" content="在nginx层配置某段逻辑按照时间段生效">
-<meta property="og:url" content="http://gongyang.wiki/2016/08/13/08-13/index.html">
-<meta property="og:site_name" content="ban">
-<meta property="og:description" content="在nginx层配置某段逻辑按照时间段生效前言最近遇到一个比较棘手的问题，发现每到零点的时候，有个应用的请求量飙升，导致后端服务器压力很大，CPU几乎耗尽。后面查到原因，是由于客户端造成的，虽然在后面的版本中修正了这个bug，但是还是有很多老用户，没有更新版本，导致问题一直持续。后面和客户端工程师沟通，对于晚上这些大量的请求，其实是可以在nginx直接应对的，只要返回一个200的状态码就可以了。当时">
-<meta property="og:updated_time" content="2016-10-09T08:53:48.000Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="在nginx层配置某段逻辑按照时间段生效">
-<meta name="twitter:description" content="在nginx层配置某段逻辑按照时间段生效前言最近遇到一个比较棘手的问题，发现每到零点的时候，有个应用的请求量飙升，导致后端服务器压力很大，CPU几乎耗尽。后面查到原因，是由于客户端造成的，虽然在后面的版本中修正了这个bug，但是还是有很多老用户，没有更新版本，导致问题一直持续。后面和客户端工程师沟通，对于晚上这些大量的请求，其实是可以在nginx直接应对的，只要返回一个200的状态码就可以了。当时">
-  
-    <link rel="alternate" href="/atom.xml" title="ban" type="application/atom+xml">
-  
-  
-    <link rel="icon" href="/favicon.png">
-  
-  
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
-  
-  <link rel="stylesheet" href="/css/style.css">
-  
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+    
+        <meta name="description" content="gy blogs">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="ggyy">
+    
+
+    <!--Open Graph Title-->
+    
+        <meta property="og:title" content="在nginx层配置某段逻辑按照时间段生效"/>
+    
+
+    <!--Open Graph Description-->
+    
+        <meta property="og:description" content="gy blogs" />
+    
+
+    <!--Open Graph Site Name-->
+    <meta property="og:site_name" content="做人要低调，做事要高调"/>
+
+    <!--Type page-->
+    
+        <meta property="og:type" content="article" />
+    
+
+    <!--Page Cover-->
+    
+
+    <meta name="twitter:card" content="summary" />
+    
+
+    <!-- Title -->
+    
+    <title>在nginx层配置某段逻辑按照时间段生效 - 做人要低调，做事要高调</title>
+
+    <!-- Tachyons Core CSS -->
+    <link rel="stylesheet" href="//unpkg.com/tachyons/css/tachyons.min.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Google Analytics -->
+    
+
 
 </head>
 
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">ban</a>
-      </h1>
-      
-        <h2 id="subtitle-wrap">
-          <a href="/" id="subtitle">blogs</a>
-        </h2>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://gongyang.wiki"></form>
-      </div>
-    </div>
-  </div>
-</header>
-      <div class="outer">
-        <section id="main"><article id="post-08-13" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/08/13/08-13/" class="article-date">
-  <time datetime="2016-08-12T16:00:00.000Z" itemprop="datePublished">2016-08-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      在nginx层配置某段逻辑按照时间段生效
-    </h1>
-  
 
-      </header>
+<body>
+
+<!-- Main Content -->
+<!-- Banner -->
+<!-- Banner -->
+<div class="w-100 bg-1 ph5-ns ph3 text-light">
     
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="在nginx层配置某段逻辑按照时间段生效"><a href="#在nginx层配置某段逻辑按照时间段生效" class="headerlink" title="在nginx层配置某段逻辑按照时间段生效"></a>在nginx层配置某段逻辑按照时间段生效</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近遇到一个比较棘手的问题，发现每到零点的时候，有个应用的请求量飙升，导致后端服务器压力很大，CPU几乎耗尽。后面查到原因，是由于客户端造成的，虽然在后面的版本中修正了这个bug，但是还是有很多老用户，没有更新版本，导致问题一直持续。后面和客户端工程师沟通，对于晚上这些大量的请求，其实是可以在nginx直接应对的，只要返回一个200的状态码就可以了。当时的第一想法就是在nginx写一个策略，晚上0-4点对于那部分请求，直接在nginx返回一个200的状态码。<br>想要完成这个策略，需要解决两个问题，在nginx怎么获取时间值？多条件的判断怎么写？接下来，我们来一一解决。</p>
+    <nav class="db dt-l w-100 mw8 center border-box pv3">
+        <a class="db dtc-l v-mid link dim w-100 w-25-l tc tl-l mb2 mb0-l white" href="/" title="做人要低调，做事要高调">
+            <img src="http://www.codeblocq.com/assets/projects/hexo-theme-anodyne/assets/anodyne.svg" class="dib h3" alt="做人要低调，做事要高调">
+        </a>
+        <div class="db dtc-l v-mid w-100 w-75-l tc tr-l">
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="Home">
+                    Home
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/archives" 
+                    title="Archives">
+                    Archives
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="About">
+                    About
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="Contact">
+                    Contact
+                </a>
+            
+        </div>
+    </nav>
+
+    <!-- Title -->
+    <div class="w-100 mw8 center vh-40 dt">
+        <div class="dtc v-mid white">
+            <h1 class="f1-l f2-m tc tc-m tl-ns">在nginx层配置某段逻辑按照时间段生效</h1>
+            <p class="f4 fw3 pab-100px tc tc-m tl-ns">2016-08-13</p>
+        </div>
+    </div>
+
+    <!-- Icon -->
+    <div class="relative w-100 mw8 center white dn dn-m db-ns">
+        <i class="header-icon fa fa-file-text-o"></i>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="w-100 ph2 ph4-m ph5-l mv5 mv6-l">
+    <div class="content">
+        <div class="mw8 center">
+            <div class="cf">
+                <div class="fl w-100 w-70-l mw7 left fw3 lh-copy pr4-ns pr0-m post-content">
+                    <!-- Tags Vertical -->
+                    
+
+                    <!-- Main Post Content -->
+                    <h2 id="在nginx层配置某段逻辑按照时间段生效"><a href="#在nginx层配置某段逻辑按照时间段生效" class="headerlink" title="在nginx层配置某段逻辑按照时间段生效"></a>在nginx层配置某段逻辑按照时间段生效</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近遇到一个比较棘手的问题，发现每到零点的时候，有个应用的请求量飙升，导致后端服务器压力很大，CPU几乎耗尽。后面查到原因，是由于客户端造成的，虽然在后面的版本中修正了这个bug，但是还是有很多老用户，没有更新版本，导致问题一直持续。后面和客户端工程师沟通，对于晚上这些大量的请求，其实是可以在nginx直接应对的，只要返回一个200的状态码就可以了。当时的第一想法就是在nginx写一个策略，晚上0-4点对于那部分请求，直接在nginx返回一个200的状态码。<br>想要完成这个策略，需要解决两个问题，在nginx怎么获取时间值？多条件的判断怎么写？接下来，我们来一一解决。</p>
 <h3 id="nginx获取时间信息"><a href="#nginx获取时间信息" class="headerlink" title="nginx获取时间信息"></a>nginx获取时间信息</h3><p>官方版本的nginx是没有可以直接用来获取时间的变量，不过淘宝开源的<a href="http://tengine.taobao.org/index_cn.html" target="_blank" rel="external">tengine</a>增加了相关的变量。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">$unix_time    #当前时间戳，其值为1970年1月1日以来的秒数</div><div class="line">$year   #当前4位年（如2011）</div><div class="line">$year2   #当前2位年（如11）</div><div class="line">$month    #当前月份，有前导0（如12）</div><div class="line">$day    #当前日，有前导0（如22）</div><div class="line">$hour    #当前24小时制的小时，有前导0（如21）</div><div class="line">$hour12    #当前12小时制的小时，有前导0（如09）</div><div class="line">$minute    #当前分钟，有前导0（如55）</div><div class="line">$second    #当前秒，有前导0（如12）</div></pre></td></tr></table></figure></p>
 <p>更多相关变量请<a href="http://tengine.taobao.org/document_cn/variables_cn.html" target="_blank" rel="external">点击查看</a></p>
 <h3 id="nginx-如何支持与-amp-amp-和或-运算"><a href="#nginx-如何支持与-amp-amp-和或-运算" class="headerlink" title="nginx 如何支持与&amp;&amp;和或|| 运算"></a>nginx 如何支持与&amp;&amp;和或|| 运算</h3><p>nginx的配置中不支持if条件的逻辑与&amp;&amp; 逻辑或|| 运算 ，而且不支持if的嵌套语法，否则会报下面的错误：nginx: [emerg] invalid condition。<br>不如下面的写法是错误的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">location ^~ /api/v2/step &#123;</div><div class="line">   if ($http_user_agent ~* &quot;Android/Volley&quot; &amp;&amp; $hour =&quot;00&quot;)</div><div class="line">   return 400;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
@@ -97,122 +141,140 @@
 <p>那如何设置0-4点这个时间段，只需要把($hour ~ “00”)改一下就可以了，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">($hour ~ &quot;(00|01|02|03|04|20)&quot;)</div></pre></td></tr></table></figure></p>
 <p>不过对于上面的逻辑，还有一个小问题，我们只是针对0-4点这个时间段，其他时间我们是没有进行任何处理的，这样的话会报错，所以最终配置是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">location ^~ /api/v2/step &#123;</div><div class="line">      set $flag 0;</div><div class="line">         if ($http_user_agent ~* &quot;Android/Volley&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;1&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($hour ~ &quot;(00|01|02|03|04|20)&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;2&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($flag = &quot;012&quot;) &#123;</div><div class="line">           return 401;</div><div class="line">         &#125;</div><div class="line">         proxy_pass  $app_server;</div><div class="line">      &#125;</div></pre></td></tr></table></figure></p>
 
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/08/13/08-13/" data-id="ciusdxy450000ychps4lq9w83" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2016/08/21/puppet/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          puppet 安装
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2016/08/07/dstat/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">dstat--多功能系统资源统计生成工具</div>
-    </a>
-  
-</nav>
+                    
+                    <!-- Tags Bottom -->
+                    
 
-  
-</article>
-
-</section>
-        
-          <aside id="sidebar">
-  
-    
-
-  
-    
-
-  
-    
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
-    </div>
-  </div>
+                    <!-- Comments -->
+                    
 
 
-  
+
+                </div>
+                <div class="fl w-100 w-30-l center fw3 lh-copy pl4-ns tl black-50">
+                    
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 1: About -->
+                    <div class="mt5 mt0-l">
+    <article class="dt db-l mw8 mw8-m mw5-ns center ml0-l bg-white mv3">
+        <div class="dn dtc-m db-l v-mid tc pr4 pr0-l" style="min-width: 6rem;">
+            <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="ggyy">
+        </div>
+        <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
+            
+        </div>
+    </article>
+</div>
+
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 2: Categories -->
+                    
+
+                    <!-- Widget 3: Recent Posts -->
+                    <div class="mt5 tc tl-l">
+    <h3>Recent Posts</h3>
     
-  <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
+        <p>
             <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
-          </li>
-        
-          <li>
-            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
-          </li>
-        
-          <li>
-            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
-        
-      </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      &copy; 2016 ggyy<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
+        </p>
     
+        <p>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+        </p>
+    
+        <p>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+        </p>
+    
+        <p>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+        </p>
+    
+        <p>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+        </p>
+    
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Footer -->
+<div class="bg-1 ph2 ph5-ns pv5">
+        <div class="mv8">
+            <div class="center tc">
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://twitter.com/?lang=en" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://www.facebook.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://dribbble.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://github.com/klugjo/hexo-theme-anodyne" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://plus.google.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://www.behance.net/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://500px.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="mailto:test@example.com" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="/#" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+            </div>
+            <div class="f6 f5-ns center tc white pt5 fw3">
+                
+            </div>
+        </div>
+    </div>
+
+<!-- After Footer -->
+<!-- Disqus Comments -->
 
 
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
-  <script src="/fancybox/jquery.fancybox.pack.js"></script>
 
-
-<script src="/js/script.js"></script>
-
-  </div>
 </body>
+
 </html>

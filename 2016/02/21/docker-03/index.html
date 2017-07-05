@@ -1,95 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
+<!-- Head tag -->
 <head>
-  <meta charset="utf-8">
-  
-  <title>Docker 入门系列之--镜像 | ban</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="上一篇我们已经讲过了，docker容器的创建和管理；今天，我们来讲一讲docker镜像的创建，以及管理。我们知道，容器是基于镜像生成的。那么，什么是docker镜像了？根据docker官方文档的描叙，Image（镜像）是docker术语的一种，代表一个只读的layer。而layer则具体代表docker container文件系统中可叠加的部分。被我这么一介绍，相信很多小伙伴们更加迷惑了，怎么又出">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Docker 入门系列之--镜像">
-<meta property="og:url" content="http://gongyang.wiki/2016/02/21/docker-03/index.html">
-<meta property="og:site_name" content="ban">
-<meta property="og:description" content="上一篇我们已经讲过了，docker容器的创建和管理；今天，我们来讲一讲docker镜像的创建，以及管理。我们知道，容器是基于镜像生成的。那么，什么是docker镜像了？根据docker官方文档的描叙，Image（镜像）是docker术语的一种，代表一个只读的layer。而layer则具体代表docker container文件系统中可叠加的部分。被我这么一介绍，相信很多小伙伴们更加迷惑了，怎么又出">
-<meta property="og:updated_time" content="2016-10-09T08:53:48.000Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Docker 入门系列之--镜像">
-<meta name="twitter:description" content="上一篇我们已经讲过了，docker容器的创建和管理；今天，我们来讲一讲docker镜像的创建，以及管理。我们知道，容器是基于镜像生成的。那么，什么是docker镜像了？根据docker官方文档的描叙，Image（镜像）是docker术语的一种，代表一个只读的layer。而layer则具体代表docker container文件系统中可叠加的部分。被我这么一介绍，相信很多小伙伴们更加迷惑了，怎么又出">
-  
-    <link rel="alternate" href="/atom.xml" title="ban" type="application/atom+xml">
-  
-  
-    <link rel="icon" href="/favicon.png">
-  
-  
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
-  
-  <link rel="stylesheet" href="/css/style.css">
-  
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+    
+        <meta name="description" content="gy blogs">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="ggyy">
+    
+
+    <!--Open Graph Title-->
+    
+        <meta property="og:title" content="Docker 入门系列之--镜像"/>
+    
+
+    <!--Open Graph Description-->
+    
+        <meta property="og:description" content="gy blogs" />
+    
+
+    <!--Open Graph Site Name-->
+    <meta property="og:site_name" content="做人要低调，做事要高调"/>
+
+    <!--Type page-->
+    
+        <meta property="og:type" content="article" />
+    
+
+    <!--Page Cover-->
+    
+
+    <meta name="twitter:card" content="summary" />
+    
+
+    <!-- Title -->
+    
+    <title>Docker 入门系列之--镜像 - 做人要低调，做事要高调</title>
+
+    <!-- Tachyons Core CSS -->
+    <link rel="stylesheet" href="//unpkg.com/tachyons/css/tachyons.min.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Google Analytics -->
+    
+
 
 </head>
 
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">ban</a>
-      </h1>
-      
-        <h2 id="subtitle-wrap">
-          <a href="/" id="subtitle">blogs</a>
-        </h2>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://gongyang.wiki"></form>
-      </div>
-    </div>
-  </div>
-</header>
-      <div class="outer">
-        <section id="main"><article id="post-docker-03" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/02/21/docker-03/" class="article-date">
-  <time datetime="2016-02-20T16:00:00.000Z" itemprop="datePublished">2016-02-21</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      Docker 入门系列之--镜像
-    </h1>
-  
 
-      </header>
+<body>
+
+<!-- Main Content -->
+<!-- Banner -->
+<!-- Banner -->
+<div class="w-100 bg-1 ph5-ns ph3 text-light">
     
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>上一篇我们已经讲过了，docker容器的创建和管理；今天，我们来讲一讲docker镜像的创建，以及管理。<br>我们知道，容器是基于镜像生成的。那么，什么是docker镜像了？<br>根据docker官方文档的描叙，Image（镜像）是docker术语的一种，代表一个只读的layer。而layer则具体代表docker container文件系统中可叠加的部分。<br>被我这么一介绍，相信很多小伙伴们更加迷惑了，怎么又出来一个layer，什么叫做可叠加的文件系统。在解答这些疑惑之前，让我们来了解几个和docker镜像相关的几个概念：rootfs、union mount。</p>
+    <nav class="db dt-l w-100 mw8 center border-box pv3">
+        <a class="db dtc-l v-mid link dim w-100 w-25-l tc tl-l mb2 mb0-l white" href="/" title="做人要低调，做事要高调">
+            <img src="http://www.codeblocq.com/assets/projects/hexo-theme-anodyne/assets/anodyne.svg" class="dib h3" alt="做人要低调，做事要高调">
+        </a>
+        <div class="db dtc-l v-mid w-100 w-75-l tc tr-l">
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="Home">
+                    Home
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/archives" 
+                    title="Archives">
+                    Archives
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="About">
+                    About
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="Contact">
+                    Contact
+                </a>
+            
+        </div>
+    </nav>
+
+    <!-- Title -->
+    <div class="w-100 mw8 center vh-40 dt">
+        <div class="dtc v-mid white">
+            <h1 class="f1-l f2-m tc tc-m tl-ns">Docker 入门系列之--镜像</h1>
+            <p class="f4 fw3 pab-100px tc tc-m tl-ns">2016-02-21</p>
+        </div>
+    </div>
+
+    <!-- Icon -->
+    <div class="relative w-100 mw8 center white dn dn-m db-ns">
+        <i class="header-icon fa fa-file-text-o"></i>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="w-100 ph2 ph4-m ph5-l mv5 mv6-l">
+    <div class="content">
+        <div class="mw8 center">
+            <div class="cf">
+                <div class="fl w-100 w-70-l mw7 left fw3 lh-copy pr4-ns pr0-m post-content">
+                    <!-- Tags Vertical -->
+                    
+
+                    <!-- Main Post Content -->
+                    <p>上一篇我们已经讲过了，docker容器的创建和管理；今天，我们来讲一讲docker镜像的创建，以及管理。<br>我们知道，容器是基于镜像生成的。那么，什么是docker镜像了？<br>根据docker官方文档的描叙，Image（镜像）是docker术语的一种，代表一个只读的layer。而layer则具体代表docker container文件系统中可叠加的部分。<br>被我这么一介绍，相信很多小伙伴们更加迷惑了，怎么又出来一个layer，什么叫做可叠加的文件系统。在解答这些疑惑之前，让我们来了解几个和docker镜像相关的几个概念：rootfs、union mount。</p>
 <h3 id="rootfs"><a href="#rootfs" class="headerlink" title="rootfs"></a>rootfs</h3><p>rootfs：代表一个docker container在启动时其内部进程可见的文件系统视角，或者说是container的根目录。当然，该目录下面还有container需要的系统文件，容器文件等。<br>说到rootfs，相信大家不会陌生，因为在linux操作系统内核启动的时候，内核会先挂载一个只读的rootfs，然后在系统自检完成之后，将其改为read-write，这样我们就可以在rootfs上面进行读写操作了。但是docker镜像却不这样，它在bootfs自检完成之后，并不会把rootfs的read-only改成read-write，而是利用union mount（Union FS的一种挂在机制）将一个或多个read-only的rootfs加载到之前的read-only的rootfs上面。虽然加载多层的rootfs，但是在外面看来，仍像是一个文件系统。<code>在Docker体系里面，把union mount的这些read-only的rootfs叫做镜像</code> 细心的读者可能会问，此时的每一层rootfs都是read-only状态，如何进行写操作了。当我们创建容器的时候，也就是将docker镜像实例化的时候，系统再次使用union mount在一层或多层read-only的rootfs之上挂载一个read-write的文件系统，但是此时的read-write文件系统是一个空的文件系统。</p>
 <h3 id="union-mount"><a href="#union-mount" class="headerlink" title="union mount"></a>union mount</h3><p> union mount 是一种文件系统的挂载方式，允许同一时刻多个不同的文件系统挂在在一起，并且以一种文件系统的形式，将多个文件系统的内容合并成一个目录。<br> 一般情况下面，通过一种文件系统挂在内容至挂载点，挂载点原先的内容会被覆盖掉。但是如果是union mount则不会将挂载点目录中的内容隐藏，反而是将挂载点目录中的内容和被挂载的内容合并，并为合并后的内容提供一个统一独立的文件系统视角。通常来讲，被合并的文件系统中只有一个会以读写（read-write）模式挂载，而其他的文件系统的挂载模式均为只读（read-only）。实现这种Union mount技术的文件系统一般被称为Union Filesystem，较为常见的有UnionFS、AUFS、OverlayFS等。<br> Aufs是Docker最初采用的文件系统，由于Aufs未能加入到Linux内核，考虑到兼容性问题，加入了Devicemapper的支持。目前，除少数版本如Ubuntu，Docker基本运行在Devicemapper基础上。</p>
 <p>好了，关于概念性的就先介绍到这里。接下来，我们进入实战环节。</p>
@@ -155,122 +199,140 @@
 <p>上面的指令，会将test.tar.gz解压到/var/local/test/目录下面。</p>
 <p>以上就是对docker镜像的入门讲解，更多的实战内容，会在后续的博客中体现出来。</p>
 
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/02/21/docker-03/" data-id="ciusdxy4u0009ychpyk6t9x8y" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2016/02/27/ftp/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          记一次关于ftp使用的那些事
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2016/01/31/docker-02/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Docker 入门系列之--容器</div>
-    </a>
-  
-</nav>
+                    
+                    <!-- Tags Bottom -->
+                    
 
-  
-</article>
-
-</section>
-        
-          <aside id="sidebar">
-  
-    
-
-  
-    
-
-  
-    
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
-    </div>
-  </div>
+                    <!-- Comments -->
+                    
 
 
-  
+
+                </div>
+                <div class="fl w-100 w-30-l center fw3 lh-copy pl4-ns tl black-50">
+                    
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 1: About -->
+                    <div class="mt5 mt0-l">
+    <article class="dt db-l mw8 mw8-m mw5-ns center ml0-l bg-white mv3">
+        <div class="dn dtc-m db-l v-mid tc pr4 pr0-l" style="min-width: 6rem;">
+            <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="ggyy">
+        </div>
+        <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
+            
+        </div>
+    </article>
+</div>
+
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 2: Categories -->
+                    
+
+                    <!-- Widget 3: Recent Posts -->
+                    <div class="mt5 tc tl-l">
+    <h3>Recent Posts</h3>
     
-  <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
+        <p>
             <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
-          </li>
-        
-          <li>
-            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
-          </li>
-        
-          <li>
-            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
-        
-      </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      &copy; 2016 ggyy<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
+        </p>
     
+        <p>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+        </p>
+    
+        <p>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+        </p>
+    
+        <p>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+        </p>
+    
+        <p>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+        </p>
+    
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Footer -->
+<div class="bg-1 ph2 ph5-ns pv5">
+        <div class="mv8">
+            <div class="center tc">
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://twitter.com/?lang=en" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://www.facebook.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://dribbble.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://github.com/klugjo/hexo-theme-anodyne" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://plus.google.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://www.behance.net/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://500px.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="mailto:test@example.com" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="/#" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+            </div>
+            <div class="f6 f5-ns center tc white pt5 fw3">
+                
+            </div>
+        </div>
+    </div>
+
+<!-- After Footer -->
+<!-- Disqus Comments -->
 
 
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
-  <script src="/fancybox/jquery.fancybox.pack.js"></script>
 
-
-<script src="/js/script.js"></script>
-
-  </div>
 </body>
+
 </html>
