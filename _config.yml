@@ -3,7 +3,7 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: ban
+title: 做人要低调，做事要高调
 subtitle: blogs
 description: gy blogs
 author: ggyy
@@ -68,7 +68,7 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://github.com/hexojs/hexo/wiki/Plugins
 ## Themes: https://github.com/hexojs/hexo/wiki/Themes
-theme: landscape
+theme: anodyne
 
 # Disqus
 # disqus_shortname: hexo-theme-icarus
