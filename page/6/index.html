@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-08-13" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-conntrack" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/08/13/08-13/" class="article-date">
-  <time datetime="2016-08-12T16:00:00.000Z" itemprop="datePublished">2016-08-13</time>
+    <a href="/2016/09/04/conntrack/" class="article-date">
+  <time datetime="2016-09-03T16:00:00.000Z" itemprop="datePublished">2016-09-04</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/13/08-13/">在nginx层配置某段逻辑按照时间段生效</a>
+      <a class="article-title" href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
     </h1>
   
 
@@ -90,18 +90,23 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="在nginx层配置某段逻辑按照时间段生效"><a href="#在nginx层配置某段逻辑按照时间段生效" class="headerlink" title="在nginx层配置某段逻辑按照时间段生效"></a>在nginx层配置某段逻辑按照时间段生效</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近遇到一个比较棘手的问题，发现每到零点的时候，有个应用的请求量飙升，导致后端服务器压力很大，CPU几乎耗尽。后面查到原因，是由于客户端造成的，虽然在后面的版本中修正了这个bug，但是还是有很多老用户，没有更新版本，导致问题一直持续。后面和客户端工程师沟通，对于晚上这些大量的请求，其实是可以在nginx直接应对的，只要返回一个200的状态码就可以了。当时的第一想法就是在nginx写一个策略，晚上0-4点对于那部分请求，直接在nginx返回一个200的状态码。<br>想要完成这个策略，需要解决两个问题，在nginx怎么获取时间值？多条件的判断怎么写？接下来，我们来一一解决。</p>
-<h3 id="nginx获取时间信息"><a href="#nginx获取时间信息" class="headerlink" title="nginx获取时间信息"></a>nginx获取时间信息</h3><p>官方版本的nginx是没有可以直接用来获取时间的变量，不过淘宝开源的<a href="http://tengine.taobao.org/index_cn.html" target="_blank" rel="external">tengine</a>增加了相关的变量。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">$unix_time    #当前时间戳，其值为1970年1月1日以来的秒数</div><div class="line">$year   #当前4位年（如2011）</div><div class="line">$year2   #当前2位年（如11）</div><div class="line">$month    #当前月份，有前导0（如12）</div><div class="line">$day    #当前日，有前导0（如22）</div><div class="line">$hour    #当前24小时制的小时，有前导0（如21）</div><div class="line">$hour12    #当前12小时制的小时，有前导0（如09）</div><div class="line">$minute    #当前分钟，有前导0（如55）</div><div class="line">$second    #当前秒，有前导0（如12）</div></pre></td></tr></table></figure></p>
-<p>更多相关变量请<a href="http://tengine.taobao.org/document_cn/variables_cn.html" target="_blank" rel="external">点击查看</a></p>
-<h3 id="nginx-如何支持与-amp-amp-和或-运算"><a href="#nginx-如何支持与-amp-amp-和或-运算" class="headerlink" title="nginx 如何支持与&amp;&amp;和或|| 运算"></a>nginx 如何支持与&amp;&amp;和或|| 运算</h3><p>nginx的配置中不支持if条件的逻辑与&amp;&amp; 逻辑或|| 运算 ，而且不支持if的嵌套语法，否则会报下面的错误：nginx: [emerg] invalid condition。<br>不如下面的写法是错误的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">location ^~ /api/v2/step &#123;</div><div class="line">   if ($http_user_agent ~* &quot;Android/Volley&quot; &amp;&amp; $hour =&quot;00&quot;)</div><div class="line">   return 400;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>正确写法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">location ^~ /api/v2/step &#123;</div><div class="line">      set $flag 0;</div><div class="line">         if ($http_user_agent ~* &quot;Android/Volley&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;1&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($hour ~ &quot;00&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;2&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($flag = &quot;012&quot;) &#123;</div><div class="line">           return 401;</div><div class="line">         &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>那如何设置0-4点这个时间段，只需要把($hour ~ “00”)改一下就可以了，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">($hour ~ &quot;(00|01|02|03|04|20)&quot;)</div></pre></td></tr></table></figure></p>
-<p>不过对于上面的逻辑，还有一个小问题，我们只是针对0-4点这个时间段，其他时间我们是没有进行任何处理的，这样的话会报错，所以最终配置是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">location ^~ /api/v2/step &#123;</div><div class="line">      set $flag 0;</div><div class="line">         if ($http_user_agent ~* &quot;Android/Volley&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;1&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($hour ~ &quot;(00|01|02|03|04|20)&quot;) &#123;</div><div class="line">           set $flag &quot;$&#123;flag&#125;2&quot;;</div><div class="line">         &#125;</div><div class="line">         if ($flag = &quot;012&quot;) &#123;</div><div class="line">           return 401;</div><div class="line">         &#125;</div><div class="line">         proxy_pass  $app_server;</div><div class="line">      &#125;</div></pre></td></tr></table></figure></p>
+        <h2 id="系统内核参数–nf-conntrack"><a href="#系统内核参数–nf-conntrack" class="headerlink" title="系统内核参数–nf_conntrack"></a>系统内核参数–nf_conntrack</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>nf_conntrack 是 iptables 防火墙模块，它是用于跟踪一个连接的状态的模块。</p>
+<p>由于nf_conntrack 工作在3层，支持IPv4和IPv6，而ip_conntrack只支持IPv4，因此nf_conntrack模块在Linux的2.6.15内核中被引入，而ip_conntrack在Linux的2.6.22内核被移除（centos6.x版本），因此不同版本的系统，配置文件也就不尽相同了。目前大多的ip<em>conntrack</em><em>已被 nf<em>conntrack</em></em> 取代，很多ip<em>conntrack</em>*仅仅是个软链接，原先的ip_conntrack配置目录/proc/sys/net/ipv4/netfilter/ 仍然存在，但是新的nf_conntrack在/proc/sys/net/netfilter/中，这样做是为了能够向下的兼容。</p>
+<p>ip_conntrack 模块会记录每一个tcp数据包的estiablished,timewait,syn_recv等状态。最常见的两个使用场景是 iptables的nat和state模块。</p>
+<p>iptables 的 nat 通过规则来修改目的、源地址，但光修改地址不行，我们还需要能让回来的包能路由到最初的来源主机。这就需要借助 nf_conntrack 来找到原来那个连接的记录才行。<br>而 state 模块则是直接使用 nf_conntrack 里记录的连接的状态来匹配用户定义的相关规则。</p>
+<h3 id="参数设定"><a href="#参数设定" class="headerlink" title="参数设定"></a>参数设定</h3><p>kernel 用 ip_conntrack 模块来记录 iptables 网络包的状态，并把每条记录保存到 table 里（这个 table 在内存里，可以通过/proc/net/ip_conntrack 查看当前已经记录的总数），如果网络状况繁忙，比如高连接，高并发连接等会导致逐步占用这个 table 可用空间，一般这个 table 很大不容易占满并且可以自己清理，table 的记录会一直呆在 table 里占用空间直到源 IP 发一个 RST 包，但是如果出现被攻击、错误的网络配置、有问题的路由/路由器、有问题的网卡等情况的时候，就会导致源 IP 发的这个 RST 包收不到，这样就积累在 table 里，越积累越多直到占满，满了以后 iptables 就会丢包，出现外部无法连接服务器的情况。内核会报如下错误信息：kernel: ip_conntrack: table full, dropping packet.</p>
+<p>系统当前连接可以查看/proc/net/nf_conntrack<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# cat /proc/net/nf_conntrack</div><div class="line">ipv4     2 tcp      6 299 ESTABLISHED src=192.168.168.1 dst=192.168.168.11 sport=53635 dport=22 src=192.168.168.11 dst=192.168.168.1 sport=22 dport=53635 [ASSURED] mark=0 secmark=0 use=3</div><div class="line">ipv4     2 udp      17 28 src=192.168.1.4 dst=192.168.1.255 sport=137 dport=137 [UNREPLIED] src=192.168.1.255 dst=192.168.1.4 sport=137 dport=137 mark=0 secmark=0 use=2</div><div class="line">ipv4     2 udp      17 28 src=192.168.1.1 dst=255.255.255.255 sport=38632 dport=7423 [UNREPLIED] src=255.255.255.255 dst=192.168.1.1 sport=7423 dport=38632 mark=0 secmark=0 use=2</div></pre></td></tr></table></figure></p>
+<p>系统当前参数值可以通过syscrl -a来查看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# sysctl -a | grep nf_conntrack</div><div class="line">net.netfilter.nf_conntrack_generic_timeout = 600</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_syn_sent = 120</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_syn_recv = 60</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_established = 4000</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 120</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_close_wait = 60</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_last_ack = 30</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_time_wait = 120</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_close = 10</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_max_retrans = 300</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_unacknowledged = 300</div><div class="line">net.netfilter.nf_conntrack_tcp_loose = 1</div><div class="line">net.netfilter.nf_conntrack_tcp_be_liberal = 0</div><div class="line">net.netfilter.nf_conntrack_tcp_max_retrans = 3</div><div class="line">net.netfilter.nf_conntrack_udp_timeout = 30</div><div class="line">net.netfilter.nf_conntrack_udp_timeout_stream = 180</div><div class="line">net.netfilter.nf_conntrack_icmpv6_timeout = 30</div><div class="line">net.netfilter.nf_conntrack_icmp_timeout = 30</div><div class="line">net.netfilter.nf_conntrack_acct = 0</div><div class="line">net.netfilter.nf_conntrack_events = 1</div><div class="line">net.netfilter.nf_conntrack_events_retry_timeout = 15</div><div class="line">net.netfilter.nf_conntrack_max = 200000</div><div class="line">net.netfilter.nf_conntrack_count = 4</div><div class="line">net.netfilter.nf_conntrack_buckets = 16384</div><div class="line">net.netfilter.nf_conntrack_checksum = 1</div><div class="line">net.netfilter.nf_conntrack_log_invalid = 0</div><div class="line">net.netfilter.nf_conntrack_expect_max = 256</div><div class="line">net.ipv6.nf_conntrack_frag6_timeout = 60</div><div class="line">net.ipv6.nf_conntrack_frag6_low_thresh = 3145728</div><div class="line">net.ipv6.nf_conntrack_frag6_high_thresh = 4194304</div><div class="line">net.nf_conntrack_max = 200000</div></pre></td></tr></table></figure></p>
+<p>以上的内容实际在/proc/sys/net/netfilter都有对应的文件配置。</p>
+<p>对于普通的服务器来说，默认参数不会影响正常使用，但如果是对外web服务器，我们通常要修改这几个值。<br><strong>直接设置：</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# sysctl -w net.netfilter.nf_conntrack_max=100000</div><div class="line">net.netfilter.nf_conntrack_max = 100000</div><div class="line">[root@gy-vm02 ~]# sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=3600</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_established = 3600</div></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# echo &quot;3600&quot; &gt; /proc/sys/net/netfilter/nf_conntrack_tcp_timeout_established </div><div class="line">[root@gy-vm02 ~]# echo &quot;100000&quot; &gt; /proc/sys/net/netfilter/nf_conntrack_max</div></pre></td></tr></table></figure></p>
+<p><strong>修改配置文件：</strong><br>打开配置文件sysctl.conf <figure class="highlight vim"><figcaption><span>/etc/sysctl.conf``` 加入上面需要修改的信息</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">```</div><div class="line">net.netfilter.nf_conntrack_max = <span class="number">100000</span></div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_established = <span class="number">3600</span></div></pre></td></tr></table></figure></p>
+<p>然后使用<code>sysctl -p</code> 生效。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/08/13/08-13/" data-id="ciu2ftojo0000w5hpn632p8pd" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/09/04/conntrack/" data-id="ciusdxy4f0004ychp7yau8lno" class="article-share-link">Share</a>
       
       
     </footer>
@@ -114,7 +119,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/5/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/7/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/5/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/7/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -132,7 +137,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -145,23 +150,23 @@
       <ul>
         
           <li>
+            <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
+        
+          <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
           </li>
         
           <li>
             <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>

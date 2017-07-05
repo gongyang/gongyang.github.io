@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-ftp" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-nginx" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/02/27/ftp/" class="article-date">
-  <time datetime="2016-02-26T16:00:00.000Z" itemprop="datePublished">2016-02-27</time>
+    <a href="/2016/03/20/nginx/" class="article-date">
+  <time datetime="2016-03-19T16:00:00.000Z" itemprop="datePublished">2016-03-20</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/27/ftp/">记一次关于ftp使用的那些事</a>
+      <a class="article-title" href="/2016/03/20/nginx/">nginx防止DDOS攻击配置</a>
     </h1>
   
 
@@ -90,17 +90,24 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>FTP，是一个相当古老的文件传输协议之一，相比大家伙都不会陌生，它的主要功能是在服务器和客户端之间进行文件的传输。由于比较古老，在安全方面比较落后，所以在实际应用当中，一般都会使用vsftp这个软件。</p>
-<p>今天我为什么要讲一讲这个大家都很熟悉的软件了，自然是我们也在使用它，并且和它也发生了那么些事。<br>关于如何安装和使用，我在这里就不具体详解了，网上资料一大把。今天我们主要来讲讲实际应用当中，遇到的那些事。</p>
-<p>我把vsftp服务搭建好了之后，创建了虚拟用户，并使用TLS协议加密登录，在公司稳稳当当的使用了一段时间，后来断断续续有人来跟我说，vsftp连接不上去；这里注明一下，我们是使用filezilla客户端进行连接的。我跑到安装vsftp的服务器上面查看，发现虽然客户端那边断开了，但是还是有进程在，开始以为是客户端的问题，我把进程kill之后，就能正常连接了。但是后来，一直都有类似的问题出现，我把服务端这边的配置都重新清理了一遍，实在是找不到原因。直到有一次，ftp又出现不能连接的问题之后，我是用netstat查看ftp端口发现是close_wait状态，我仿佛像是抓到了救命稻草一样，发现了问题的所在，虽然我不知道这是什么意思，但我敢肯定，问题就在这。</p>
-<p>首先我们知道，如果我们的服务器程序处于CLOSE_WAIT状态的话，说明套接字是被动关闭的！<br>因为如果是CLIENT端主动断掉当前连接的话，那么双方关闭这个TCP连接共需要四个packet：</p>
-<p>Client –-&gt; FIN  –-&gt; Server<br>Client &lt;–- ACK  &lt;–- Server<br>这时候Client端处于FIN_WAIT_2状态；而Server 程序处于CLOSE_WAIT状态。<br>Client &lt;–- FIN  &lt;–- Server<br>这时Server 发送FIN给Client，Server 就置为LAST_ACK状态。<br>Client –-&gt; ACK  –-&gt; Server<br>Client回应了ACK，那么Server 的套接字才会真正置为CLOSED状态。</p>
-<p>Server 程序处于CLOSE_WAIT状态，而不是LAST_ACK状态，说明还没有发FIN给Client，那么可能是在关闭连接之前还有许多数据要发送或者其他事要做，导致没有发这个FIN packet。<br>通常来说，一个CLOSE_WAIT会维持至少2个小时的时间（这个时间外网服务器通常会做调整，要不然太危险了）。如果有个流氓特地写了个程序，给你造成一堆的CLOSE_WAIT，消耗你的资源，那么通常是等不到释放那一刻，系统就已经解决崩溃了。<br>只能通过修改一下TCP/IP的参数，来缩短这个时间：修改tcp<em>keepalive</em>*系列参数有助于解决这个问题。<br>其实一个close_wait并不会导致ftp服务不可用，问题就在于我们是使用ftp被动连接模式，并且只对外打开了一个端口。如果产生了一个close_wait，那么相应的端口也被占用了，那么这个时候，其他人就连接不上去了，或者等两个小时之后等服务器自动断开。<br>解决方法，要么修改TCP/IP参数，这个比较麻烦，所以采用第二种方式，增加一个端口，由于是被动模式，我们是可以在配置文件里面定义对外的端口范围。我在原来的基础上增加了一个对外的端口，如果有一个端口处于close_wait状态，至少还有一个可以使用，果然到现在只出现过一次连接不上的问题了。</p>
+        <p>最近查看服务器nginx日志，看到很多类似DDos攻击的IP被nginx拦截了。<br>DDos全称分布式拒绝服务(DDoS:Distributed Denial of Service)攻击指借助于客户/服务器技术，将多个计算机联合起来作为攻击平台，对一个或多个目标发动DDoS攻击，从而成倍地提高拒绝服务攻击的威力。<br>DDOS的特点是分布式，针对带宽和服务攻击，也就是四层流量攻击和七层应用攻击，相应的防御瓶颈四层在带宽，七层的多在架构的吞吐量。对于七层的应用攻击，我们还是可以做一些配置来防御的，例如前端是Nginx，主要使用nginx的http_limit_conn和http_limit_req模块来防御。<br>ngx_http_limit_conn_module 可以限制单个IP的连接数，ngx_http_limit_req_module 可以限制单个IP每秒请求数，通过限制连接数和请求数能相对有效的防御CC攻击。</p>
+<h3 id="限制每秒请求数"><a href="#限制每秒请求数" class="headerlink" title="限制每秒请求数"></a>限制每秒请求数</h3><p>ngx_http_limit_req_module模块通过漏桶原理来限制单位时间内的请求数，一旦单位时间内请求数超过限制，就会返回503错误。配置需要在两个地方设置：</p>
+<ul>
+<li>nginx.conf的http段内定义触发条件，可以有多个条件</li>
+<li>在location内定义达到触发条件时nginx所要执行的动作</li>
+</ul>
+<p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">http &#123;</div><div class="line">    limit_req_zone $limit zone=one:10m rate=20r/s; //触发条件，所有访问ip 限制每秒10个请求</div><div class="line">    ...</div><div class="line">    server &#123;</div><div class="line">        ...</div><div class="line">        location  ~ \.php$ &#123;</div><div class="line">            limit_req zone=one burst=5 nodelay;   //执行的动作,通过zone名字对应</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">     &#125;</div></pre></td></tr></table></figure></p>
+<p><strong>参数说明</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$binary_remote_addr  二进制远程地址</div><div class="line">zone=one:10m    定义zone名字叫one，并为这个zone分配10M内存，用来存储会话（二进制远程地址），1m内存可以保存16000会话</div><div class="line">rate=20r/s;     限制频率为每秒20个请求</div><div class="line">burst=5         允许超过频率限制的请求数不多于5个，假设1、2、3、4秒请求为每秒9个，那么第5秒内请求15个是允许的，反之，如果第一秒内请求15个，会将5个请求放到第二秒，第二秒内超过10的请求直接503，类似多秒内平均速率限制。</div><div class="line">nodelay         超过的请求不被延迟处理，设置后15个请求在1秒内处理。</div></pre></td></tr></table></figure></p>
+<h3 id="限制IP连接数"><a href="#限制IP连接数" class="headerlink" title="限制IP连接数"></a>限制IP连接数</h3><p>ngx_http_limit_conn_module的配置方法和参数与http_limit_req模块很像，参数少，要简单很多<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">http &#123;</div><div class="line">    limit_conn_zone $binary_remote_addr zone=addr:10m; //触发条件</div><div class="line">    ...</div><div class="line">    server &#123;</div><div class="line">        ...</div><div class="line">        location /download/ &#123;</div><div class="line">            limit_conn addr 1;    // 限制同一时间内1个连接，超出的连接返回503</div><div class="line">                &#125;</div><div class="line">           &#125;</div><div class="line">     &#125;</div></pre></td></tr></table></figure></p>
+<h3 id="白名单设置"><a href="#白名单设置" class="headerlink" title="白名单设置"></a>白名单设置</h3><p>http_limit_conn和http_limit_req模块限制了单ip单位时间内的并发和请求数，但是如果Nginx前面有lvs或者haproxy之类的负载均衡或者反向代理，nginx获取的都是来自负载均衡的连接或请求，这时不应该限制负载均衡的连接和请求，就需要geo和map模块设置白名单：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">geo $boohee &#123;</div><div class="line">   default 1;</div><div class="line">   127.0.0.1 0;</div><div class="line">   192.168.1.0/24 0;</div><div class="line">&#125;</div><div class="line">map $boohee $limit &#123;</div><div class="line">   1 $binary_remote_addr;</div><div class="line">   0 &quot;&quot;;</div><div class="line">&#125;</div><div class="line">limit_req_zone $limit zone=one:10m rate=20r/s;</div><div class="line">limit_conn_zone $limit zone=addr:10m;</div></pre></td></tr></table></figure></p>
+<p>geo模块定义了一个默认值是1的变量boohee，当在ip在白名单中，变量boohee的值为0，反之为1</p>
+<p>如果ip在白名单中，boohee=0，$limit=””，则不受到限制</p>
+<p>如果ip不在白名单中，boohee=1，$limit=$binary_remote_addr，受到限制。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/02/27/ftp/" data-id="ciu2ftokf000bw5hpbgolkwja" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/03/20/nginx/" data-id="ciusdxy5e000jychp6x3jq9a9" class="article-share-link">Share</a>
       
       
     </footer>
@@ -113,7 +120,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/27/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="page-number" href="/page/27/">27</a><span class="page-number current">28</span><a class="page-number" href="/page/29/">29</a><a class="page-number" href="/page/30/">30</a><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/29/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/27/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="page-number" href="/page/27/">27</a><span class="page-number current">28</span><a class="page-number" href="/page/29/">29</a><a class="page-number" href="/page/30/">30</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/29/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -131,7 +138,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -144,23 +151,23 @@
       <ul>
         
           <li>
+            <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
+        
+          <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
           </li>
         
           <li>
             <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>

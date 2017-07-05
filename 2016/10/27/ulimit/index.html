@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>linux内建命令之--ulimit | ban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="linux内建命令之–ulimitulimit是linux内建指令之一，主要用于控制shell程序的资源，通过限制资源使用来改善系统性能。
+内部命令  外部命令可能有的同学对于内建命令这个概念有些陌生，我在这里简单的讲解下：linux命令分为内部命令（内建指令）和外部命令，内部命令是在系统启动的时候就加载到内存中，并常驻内存，执行效率高；外部命令是系统程序部分，用户使用的时候从硬盘中读入内存。如何">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux内建命令之--ulimit">
+<meta property="og:url" content="http://gongyang.wiki/2016/10/27/ulimit/index.html">
+<meta property="og:site_name" content="ban">
+<meta property="og:description" content="linux内建命令之–ulimitulimit是linux内建指令之一，主要用于控制shell程序的资源，通过限制资源使用来改善系统性能。
+内部命令  外部命令可能有的同学对于内建命令这个概念有些陌生，我在这里简单的讲解下：linux命令分为内部命令（内建指令）和外部命令，内部命令是在系统启动的时候就加载到内存中，并常驻内存，执行效率高；外部命令是系统程序部分，用户使用的时候从硬盘中读入内存。如何">
+<meta property="og:updated_time" content="2016-10-27T13:28:12.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="linux内建命令之--ulimit">
+<meta name="twitter:description" content="linux内建命令之–ulimitulimit是linux内建指令之一，主要用于控制shell程序的资源，通过限制资源使用来改善系统性能。
+内部命令  外部命令可能有的同学对于内建命令这个概念有些陌生，我在这里简单的讲解下：linux命令分为内部命令（内建指令）和外部命令，内部命令是在系统启动的时候就加载到内存中，并常驻内存，执行效率高；外部命令是系统程序部分，用户使用的时候从硬盘中读入内存。如何">
+  
+    <link rel="alternate" href="/atom.xml" title="ban" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">ban</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">blogs</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://gongyang.wiki"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-ulimit" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/10/27/ulimit/" class="article-date">
+  <time datetime="2016-10-26T16:00:00.000Z" itemprop="datePublished">2016-10-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      linux内建命令之--ulimit
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="linux内建命令之–ulimit"><a href="#linux内建命令之–ulimit" class="headerlink" title="linux内建命令之–ulimit"></a>linux内建命令之–ulimit</h2><p>ulimit是linux内建指令之一，主要用于控制shell程序的资源，通过限制资源使用来改善系统性能。</p>
+<h3 id="内部命令-外部命令"><a href="#内部命令-外部命令" class="headerlink" title="内部命令  外部命令"></a>内部命令  外部命令</h3><p>可能有的同学对于内建命令这个概念有些陌生，我在这里简单的讲解下：<br>linux命令分为内部命令（内建指令）和外部命令，内部命令是在系统启动的时候就加载到内存中，并常驻内存，执行效率高；外部命令是系统程序部分，用户使用的时候从硬盘中读入内存。<br>如何区分？<br>我们在命令前面加上type来查看这个命令是内部命令，还是外部命令。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ type ulimit</div><div class="line">ulimit is a shell builtin</div><div class="line">[ggyy@gy-vm02 ~]$ type mysql</div><div class="line">mysql is /usr/bin/mysql</div><div class="line">[ggyy@gy-vm02 ~]$ type type</div><div class="line">type is a shell builtin</div></pre></td></tr></table></figure></p>
+<p>内部命令用户输入时系统调用的速率快，不是内置命令，系统将会读取环境变量文件.bash_profile、/etc/profile去找PATH路径。</p>
+<p><strong>tip</strong><br>使用help命令方式<br>内部命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">help command</div></pre></td></tr></table></figure></p>
+<p>外部命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">command help</div></pre></td></tr></table></figure></p>
+<h3 id="ulimit的功能"><a href="#ulimit的功能" class="headerlink" title="ulimit的功能"></a>ulimit的功能</h3><p>ulimit 用于限制 shell 启动进程所占用的资源，具体有哪些我们可以可以使用help ulimit详细的查看。查看当前shell的ulimit设置，使用ulimit -a进行查看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ ulimit -a</div><div class="line">core file size          (blocks, -c) 0</div><div class="line">data seg size           (kbytes, -d) unlimited</div><div class="line">scheduling priority             (-e) 0</div><div class="line">file size               (blocks, -f) unlimited</div><div class="line">pending signals                 (-i) 30493</div><div class="line">max locked memory       (kbytes, -l) 64</div><div class="line">max memory size         (kbytes, -m) unlimited</div><div class="line">open files                      (-n) 1024</div><div class="line">pipe size            (512 bytes, -p) 8</div><div class="line">POSIX message queues     (bytes, -q) 819200</div><div class="line">real-time priority              (-r) 0</div><div class="line">stack size              (kbytes, -s) 10240</div><div class="line">cpu time               (seconds, -t) unlimited</div><div class="line">max user processes              (-u) 1024</div><div class="line">virtual memory          (kbytes, -v) unlimited</div><div class="line">file locks                      (-x) unlimited</div></pre></td></tr></table></figure></p>
+<p>如果你没有调整过，那么看到的数据应该和我的是一样的（centos 6），这也是系统默认的设置。<br>一般的服务器使用默认的配置就足够了，如果你的服务器是对外的web server，或者是db server，比如说nginx服务器、mongodb服务器、mysql服务器等，对于这类服务器，你可能需要对其中某几项参数做下调整。其中主要是open files和max user processes这两项参数。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">open files ：可以打开最大文件描述符的数量</div><div class="line">max user processes：最大生成的线程数</div></pre></td></tr></table></figure></p>
+<h3 id="ulimit-使用"><a href="#ulimit-使用" class="headerlink" title="ulimit 使用"></a>ulimit 使用</h3><p>ulimit 命令的格式为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ulimit: ulimit [-SHacdefilmnpqrstuvx] [limit]</div></pre></td></tr></table></figure></p>
+<p>比如说，我要设置当前shell最大打开文件数为2000：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ ulimit -n 2000</div><div class="line">[ggyy@gy-vm02 ~]$ ulimit -n</div><div class="line">2000</div></pre></td></tr></table></figure>
+<p>设置最大生成线程数为10000</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ ulimit -u 10000</div><div class="line">[ggyy@gy-vm02 ~]$ ulimit -u </div><div class="line">10000</div></pre></td></tr></table></figure>
+<p><strong>在shell里面通过command配置的参数，只对当前的shell起作用，如果你这个时候退出，然后重新打开shell，你的这个设置就失效了。</strong></p>
+<p>这个时候我们打开另外一个shell测试一下；<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ ulimit -n</div><div class="line">1024</div><div class="line">[ggyy@gy-vm02 ~]$ ulimit -u</div><div class="line">1024</div></pre></td></tr></table></figure></p>
+<p>发现还是系统默认值。</p>
+<p>如果你想永久保存设置，对所有的 terminal都生效，你可以把配置写在 /etc/security/limits.conf 或者是 /etc/security/limits.d/*.conf。</p>
+<h3 id="ulimit配置文件"><a href="#ulimit配置文件" class="headerlink" title="ulimit配置文件"></a>ulimit配置文件</h3><p>limits.conf的格式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;domain&gt;  &lt;type&gt;  &lt;item&gt;  &lt;value&gt;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>domain ：设置需要被限制的用户名，组名前面加@和用户名区别。也可以用通配符*来做所有用户的限制。</li>
+<li>type ： 有 soft，hard 和 -<br>soft 指的是当前系统生效的设置值<br>hard 表明系统中所能设定的最大值<br>soft 的限制不能比har 限制高<br>用 - 就表明同时设置了 soft 和 hard 的值。</li>
+<li>resource ：<br>core - 限制内核文件的大小<br>date - 最大数据大小<br>fsize - 最大文件大小<br>memlock - 最大锁定内存地址空间<br>nofile - 打开文件的最大数目<br>rss - 最大持久设置大小<br>stack - 最大栈大小<br>cpu - 以分钟为单位的最多 CPU 时间<br>noproc - 进程的最大数目<br>as - 地址空间限制<br>maxlogins - 此用户允许登录的最大数目</li>
+<li>value ： 需要设置的值</li>
+</ul>
+<p>其中关于type我详细解释一下：<br>type分为soft和hard，也就是软限制和硬限制。怎么理解：<br>软限制：我们在shell中使用命令进行设置的就是软限制，它是可以通过命令设置动态调整的，但是不能超过硬限制设置的值。<br>硬限制：就是该参数可设置的最大值</p>
+<p>我们举个例子，我们刚刚使用ulimit -n设置当前shell最大打开文件为2000，那我们那这个值改成10000试试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ ulimit -n 10000</div><div class="line">-bash: ulimit: open files: cannot modify limit: Operation not permitted</div><div class="line">[ggyy@gy-vm02 ~]$ ulimit -n</div><div class="line">2000</div></pre></td></tr></table></figure></p>
+<p>设置不成功，当前的值还是2000，之所以不能设置，是因为我们还有一个硬限制，使用 -H 参数查看硬限制的值<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ ulimit -H -n</div><div class="line">4096</div></pre></td></tr></table></figure></p>
+<p>也就是说，软限制最大值不能超过4096。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>ulimit 作为对资源使用限制的一种工作，是有其作用范围的。ulimit 限制的是当前 shell 进程以及其派生的子进程。举例来说，如果用户同时运行了两个 shell 终端进程，只在其中一个环境中执行了 ulimit – s 100，则该 shell 进程里创建文件的大小收到相应的限制，而同时另一个 shell 终端包括其上运行的子程序都不会受其影响。<br>我们可以查看<strong>cat /proc/pid/limits</strong>该进程的资源限制情况。<br>如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# cat /proc/2841/limits </div><div class="line">Limit                     Soft Limit           Hard Limit           Units     </div><div class="line">Max cpu time              unlimited            unlimited            seconds   </div><div class="line">Max file size             unlimited            unlimited            bytes     </div><div class="line">Max data size             unlimited            unlimited            bytes     </div><div class="line">Max stack size            10485760             unlimited            bytes     </div><div class="line">Max core file size        0                    unlimited            bytes     </div><div class="line">Max resident set          unlimited            unlimited            bytes     </div><div class="line">Max processes             14779                14779                processes </div><div class="line">Max open files            1024                 4096                 files     </div><div class="line">Max locked memory         65536                65536                bytes     </div><div class="line">Max address space         unlimited            unlimited            bytes     </div><div class="line">Max file locks            unlimited            unlimited            locks     </div><div class="line">Max pending signals       14779                14779                signals   </div><div class="line">Max msgqueue size         819200               819200               bytes     </div><div class="line">Max nice priority         0                    0                    </div><div class="line">Max realtime priority     0                    0                    </div><div class="line">Max realtime timeout      unlimited            unlimited            us</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://gongyang.wiki/2016/10/27/ulimit/" data-id="ciusdxy6d000wychp8w7fp5is" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/10/23/nginx_config/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Nginx 配置文件详解</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 ggyy<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

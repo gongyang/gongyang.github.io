@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-conntrack" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-nginx_limit" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/09/04/conntrack/" class="article-date">
-  <time datetime="2016-09-03T16:00:00.000Z" itemprop="datePublished">2016-09-04</time>
+    <a href="/2016/10/16/nginx_limit/" class="article-date">
+  <time datetime="2016-10-15T16:00:00.000Z" itemprop="datePublished">2016-10-16</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
+      <a class="article-title" href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
     </h1>
   
 
@@ -90,23 +90,21 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="系统内核参数–nf-conntrack"><a href="#系统内核参数–nf-conntrack" class="headerlink" title="系统内核参数–nf_conntrack"></a>系统内核参数–nf_conntrack</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>nf_conntrack 是 iptables 防火墙模块，它是用于跟踪一个连接的状态的模块。</p>
-<p>由于nf_conntrack 工作在3层，支持IPv4和IPv6，而ip_conntrack只支持IPv4，因此nf_conntrack模块在Linux的2.6.15内核中被引入，而ip_conntrack在Linux的2.6.22内核被移除（centos6.x版本），因此不同版本的系统，配置文件也就不尽相同了。目前大多的ip<em>conntrack</em><em>已被 nf<em>conntrack</em></em> 取代，很多ip<em>conntrack</em>*仅仅是个软链接，原先的ip_conntrack配置目录/proc/sys/net/ipv4/netfilter/ 仍然存在，但是新的nf_conntrack在/proc/sys/net/netfilter/中，这样做是为了能够向下的兼容。</p>
-<p>ip_conntrack 模块会记录每一个tcp数据包的estiablished,timewait,syn_recv等状态。最常见的两个使用场景是 iptables的nat和state模块。</p>
-<p>iptables 的 nat 通过规则来修改目的、源地址，但光修改地址不行，我们还需要能让回来的包能路由到最初的来源主机。这就需要借助 nf_conntrack 来找到原来那个连接的记录才行。<br>而 state 模块则是直接使用 nf_conntrack 里记录的连接的状态来匹配用户定义的相关规则。</p>
-<h3 id="参数设定"><a href="#参数设定" class="headerlink" title="参数设定"></a>参数设定</h3><p>kernel 用 ip_conntrack 模块来记录 iptables 网络包的状态，并把每条记录保存到 table 里（这个 table 在内存里，可以通过/proc/net/ip_conntrack 查看当前已经记录的总数），如果网络状况繁忙，比如高连接，高并发连接等会导致逐步占用这个 table 可用空间，一般这个 table 很大不容易占满并且可以自己清理，table 的记录会一直呆在 table 里占用空间直到源 IP 发一个 RST 包，但是如果出现被攻击、错误的网络配置、有问题的路由/路由器、有问题的网卡等情况的时候，就会导致源 IP 发的这个 RST 包收不到，这样就积累在 table 里，越积累越多直到占满，满了以后 iptables 就会丢包，出现外部无法连接服务器的情况。内核会报如下错误信息：kernel: ip_conntrack: table full, dropping packet.</p>
-<p>系统当前连接可以查看/proc/net/nf_conntrack<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# cat /proc/net/nf_conntrack</div><div class="line">ipv4     2 tcp      6 299 ESTABLISHED src=192.168.168.1 dst=192.168.168.11 sport=53635 dport=22 src=192.168.168.11 dst=192.168.168.1 sport=22 dport=53635 [ASSURED] mark=0 secmark=0 use=3</div><div class="line">ipv4     2 udp      17 28 src=192.168.1.4 dst=192.168.1.255 sport=137 dport=137 [UNREPLIED] src=192.168.1.255 dst=192.168.1.4 sport=137 dport=137 mark=0 secmark=0 use=2</div><div class="line">ipv4     2 udp      17 28 src=192.168.1.1 dst=255.255.255.255 sport=38632 dport=7423 [UNREPLIED] src=255.255.255.255 dst=192.168.1.1 sport=7423 dport=38632 mark=0 secmark=0 use=2</div></pre></td></tr></table></figure></p>
-<p>系统当前参数值可以通过syscrl -a来查看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# sysctl -a | grep nf_conntrack</div><div class="line">net.netfilter.nf_conntrack_generic_timeout = 600</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_syn_sent = 120</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_syn_recv = 60</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_established = 4000</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 120</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_close_wait = 60</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_last_ack = 30</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_time_wait = 120</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_close = 10</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_max_retrans = 300</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_unacknowledged = 300</div><div class="line">net.netfilter.nf_conntrack_tcp_loose = 1</div><div class="line">net.netfilter.nf_conntrack_tcp_be_liberal = 0</div><div class="line">net.netfilter.nf_conntrack_tcp_max_retrans = 3</div><div class="line">net.netfilter.nf_conntrack_udp_timeout = 30</div><div class="line">net.netfilter.nf_conntrack_udp_timeout_stream = 180</div><div class="line">net.netfilter.nf_conntrack_icmpv6_timeout = 30</div><div class="line">net.netfilter.nf_conntrack_icmp_timeout = 30</div><div class="line">net.netfilter.nf_conntrack_acct = 0</div><div class="line">net.netfilter.nf_conntrack_events = 1</div><div class="line">net.netfilter.nf_conntrack_events_retry_timeout = 15</div><div class="line">net.netfilter.nf_conntrack_max = 200000</div><div class="line">net.netfilter.nf_conntrack_count = 4</div><div class="line">net.netfilter.nf_conntrack_buckets = 16384</div><div class="line">net.netfilter.nf_conntrack_checksum = 1</div><div class="line">net.netfilter.nf_conntrack_log_invalid = 0</div><div class="line">net.netfilter.nf_conntrack_expect_max = 256</div><div class="line">net.ipv6.nf_conntrack_frag6_timeout = 60</div><div class="line">net.ipv6.nf_conntrack_frag6_low_thresh = 3145728</div><div class="line">net.ipv6.nf_conntrack_frag6_high_thresh = 4194304</div><div class="line">net.nf_conntrack_max = 200000</div></pre></td></tr></table></figure></p>
-<p>以上的内容实际在/proc/sys/net/netfilter都有对应的文件配置。</p>
-<p>对于普通的服务器来说，默认参数不会影响正常使用，但如果是对外web服务器，我们通常要修改这几个值。<br><strong>直接设置：</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# sysctl -w net.netfilter.nf_conntrack_max=100000</div><div class="line">net.netfilter.nf_conntrack_max = 100000</div><div class="line">[root@gy-vm02 ~]# sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=3600</div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_established = 3600</div></pre></td></tr></table></figure></p>
-<p>或者<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# echo &quot;3600&quot; &gt; /proc/sys/net/netfilter/nf_conntrack_tcp_timeout_established </div><div class="line">[root@gy-vm02 ~]# echo &quot;100000&quot; &gt; /proc/sys/net/netfilter/nf_conntrack_max</div></pre></td></tr></table></figure></p>
-<p><strong>修改配置文件：</strong><br>打开配置文件sysctl.conf <figure class="highlight vim"><figcaption><span>/etc/sysctl.conf``` 加入上面需要修改的信息</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">```</div><div class="line">net.netfilter.nf_conntrack_max = <span class="number">100000</span></div><div class="line">net.netfilter.nf_conntrack_tcp_timeout_established = <span class="number">3600</span></div></pre></td></tr></table></figure></p>
-<p>然后使用<code>sysctl -p</code> 生效。</p>
+        <h2 id="nginx-limit-conn-limit-req模块讲解"><a href="#nginx-limit-conn-limit-req模块讲解" class="headerlink" title="nginx limit_conn  limit_req模块讲解"></a>nginx limit_conn  limit_req模块讲解</h2><p>nginx针对于限流，提供了两个模块：连接数限流模块 ngx_http_limit_conn_module 和漏桶算法实现的请求限流模块 ngx_http_limit_req_module 。</p>
+<p>limit_conn 用来对某个 KEY 对应的总的网络连接数进行限流，可以按照如 IP 、域名维度进行限流。 limit_req 用来对某个 KEY 对应的请求的平均速率进行限流，并有两种用法：平滑模式（ delay ）和允许突发模式 (nodelay) 。</p>
+<h3 id="ngx-http-limit-conn-module"><a href="#ngx-http-limit-conn-module" class="headerlink" title="ngx_http_limit_conn_module"></a>ngx_http_limit_conn_module</h3><p>limit_conn 是对某个 KEY 对应的总的网络连接数进行限流。可以按照 IP 来限制 IP 维度的总连接数，或者按照服务域名来限制某个域名的总连接数。但是记住不是每一个请求连接都会被计数器统计，只有那些被 Nginx 处理的且已经读取了整个请求头的请求连接才会被计数器统计。</p>
+<p><strong>配置示例</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">http &#123;  </div><div class="line">    log_format mylogformat [$time_local] [$msec] &apos;$status&apos;;</div><div class="line">    limit_req_zone $binary_remote_addr zone=ggyy:10m rate=2r/s;</div><div class="line">    server &#123;</div><div class="line">    listen 80;</div><div class="line">    server_name abc.gongyang.com;</div><div class="line">    root /var/www/html;     </div><div class="line">    location /a.txt &#123;</div><div class="line">    limit_req zone=ggyy burst=3 nodelay;</div><div class="line">    access_log logs/abc.log mylogformat;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>配置说明</strong><br>limit_conn ：要配置存放 KEY 和计数器的共享内存区域和指定 KEY 的最大连接数；此处指定的最大连接数是 1 ，表示 Nginx 最多同时并发处理 1 个连接；<br>limit_conn_zone ：用来配置限流 KEY 、及存放 KEY 对应信息的共享内存区域大小；此处的 KEY 是“ \$binary_remote_addr ”其表示 IP 地址，也可以使用如 \$server_name 作为 KEY 来限制域名级别的最大连接数；<br>limit_conn_status ：配置被限流后返回的状态码，默认返回 503 ；<br>limit_conn_log_level ：配置记录被限流后的日志级别，默认 error 级别。</p>
+<p><strong>limit_conn 的主要执行过程如下所示：</strong><br>1 、请求进入后首先判断当前 limit_conn_zone 中相应 KEY 的连接数是否超出了配置的最大连接数；<br>2.1 、如果超过了配置的最大大小，则被限流，返回 limit_conn_status 定义的错误状态码；<br>2.2 、否则相应 KEY 的连接数加 1 ，并注册请求处理完成的回调函数；<br>3 、进行请求处理；<br>4 、在结束请求阶段会调用注册的回调函数对相应 KEY 的连接数减 1 。<br>limt_conn 可以限流某个 KEY 的总并发 / 请求数， KEY 可以根据需要变化。</p>
+<h3 id="ngx-http-limit-rep-module"><a href="#ngx-http-limit-rep-module" class="headerlink" title="ngx_http_limit_rep_module"></a>ngx_http_limit_rep_module</h3><p>limit_req 是令牌桶算法实现，用于对指定 KEY 对应的请求进行限流，比如按照 IP 维度限制请求速率。</p>
+<p><strong>配置示例</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">http &#123;</div><div class="line">    include       mime.types;</div><div class="line">    default_type  application/octet-stream;</div><div class="line">    sendfile        on;</div><div class="line">    keepalive_timeout  65;</div><div class="line">  </div><div class="line">    log_format mylogformat [$time_local] [$msec] &apos;$status&apos;;</div><div class="line">    limit_req_zone $binary_remote_addr zone=ggyy:10m rate=2r/s;</div><div class="line">    server &#123;</div><div class="line">    listen 80;</div><div class="line">    server_name abc.gongyang.com;</div><div class="line">    root /var/www/html;     </div><div class="line"></div><div class="line">    location /a.txt &#123;</div><div class="line">    limit_req zone=ggyy burst=3 nodelay;</div><div class="line">    access_log logs/abc.log mylogformat;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>配置说明</strong><br>limit_req ：配置限流区域、桶容量（突发容量，默认 0 ）、是否延迟模式（默认延迟）；<br>limit_req_zone ：配置限流 KEY 、及存放 KEY 对应信息的共享内存区域大小、固定请求速率；此处指定的 KEY 是“\$binary_remote_addr ”表示 IP 地址；固定请求速率使用 rate 参数配置，支持 10r/s 和 60r/m ，即每秒 10 个请求和每分钟 60 个请求，不过最终都会转换为每秒的固定请求速率（ 10r/s 为每 100 毫秒处理一个请求； 60r/m ，即每 1000 毫秒处理一个请求）。<br>limit_conn_status ：配置被限流后返回的状态码，默认返回 503 ；<br>limit_conn_log_level ：配置记录被限流后的日志级别，默认 error 级别。</p>
+<p><strong>limit_req 的主要执行过程如下所示：</strong><br>1 、请求进入后首先判断最后一次请求时间相对于当前时间（第一次是 0 ）是否需要限流，如果需要限流则执行步骤 2 ，否则执行步骤 3 ；<br>2.1 、如果没有配置桶容量（ burst ），则桶容量为 0 ；按照固定速率处理请求；如果请求被限流，则直接返回相应的错误码（默认 503 ）；<br>2.2 、如果配置了桶容量（ burst&gt;0 ）且延迟模式 ( 没有配置 nodelay) ；如果桶满了，则新进入的请求被限流；如果没有满则请求会以固定平均速率被处理（按照固定速率并根据需要延迟处理请求，延迟使用休眠实现）；<br>2.3 、如果配置了桶容量（ burst&gt;0 ）且非延迟模式（配置了 nodelay ）；不会按照固定速率处理请求，而是允许突发处理请求；如果桶满了，则请求被限流，直接返回相应的错误码；<br>3 、如果没有被限流，则正常处理请求；<br>4 、 Nginx 会在相应时机进行选择一些（ 3 个节点）限流 KEY 进行过期处理，进行内存回收。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/09/04/conntrack/" data-id="ciu2ftok00004w5hpd8w4dum3" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/10/16/nginx_limit/" data-id="ciusdxy5j000lychpz2aku1au" class="article-share-link">Share</a>
       
       
     </footer>
@@ -119,7 +117,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/2/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/4/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/2/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/4/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -137,7 +135,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -150,23 +148,23 @@
       <ul>
         
           <li>
+            <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
+        
+          <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
           </li>
         
           <li>
             <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>

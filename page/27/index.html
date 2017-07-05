@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-mongodb" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-linux-file" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/03/06/mongodb/" class="article-date">
-  <time datetime="2016-03-05T16:00:00.000Z" itemprop="datePublished">2016-03-06</time>
+    <a href="/2016/03/27/linux-file/" class="article-date">
+  <time datetime="2016-03-26T16:00:00.000Z" itemprop="datePublished">2016-03-27</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/06/mongodb/">mongodb 在复制集上创建修改索引</a>
+      <a class="article-title" href="/2016/03/27/linux-file/">linux 文件时间atime、mtime、ctime</a>
     </h1>
   
 
@@ -90,21 +90,34 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>在讲mongodb如何在复制集上创建或修改索引的操作步骤前，我们先来了解一下mongodb在创建索引时会产生什么影响。<br>mongodb在默认情况下，创建索引会阻塞数据库中所有其他操作。当在一个集合上创建索引时，存储了这个集合的数据库变成不可读不可写的状态直到索引建立完毕。任何需要所有数据库中读或者写锁的操作(例如 listDatabases )将会等待，直到索引创建完成。<br>对于可能需要长时间运行的索引创建操作，可以考虑 background 选项，这样MongoDB数据库在索引创建期间仍然是可用的。<br>例如，在 people 集合的 zipcode 键上创建一个索引，这个过程在后台运行，可以使用如下方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">db.people.createIndex( &#123; zipcode: 1&#125;, &#123;background: true&#125; )</div></pre></td></tr></table></figure></p>
-<p>默认地，MongoDB索引创建的 background 是 false 。索引在创建过程中,查询将不会使用部分建立的索引：索引只有在建立完毕之后才是可用的。</p>
-<p><strong>tips：</strong><br>使用后台索引的方式，虽然可以保证数据库可用，但是会影响mongodb的性能，后台索引创建操作使用的是一种增量的方式，这会比普通的 “前台” 创建过程慢。如果索引大于现有的内存，那么这个增量处理过程将会比前台创建过程 久得多 。<br>如果MongoDB在后台创建一个索引，您不能执行其他会涉及到该集合的管理操作，包括 repairDatabase 命令，删除集合(例如 db.collection.drop() )，和 compact 命令。当后台创建索引时，这些操作会返回一个错误。<br>If your application includes createIndex() operations, and an index doesn’t exist for other operational concerns, building the index can have a severe impact on the performance of the database.<br>为了避免性能问题，请确保您的应用在启动时就使用 getIndexes() 方法或者其他 equivalent method for your driver 检查索引是否存在，如果不存在请退出应用。或者在生产实例上使用不同的应用代码在指定的维护时间窗口期间创建索引。</p>
-<p>处于以上考虑，对于mongodb复制集的索引创建和修改，mongodb官方建议使用下面步骤</p>
-<p><strong>停止一个从节点</strong><br>停止一个从节点上的 mongod 进程。重启 mongod 进程， 不要 带 –replSet 选项且指定一个不同的端口。限制这个实例是运行在 “standalone” 模式下的。</p>
-<p><strong>创建索引</strong><br>在 mongo shell 里通过 ensureIndex() 方法创建新索引（mongodb3.2版本，“ensureIndex() ”方法已经停用，使用createIndex()方法来创建索引 ）<br>例如，为了在 records 集合的 username 键上创建一个递增索引，可以使用如下 mongo shell 操作：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">db.records.createIndex( &#123; username: 1 &#125; )</div></pre></td></tr></table></figure></p>
-<p><strong>重启 mongod 进程</strong><br>当索引创建完毕，在原有端口上用选项 –replSet 重启 mongod 实例，让其加入到复制集中，同步数据。</p>
-<p><strong>在所有从节点上创建索引</strong><br>对于复制集中的每个从节点，按如下步骤创建索引：</p>
-<p>停止一个从节点<br>创建索引<br>重启 mongod 进程</p>
-<p><strong>主节点</strong><br>使用 mongo shell 中的 rs.stepDown() 方法让主节点下台(step down)，这样主节点平滑地过渡为从节点，且允许复制集选举其他成员为主节点。<br>然后重启上述索引创建步骤，在(原)主节点上创建索引:<br>停止一个从节点<br>创建索引<br>重启 mongod 进程<br>在后台创建索引会比前台方式耗时更久，且会生成不够紧凑的索引 结构。此外，后台创建索引可能会影响主节点的写性能。但是，在后台建立索引允许复制集在MongoDB建立索引期间持续写操作。</p>
+        <h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>对于linux文件系统中的文件和目录，有三种时间状态atime、mtime和ctime，他们分别代表的意思是：<br><strong><em>atime：access time</em></strong><br>访问时间，读一次这个文件的内容，这个时间就会更新。比如对这个文件运用 more、cat等命令。ls、stat命令都不会修改文件的访问时间。<br><strong><em>mtime：modified time</em></strong><br>修改时间，修改时间是文件内容最后一次被修改时间。比如：vi后保存文件。ls -l列出的时间就是这个时间。<br><strong><em>ctime：change time</em></strong><br>状态改动时间。是该文件的inode节点最后一次被修改的时间，通过chmod、chown命令修改一次文件属性，这个时间就会更新。</p>
+<p><strong>如何查看atime、mtime和ctime</strong><br>ls -lu filename         列出文件的 atime<br>ls -l  filename          列出文件的 mtime<br>ls -lc filename         列出文件的 ctime<br>也可以使用stat filename来同时查看三个时间<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm03 ~]$ stat 1.txt </div><div class="line">  File: `1.txt&apos;</div><div class="line">  Size: 11        	Blocks: 8          IO Block: 4096   regular file</div><div class="line">Device: 802h/2050d	Inode: 394206      Links: 1</div><div class="line">Access: (0664/-rw-rw-r--)  Uid: (  500/    ggyy)   Gid: (  500/    ggyy)</div><div class="line">Access: 2016-03-27 00:09:04.196004991 +0800</div><div class="line">Modify: 2016-03-27 00:08:48.150005058 +0800</div><div class="line">Change: 2016-03-27 00:08:48.150005058 +0800</div></pre></td></tr></table></figure></p>
+<p>在linux中stat函数中，用st_atime表示文件数据最近的存取时间(last accessed time)；用st_mtime表示文件数据最近的修改时间(last modified time)；使用st_ctime表示文件i节点数据最近的修改时间(last i-node’s status changed time)。</p>
+<p> 字段           说明                  例子           ls(-l)<br> st_atime  文件数据的最后存取时间       read            -u<br> st_mtime  文件数据的最后修改时间       write           缺省<br> st_ctime  文件数据的最后更改时间       chown,chmod     -c</p>
+<h4 id="实例-1"><a href="#实例-1" class="headerlink" title="实例 1"></a>实例 1</h4><p>有时候我们会发现，即是访问了文件，该文件的访问时间也不会变，例如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm03 ~]$ stat 1.txt </div><div class="line">  File: `1.txt&apos;</div><div class="line">  Size: 5         	Blocks: 8          IO Block: 4096   regular file</div><div class="line">Device: 802h/2050d	Inode: 394206      Links: 1</div><div class="line">Access: (0664/-rw-rw-r--)  Uid: (  500/    ggyy)   Gid: (  500/    ggyy)</div><div class="line">Access: 2016-03-27 00:01:09.379005522 +0800</div><div class="line">Modify: 2016-03-26 23:27:18.032007859 +0800</div><div class="line">Change: 2016-03-26 23:27:18.032007859 +0800</div><div class="line">[ggyy@gy-vm03 ~]$ cat 1.txt </div><div class="line">test</div><div class="line">[ggyy@gy-vm03 ~]$ stat 1.txt </div><div class="line">  File: `1.txt&apos;</div><div class="line">  Size: 5         	Blocks: 8          IO Block: 4096   regular file</div><div class="line">Device: 802h/2050d	Inode: 394206      Links: 1</div><div class="line">Access: (0664/-rw-rw-r--)  Uid: (  500/    ggyy)   Gid: (  500/    ggyy)</div><div class="line">Access: 2016-03-27 00:01:09.379005522 +0800</div><div class="line">Modify: 2016-03-26 23:27:18.032007859 +0800</div><div class="line">Change: 2016-03-26 23:27:18.032007859 +0800</div><div class="line">[ggyy@gy-vm03 ~]$</div></pre></td></tr></table></figure></p>
+<p>其原因是kernel更新文件访问时间是有策略的，其策略经过了三个发展阶段</p>
+<ul>
+<li><p>初始阶段<br>linux总是实时更新访问时间的，但这会涉及到大量的写磁盘操作，严重影响到linux性能。</p>
+</li>
+<li><p>第二阶段<br>考虑到1的缺陷，可以在挂载文件系统时使用noatime属性来停止更新atime。但这会对许多应用程序造成影响，比如邮箱，备份软件，时间同步工具</p>
+</li>
+<li><p>第三阶段<br>综合1,2，现在的linux使用了折中方案，挂载文件系统时使用的默认属性为relatime。其更新策略为：当满足以下任一条件时才更新访问时间，<br>1、访问时间早于修改时间或改变状态时间<br>2、距离上次更新时间间隔大于24h</p>
+</li>
+</ul>
+<p>综上所叙：当访问时间大于修改时间和改变时间时，且距离上次更新时间小于24h时，访问时间不再更新，这就是造成上述访问时间不变的原因。</p>
+<h4 id="实例-2"><a href="#实例-2" class="headerlink" title="实例 2"></a>实例 2</h4><p>有时候，我们会发现某一文件的访问时间甚至比修改时间还要早，如下所示，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm03 ~]$ stat 1.txt </div><div class="line">  File: `1.txt&apos;</div><div class="line">  Size: 11        	Blocks: 8          IO Block: 4096   regular file</div><div class="line">Device: 802h/2050d	Inode: 394206      Links: 1</div><div class="line">Access: (0664/-rw-rw-r--)  Uid: (  500/    ggyy)   Gid: (  500/    ggyy)</div><div class="line">Access: 2016-03-27 00:09:04.196004991 +0800</div><div class="line">Modify: 2016-03-27 00:08:48.150005058 +0800</div><div class="line">Change: 2016-03-27 00:08:48.150005058 +0800</div><div class="line">[ggyy@gy-vm03 ~]$ echo &quot;1122&quot; &gt;&gt; 1.txt </div><div class="line">[ggyy@gy-vm03 ~]$ stat 1.txt </div><div class="line">  File: `1.txt&apos;</div><div class="line">  Size: 16        	Blocks: 8          IO Block: 4096   regular file</div><div class="line">Device: 802h/2050d	Inode: 394206      Links: 1</div><div class="line">Access: (0664/-rw-rw-r--)  Uid: (  500/    ggyy)   Gid: (  500/    ggyy)</div><div class="line">Access: 2016-03-27 00:09:04.196004991 +0800</div><div class="line">Modify: 2016-03-27 00:35:04.421003193 +0800</div><div class="line">Change: 2016-03-27 00:35:04.421003193 +0800</div><div class="line">[ggyy@gy-vm03 ~]$</div></pre></td></tr></table></figure></p>
+<p>这是因为在修改文件的操作中，有的会访问到该文件，有的不会。</p>
+<ul>
+<li><p>比如，使用命令vim file修改文件,同时也访问了该文件。所以，修改完后首先更新文件的修改时间，接着更新访问时间。由于此时的访问时间已经小于新的修改时间，所以更新访问时间到与修改时间相同。</p>
+</li>
+<li><p>使用命令echo “1122” &gt;&gt; 1.txt，此命令仅仅修改了文件，并没有访问，故仅更新修改时间，访问时间因为没变而晚于修改时间，此即上述现象产生的原因。</p>
+</li>
+</ul>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/03/06/mongodb/" data-id="ciu2ftokl000fw5hpvzqm2xgh" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/03/27/linux-file/" data-id="ciusdxy52000eychpxxdmuq4y" class="article-share-link">Share</a>
       
       
     </footer>
@@ -117,7 +130,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/26/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="page-number current">27</span><a class="page-number" href="/page/28/">28</a><a class="page-number" href="/page/29/">29</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/28/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/26/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="page-number current">27</span><a class="page-number" href="/page/28/">28</a><a class="page-number" href="/page/29/">29</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/28/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -135,7 +148,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -148,23 +161,23 @@
       <ul>
         
           <li>
+            <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
+        
+          <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
           </li>
         
           <li>
             <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>

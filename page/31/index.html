@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-docker-01" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-ftp" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/01/30/docker-01/" class="article-date">
-  <time datetime="2016-01-29T16:00:00.000Z" itemprop="datePublished">2016-01-30</time>
+    <a href="/2016/02/27/ftp/" class="article-date">
+  <time datetime="2016-02-26T16:00:00.000Z" itemprop="datePublished">2016-02-27</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/01/30/docker-01/">Docker 入门系列之---认识Docker</a>
+      <a class="article-title" href="/2016/02/27/ftp/">记一次关于ftp使用的那些事</a>
     </h1>
   
 
@@ -90,59 +90,17 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p> 最近有一项很火的技术，身边很多人都在讨论他，很多技术交流会上也会提到他，没错，他就是Docker。<br> Docker为什么会这么火了，我们还是先来说说另一个技术，容器。</p>
-<h3 id="容器简介"><a href="#容器简介" class="headerlink" title="容器简介"></a>容器简介</h3><p> 容器技术其实已经出来很久了，其中比较成熟有Linux的LXC、FreeBSD的Jail、Solaris的Solaris Containers。容器与管理程序虚拟化（hypervisor virtualization，HV）有所不同，管理程序的虚拟化一般都是通过中间层将一台或多台独立的机器虚拟化运行于物理硬件之上，而容器则是直接运行在操作系统内核之上的用户空间。因此，容器虚拟化也被称为“操作系统级虚拟化”，容器技术可以让多个独立的用户空间运行在同一台宿主机之上。</p>
-<p> 容器有效地将由单个操作系统管理的资源划分到孤立的组中，以更好的在孤立的组之间平衡有冲突的资源使用需求。与虚拟化相比，这样既不需要指令级模拟，也不需要即时编译。容器可以在核心CPU本地运行指令，而不需要任何专门的解释机制。此外，也避免了准虚拟化和系统调用替换中的复杂性。 通过提供一种创建和进入容器的方式，操作系统让应用程序就像在独立的机器上运行一样，但又能共享很多底层资源。例如，可以有效的共享公共文件（如glibc）的页缓存，因为所有容器都使用相同的内核，所以容器还常常共享相同的libc库（取决于容器配置）。这种共享常常可以扩展到目录中其他不需要写入内容的文件。 容器在提供隔离的同时，还通过共享这些资源节省开销，这意味着容器比真正的虚拟化开销要小很多。和传统的虚拟化以及版虚拟化相比，容器运行不需要模拟层和管理层，而是使用操作系统的系统调用接口，这降低了运行单个容器所需的开销，也使得宿主机中可以运行更多的容器。</p>
-<p> 尽管有着这么多优秀技术，但是容器一直没有得到广泛使用和认可。一方面和起安全有关系，另一个很重要的原因就是容器技术的复杂性，容器本身比较复杂，不易安装，管理和自动化也很困难。而Docker就是为改变这一切而生。</p>
-<h3 id="Docker-简介"><a href="#Docker-简介" class="headerlink" title="Docker 简介"></a>Docker 简介</h3><p> Docker 是一个开源项目，于2013年由dotCloud（现改名为Docker）公司推出，一开始其实只是公司内部的一个业余项目。他是用Go语言写的，基于Apache 2.0开源授权协议发行。项目代码在<a href="https://github.com/docker/docker" target="_blank" rel="external">GitHub</a>上进行维护。基于 <a href="https://zh.wikipedia.org/wiki/LXC" target="_blank" rel="external">LXC</a>技术之上构建的Container容器引擎。<br>Docker可以轻松的为任何应用创建一个轻量级的、可移植的、自给自足的容器。开发者在笔记本上编译测试通过的容器可以批量地在生产环境中部署，包括VMs（虚拟机）、bare metal、OpenStack 集群和其他的基础应用平台。</p>
-<p>###Docker 组件<br> <strong>Docker的核心组件：</strong><br>        客户端和服务器；<br>        Docker镜像；<br>        Registry；<br>        Docker容器。</p>
-<p><strong>Docker客户端和服务器</strong><br>Docker是一个客户-服务器（C/S）架构的程序。Docker客户端只需香Docker服务器发出请求，服务器或守护进程将完成所有工作并返回结果。Docker提供了一个命令行工具docker以及一整套<a href="https://docs.docker.com/engine/reference/api/docker_remote_api/" target="_blank" rel="external">RESTfulAPI</a>。你可以在同一台宿主机上运行Docker守护进程和客户端，也可以从本地的Docker客户端连接到运行在另一台宿主机上的远程Docker守护进程。</p>
-<p><strong>Docker镜像</strong><br>镜像是构建Docker世界的基石。用户基于镜像来运行自己的容器。镜像也是Docker生命周期中的构建部分。镜像是基于联合文件系统的一种层式的结构，由一系列指令一步一步构建出来。比如说：添加一个文件；执行一个命令；打开一个端口。<br>也可以把镜像当作容器的“源代码”。镜像体积很小，非常“便携”，易于分享、存储和更新。</p>
-<p><strong>Registry</strong><br>Docker用Registry来保存用户构建的镜像。Registry分为公共和私有两种。Docker公司运营的公共Registry叫做Docker Hub。我们可以在Docker Hub上注册帐号，分享并保存自己的镜像。当然，我们也可以架设自己的私有Registry，私有的Registry可以受到防火墙的保护，将镜像保存在防火墙的后面，就像我们私有的gitlab一样。</p>
-<p><strong>容器</strong><br>前面说镜像是Docker世界的基石，而容器，则是组成Docker世界的最小组件。容器是基于镜像启动的，他的主要作用是来运行应用实例的,Docker官方推荐一个容器里面只运行一个进程，当然你要运行多个进程也是可以的。容器可以被启动、开始、停止、删除。每个容器都是相互隔离的、保证安全的平台。我们可以把容器看做是一个简易版的能跑应用程序的linux环境。镜像是只读的，容器的创建是在只读的镜像最上面创建一层可写层。</p>
-<p>###Do what<br>前面花了那么多时间来介绍Docker，那么我们到底能用他来做什么。</p>
-<p><strong>快速开发和部署</strong><br>在实际的的工作当中，我们的环境至少分为开发、测试、生产等多个环境，环境的不同，往往导致一个程序运行结果不一样。并且配置这些环境也是相当麻烦的一件事情（因为各个部门，所使用的操作系统还不一样）<br>，这样就导致了一个矛盾链的产生，开发说是测试的问题，测试说是运维的问题，运维说是运行环境的问题，最后运维只能背锅。有了Docker，开发者可以使用一个标准的镜像来构建一套开发容器，开发完成之后，交给测试人员测试，运维人员可以直接使用这个容器来部署代码。Docker 可以快速创建容器，快速迭代应用程序，并让整个过程全程可见，使团队中的其他成员更容易理解应用程序是如何创建和工作的。 Docker 容器很轻很快！容器的启动时间是秒级的，大量地节约开发、测试、部署的时间。</p>
-<p><strong>简单高效的虚拟化</strong><br>现在我们使用虚拟化，都是在自己的宿主机上面安装虚拟机软件，然后运行虚拟主机，一般只能运行几个虚拟主机，开多了，宿主机会很卡，就算你把内存加到16G、32G,你也只能跑几个虚拟主机，毕竟你是中间加了一层中间件。Docker 容器的运行不需要额外的 hypervisor 支持，它是内核级的虚拟化，因此可以实现更高的性能和效率。</p>
-<p><strong>快速的迁移和扩展</strong><br>Docker 容器几乎可以在任意的平台上运行，包括物理机、虚拟机、公有云、私有云、个人电脑、服务器等。 这种兼容性可以让用户把一个应用程序从一个平台直接迁移到另外一个。</p>
-<p><strong>轻松的运维</strong><br>使用 Docker，只需要小小的修改，就可以替代以往大量的更新工作。所有的修改都以增量的方式被分发和更新，从而实现自动化并且高效的管理。</p>
-<p><strong>对比传统虚拟机总结</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align:left">特性</th>
-<th style="text-align:left">容器</th>
-<th style="text-align:left">虚拟机</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left">启动</td>
-<td style="text-align:left">秒级</td>
-<td style="text-align:left">分钟级</td>
-</tr>
-<tr>
-<td style="text-align:left">硬盘使用</td>
-<td style="text-align:left">一般为 MB</td>
-<td style="text-align:left">一般为 GB</td>
-</tr>
-<tr>
-<td style="text-align:left">性能</td>
-<td style="text-align:left">接近原生</td>
-<td style="text-align:left">弱于</td>
-</tr>
-<tr>
-<td style="text-align:left">系统支持量</td>
-<td style="text-align:left">单机支持上千个容器</td>
-<td style="text-align:left">一般几十个</td>
-</tr>
-</tbody>
-</table>
-<p>好了，关于Docker的介绍就到这里，接下来我们就开始Docker的详细操作使用</p>
+        <p>FTP，是一个相当古老的文件传输协议之一，相比大家伙都不会陌生，它的主要功能是在服务器和客户端之间进行文件的传输。由于比较古老，在安全方面比较落后，所以在实际应用当中，一般都会使用vsftp这个软件。</p>
+<p>今天我为什么要讲一讲这个大家都很熟悉的软件了，自然是我们也在使用它，并且和它也发生了那么些事。<br>关于如何安装和使用，我在这里就不具体详解了，网上资料一大把。今天我们主要来讲讲实际应用当中，遇到的那些事。</p>
+<p>我把vsftp服务搭建好了之后，创建了虚拟用户，并使用TLS协议加密登录，在公司稳稳当当的使用了一段时间，后来断断续续有人来跟我说，vsftp连接不上去；这里注明一下，我们是使用filezilla客户端进行连接的。我跑到安装vsftp的服务器上面查看，发现虽然客户端那边断开了，但是还是有进程在，开始以为是客户端的问题，我把进程kill之后，就能正常连接了。但是后来，一直都有类似的问题出现，我把服务端这边的配置都重新清理了一遍，实在是找不到原因。直到有一次，ftp又出现不能连接的问题之后，我是用netstat查看ftp端口发现是close_wait状态，我仿佛像是抓到了救命稻草一样，发现了问题的所在，虽然我不知道这是什么意思，但我敢肯定，问题就在这。</p>
+<p>首先我们知道，如果我们的服务器程序处于CLOSE_WAIT状态的话，说明套接字是被动关闭的！<br>因为如果是CLIENT端主动断掉当前连接的话，那么双方关闭这个TCP连接共需要四个packet：</p>
+<p>Client –-&gt; FIN  –-&gt; Server<br>Client &lt;–- ACK  &lt;–- Server<br>这时候Client端处于FIN_WAIT_2状态；而Server 程序处于CLOSE_WAIT状态。<br>Client &lt;–- FIN  &lt;–- Server<br>这时Server 发送FIN给Client，Server 就置为LAST_ACK状态。<br>Client –-&gt; ACK  –-&gt; Server<br>Client回应了ACK，那么Server 的套接字才会真正置为CLOSED状态。</p>
+<p>Server 程序处于CLOSE_WAIT状态，而不是LAST_ACK状态，说明还没有发FIN给Client，那么可能是在关闭连接之前还有许多数据要发送或者其他事要做，导致没有发这个FIN packet。<br>通常来说，一个CLOSE_WAIT会维持至少2个小时的时间（这个时间外网服务器通常会做调整，要不然太危险了）。如果有个流氓特地写了个程序，给你造成一堆的CLOSE_WAIT，消耗你的资源，那么通常是等不到释放那一刻，系统就已经解决崩溃了。<br>只能通过修改一下TCP/IP的参数，来缩短这个时间：修改tcp<em>keepalive</em>*系列参数有助于解决这个问题。<br>其实一个close_wait并不会导致ftp服务不可用，问题就在于我们是使用ftp被动连接模式，并且只对外打开了一个端口。如果产生了一个close_wait，那么相应的端口也被占用了，那么这个时候，其他人就连接不上去了，或者等两个小时之后等服务器自动断开。<br>解决方法，要么修改TCP/IP参数，这个比较麻烦，所以采用第二种方式，增加一个端口，由于是被动模式，我们是可以在配置文件里面定义对外的端口范围。我在原来的基础上增加了一个对外的端口，如果有一个端口处于close_wait状态，至少还有一个可以使用，果然到现在只出现过一次连接不上的问题了。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/01/30/docker-01/" data-id="ciu2ftok60006w5hpoapnacqb" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/02/27/ftp/" data-id="ciusdxy4x000bychpmr4vfs2k" class="article-share-link">Share</a>
       
       
     </footer>
@@ -155,7 +113,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/30/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/29/">29</a><a class="page-number" href="/page/30/">30</a><span class="page-number current">31</span>
+    <a class="extend prev" rel="prev" href="/page/30/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/29/">29</a><a class="page-number" href="/page/30/">30</a><span class="page-number current">31</span><a class="page-number" href="/page/32/">32</a><a class="page-number" href="/page/33/">33</a><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/32/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -173,7 +131,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -186,23 +144,23 @@
       <ul>
         
           <li>
+            <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
+        
+          <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
           </li>
         
           <li>
             <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>

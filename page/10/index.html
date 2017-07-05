@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-mysql2" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-dstat" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/07/17/mysql2/" class="article-date">
-  <time datetime="2016-07-16T16:00:00.000Z" itemprop="datePublished">2016-07-17</time>
+    <a href="/2016/08/07/dstat/" class="article-date">
+  <time datetime="2016-08-06T16:00:00.000Z" itemprop="datePublished">2016-08-07</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/07/17/mysql2/">rails项目mysql编码由utf8改成utf8mb4</a>
+      <a class="article-title" href="/2016/08/07/dstat/">dstat--多功能系统资源统计生成工具</a>
     </h1>
   
 
@@ -90,26 +90,19 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="rails项目mysql编码由utf8改成utf8mb4"><a href="#rails项目mysql编码由utf8改成utf8mb4" class="headerlink" title="rails项目mysql编码由utf8改成utf8mb4"></a>rails项目mysql编码由utf8改成utf8mb4</h2><h3 id="为什么要改编码"><a href="#为什么要改编码" class="headerlink" title="为什么要改编码"></a>为什么要改编码</h3><p>因为utf8编码的mysql不能保存含有4个字节的emoji表情，为了能让客户端支持输入保存emoji表情，数据库必须升级并把编码改成utf8mb4。mysql从5.5.3版本开始支持utf8mb4 字符集。</p>
-<p>首先确保mysql server端支持utf8mb4 字符集。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">mysql&gt; SHOW CHAR SET WHERE Charset LIKE &quot;%utf8%&quot;;</div><div class="line">+---------+---------------+--------------------+--------+</div><div class="line">| Charset | Description   | Default collation  | Maxlen |</div><div class="line">+---------+---------------+--------------------+--------+</div><div class="line">| utf8    | UTF-8 Unicode | utf8_general_ci    |      3 |</div><div class="line">| utf8mb4 | UTF-8 Unicode | utf8mb4_general_ci |      4 |</div><div class="line">+---------+---------------+--------------------+--------+</div><div class="line">2 rows in set (0.00 sec)</div></pre></td></tr></table></figure></p>
-<p>然后升级部署应用的服务器上的mysql client版本也得大于5.5.3。我这边是用rpm包单独升级。先卸载掉低版本的rpm包，然后再进行安装。</p>
-<ul>
-<li>MySQL-client：包含最少的访问mysql服务器所需要的客户端命令。里面包含的是像mysql，mysqladmin这样的工具。</li>
-<li>MySQL-devel：包含开发mysql客户端所需要的库。里面没有包含工具，都是包含.a这样的库链接文件</li>
-<li>MySQL-server：包含安装mysql所需要的所有工具。里面包含的像是mysqld_safe，mysqld_multi这样的服务器启动安装工具。里面并不包含mysql这样的客户端工具。</li>
-<li>Mysql-shared：包含开发mysql客户端所需要的动态链接库。里面并没有工具，都是像libmysqlclient.so*这样的动态库文件。</li>
-<li>Mysql-shared-compact：上面动态链接库的以前各个版本的文件。就是进行这个安装会在lib64中放上之前所有release版本的libmysqlclient.so</li>
-</ul>
-<h3 id="mysql2支持utf8mb4"><a href="#mysql2支持utf8mb4" class="headerlink" title="mysql2支持utf8mb4"></a>mysql2支持utf8mb4</h3><p>当mysql server端和client端都支持utf8mb4之后，我们需要对mysql2<br>进行重新安装。这里需要注意的是，mysql2的版本必须大于0.3.11，不然是不支持utf8mb4字符集的。</p>
-<p>进入到应用部署目录，使用bundle exec gem uninstall mysql2，选择当前应用使用的mysql2版本，然后再bundler重新安装mysql2<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[bhuser@bhqa current]$ bundle show | grep mysql2</div><div class="line">  * mysql2 (0.4.3)</div><div class="line">[bhuser@bhqa current]$ bundle exec gem uninstall mysql2</div><div class="line">Successfully uninstalled mysql2-0.4.3</div><div class="line">[bhuser@bhqa current]$ bundle</div></pre></td></tr></table></figure></p>
-<h3 id="检验"><a href="#检验" class="headerlink" title="检验"></a>检验</h3><p>使用下面代码在rails 下进行检验<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Mysql2::Client.new(</div><div class="line"> :host =&gt; &apos;host&apos;,</div><div class="line"> :username =&gt; &apos;user&apos;,</div><div class="line"> :password =&gt; &apos;passwd&apos;,</div><div class="line"> :encoding =&gt; &apos;utf8mb4&apos;</div><div class="line">)</div></pre></td></tr></table></figure></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">2.3.0 :007 &gt; Mysql2::Client.new(</div><div class="line">2.3.0 :008 &gt;      :host =&gt; &apos;x.x.x.x&apos;,</div><div class="line">2.3.0 :009 &gt;      :username =&gt; &apos;user&apos;,</div><div class="line">2.3.0 :010 &gt;      :password =&gt; &apos;passwd&apos;,</div><div class="line">2.3.0 :011 &gt;      :encoding =&gt; &apos;utf8mb4&apos;</div><div class="line">2.3.0 :012?&gt;   )</div><div class="line"> =&gt; #&lt;Mysql2::Client:0x000000040c17b0 @read_timeout=nil, @query_options=&#123;:as=&gt;:hash, :async=&gt;false, :cast_booleans=&gt;false, :symbolize_keys=&gt;false, :database_timezone=&gt;:local, :application_timezone=&gt;nil, :cache_rows=&gt;true, :connect_flags=&gt;2147525125, :cast=&gt;true, :default_file=&gt;nil, :default_group=&gt;nil, :host=&gt;&quot;host&quot;, :username=&gt;&quot;user&quot;, :password=&gt;&quot;passwd&quot;, :encoding=&gt;&quot;utf8mb4&quot;&#125;&gt; </div><div class="line">2.3.0 :013 &gt;</div></pre></td></tr></table></figure>
-<p>上面结果表示成功升级<br>下面的提示是没有升级mysql2的错误信息。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Character set &apos;utf8mb4&apos; is not a compiled character set and is not specified in the &apos;/path/mysql/charsets/Index.xml&apos; file</div><div class="line">rake aborted!</div><div class="line">Mysql2::Error: Can&apos;t initialize character set utf8mb4 (path: /path/mysql/charsets/)</div></pre></td></tr></table></figure></p>
+        <h2 id="dstat–多功能系统资源统计生成工具"><a href="#dstat–多功能系统资源统计生成工具" class="headerlink" title="dstat–多功能系统资源统计生成工具"></a>dstat–多功能系统资源统计生成工具</h2><p>dstat是一个用来替换vmstat、iostat、netstat、nfsstat和ifstat这些命令的工具，是一个全能系统信息统计工具，而且还可以通过使用插件扩展其功能。</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>centos系统上直接使用yum安装<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum install dstat</div></pre></td></tr></table></figure></p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>使用语法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">dstat [-afv] [options..] [delay [count]]</div></pre></td></tr></table></figure></p>
+<p>安装完成之后，我们就可以直接使用dstat了，默认参数是-cdngy，分别代表显示cpu、disk、net、page、system信息，还可以在命令后面加上输出间隔时间(delay)以及输出次数(count)。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">[root@bhqa ~]# dstat 3 5</div><div class="line">----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system--</div><div class="line">usr sys idl wai hiq siq| read  writ| recv  send|  in   out | int   csw </div><div class="line"> 10   4  85   1   0   0|  46k   40k|   0     0 |5085B 3034B| 599  2316 </div><div class="line">  8   4  85   3   0   1|  24k  105k| 493B  965B|   0     0 |1744  2630 </div><div class="line"> 11   4  86   0   0   0|   0    23k|4642B 5476B|   0     0 |1653  2086 </div><div class="line">  7   3  90   0   0   0|   0     0 | 551B  738B|   0     0 |1523  1969 </div><div class="line">  7   3  90   0   0   0|   0    12k|1421B 1211B|   0     0 |1590  2010 </div><div class="line">  8   3  88   0   0   1|  67k 1365B|1607B 1008B|   0     0 |1592  1975</div></pre></td></tr></table></figure></p>
+<p>其中cpu一栏中的hiq、siq分别为硬中断和软中断次数。<br>system一栏的int、csw分别为系统的中断次数（interrupt）和上下文切换（context switch）。<br>其他常用选项<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">-c：显示CPU系统占用，用户占用，空闲，等待，中断，软件中断等信息。 </div><div class="line">-C：当有多个CPU时候，此参数可按需分别显示cpu状态，例：-C 0,1 是显示cpu0和cpu1的信息。 </div><div class="line">-d：显示磁盘读写数据大小。 </div><div class="line">-D  和-C类似，默认是显示所有磁盘信息，使用-D可以指定查看单个磁盘的信息</div><div class="line">-n：显示网络状态。 </div><div class="line">-N eth1,total：有多块网卡时，指定要显示的网卡。 </div><div class="line">-l：显示系统负载情况。 </div><div class="line">-m：显示内存使用情况。 </div><div class="line">-g：显示页面使用情况。 </div><div class="line">-p：显示进程状态。 </div><div class="line">-s：显示交换分区使用情况。 </div><div class="line">-S：类似D/N。 </div><div class="line">-r：I/O请求情况。 </div><div class="line">-y：系统状态。 </div><div class="line">--ipc：显示ipc消息队列，信号等信息。 </div><div class="line">--socket：用来显示tcp udp端口状态。 </div><div class="line">-a：此为默认选项，等同于-cdngy。 </div><div class="line">-v：等同于 -pmgdsc -D total。 </div><div class="line">--output 文件：此选项也比较有用，可以把状态信息以csv的格式重定向到指定的文件中，以便日后查看。例：dstat --output /tmp/dstat.csv</div></pre></td></tr></table></figure></p>
+<p>更多的参数请查看<a href="http://linux.die.net/man/1/dstat" target="_blank" rel="external">man dstat</a> 或者使用dstat -h来查看</p>
+<p>除了常用的功能，dstat还支持插件提供而外功能。<br>通过输入命令dstat –list查看所有参数<br>上面internal是dstat本身自带的一些监控参数；<br>下面/usr/share/dstat中是dstat的插件，这些插件可以扩展dstat的功能，如可以监控电源（battery）、mysql等。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">[root@bhqa ~]# dstat --list</div><div class="line">internal:</div><div class="line">	aio, cpu, cpu24, disk, disk24, disk24old, epoch, fs, int, int24, io, ipc, load, lock, mem, net, page, page24, </div><div class="line">	proc, raw, socket, swap, swapold, sys, tcp, time, udp, unix, vm</div><div class="line">/usr/share/dstat:</div><div class="line">	battery, battery-remain, cpufreq, dbus, disk-util, fan, freespace, gpfs, gpfs-ops, helloworld, innodb-buffer, </div><div class="line">	innodb-io, innodb-ops, lustre, memcache-hits, mysql-io, mysql-keys, mysql5-cmds, mysql5-conn, mysql5-io, </div><div class="line">	mysql5-keys, net-packets, nfs3, nfs3-ops, nfsd3, nfsd3-ops, ntp, postfix, power, proc-count, rpc, rpcd, </div><div class="line">	sendmail, snooze, thermal, top-bio, top-cpu, top-cputime, top-cputime-avg, top-io, top-latency, </div><div class="line">	top-latency-avg, top-mem, top-oom, utmp, vm-memctl, vmk-hba, vmk-int, vmk-nic, vz-cpu, vz-io, vz-ubc, wifi</div></pre></td></tr></table></figure></p>
+<p>例如通过–top-(io|bio|cpu|cputime|cputime-avg|mem) 这几个选项，可以看到具体是那个用户那个进程占用了相关系统资源，对系统调优非常有效。如查看当前占用I/O、cpu、内存等最高的进程信息可以使用dstat –top-mem –top-io –top-cpu。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/07/17/mysql2/" data-id="ciu2ftol4000jw5hpoktn8kr2" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/08/07/dstat/" data-id="ciusdxy4u000aychprevb70f0" class="article-share-link">Share</a>
       
       
     </footer>
@@ -122,7 +115,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/9/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/11/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/9/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/11/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -140,7 +133,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -153,23 +146,23 @@
       <ul>
         
           <li>
+            <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
+        
+          <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
           </li>
         
           <li>
             <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>

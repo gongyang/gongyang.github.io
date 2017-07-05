@@ -68,10 +68,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-route" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-awk" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/05/29/route/" class="article-date">
-  <time datetime="2016-05-28T16:00:00.000Z" itemprop="datePublished">2016-05-29</time>
+    <a href="/2016/06/26/awk/" class="article-date">
+  <time datetime="2016-06-25T16:00:00.000Z" itemprop="datePublished">2016-06-26</time>
 </a>
     
   </div>
@@ -82,7 +82,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/05/29/route/">linux 路由表</a>
+      <a class="article-title" href="/2016/06/26/awk/">linux实用工具之--AWK</a>
     </h1>
   
 
@@ -90,29 +90,26 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>我们知道，同一个局域网里面，我们可以通过ip广播的方式来实现数据传递的目的。但是不是同一个局域网内的数据传递，就需要路由器来实现了。</p>
-<p>假设我们一台主机A（192.168.1.100/24），主机B（192.168.2.100/24），它们是不同的网段，所以不能直接通讯。那A是怎么知道B不是同一个网段了，当然是通过Net_ID（网络号码）来区分的。一个完整的IP是由Net_ID（网络号码）和Host_ID（主机号码）组成，Net_ID是用来区分是不是同一个网段，而Host_ID是用来区分不同主机的。一台主机需要发送数据，主要是通过参考本机的路由表来决定。</p>
-<h3 id="查看主机路由表"><a href="#查看主机路由表" class="headerlink" title="查看主机路由表"></a>查看主机路由表</h3><p>在linux系统下面，我们可以通过route这条命令查看一下本机的路由信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# route </div><div class="line">Kernel IP routing table</div><div class="line">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</div><div class="line">192.168.1.0     *               255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.168.0   *               255.255.255.0   U     0      0        0 eth1</div><div class="line">link-local      *               255.255.0.0     U     1002   0        0 eth0</div><div class="line">link-local      *               255.255.0.0     U     1003   0        0 eth1</div><div class="line">172.17.0.0      *               255.255.0.0     U     0      0        0 docker0</div><div class="line">default         192.168.1.1     0.0.0.0         UG    0      0        0 eth0</div></pre></td></tr></table></figure></p>
-<p>一般我们会加上参数-n，将主机名以 IP 的方式显示<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# route -n</div><div class="line">Kernel IP routing table</div><div class="line">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</div><div class="line">192.168.1.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.168.0   0.0.0.0         255.255.255.0   U     0      0        0 eth1</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1002   0        0 eth0</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1003   0        0 eth1</div><div class="line">172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0</div><div class="line">0.0.0.0         192.168.1.1     0.0.0.0         UG    0      0        0 eth0</div></pre></td></tr></table></figure></p>
-<p>上面输出的数据共有八个字段，你需要注意的有几个地方：<br> Destination ：其实就是 Network 的意思；<br> Gateway     ：就是该接口的 Gateway 那个 IP ，若为 0.0.0.0 表示不需要额外的 IP；<br> Genmask     ：就是 Netmask 啦，与 Destination 组合成为一部主机或网域；<br> Flags       ：共有多个标志可以来表示该网域或主机代表的意义：</p>
-<ul>
-<li>U：代表该路由可用；</li>
-<li>G：代表该网域需要经由 Gateway 来帮忙转递；</li>
-<li>H：代表该行路由为一部主机，而非一整个网域；</li>
-</ul>
-<p>Iface       ：就是 Interface (接口) 的意思。</p>
-<p>上面的信息就是我本机的路由表信息，如果我们有个数据包目的IP是192.168.1.0/24网段的，那么就会选择第一条路由，并且通过eth0这个接口发送出去。同理，如果我们有个数据包目的IP是192.168.168.0/24网段的，那么就会选择第二条路由，并且通过eth1这个接口发送出去。如果目的IP不在路由表的规则里面，那么就会将数据包传送到Flags带有G的那条路由规则里面，也就是192.168.1.1这个Gateway。</p>
-<h3 id="添加路由信息"><a href="#添加路由信息" class="headerlink" title="添加路由信息"></a>添加路由信息</h3><p>上面，我们通过route这条命令，可以看到本机的路由信息，那么这些信息是如何产生的了？<br>首先，192.168.1.0/24和192.168.168.0/24这两条路由信息的存在是因为我们本机有192.168.1.109和192.168.168.11这两个ip。也就是说，主机上面有几个网络接口，就会存在几条对应的路由信息。下面我来添加一个虚拟接口来验证一下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# ifconfig eth0:0 192.168.2.100</div></pre></td></tr></table></figure></p>
-<p>再来查看一下路由信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# route -n</div><div class="line">Kernel IP routing table</div><div class="line">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</div><div class="line">192.168.2.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.1.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.168.0   0.0.0.0         255.255.255.0   U     0      0        0 eth1</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1002   0        0 eth0</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1003   0        0 eth1</div><div class="line">172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0</div><div class="line">0.0.0.0         192.168.1.1     0.0.0.0         UG    0      0        0 eth0</div></pre></td></tr></table></figure></p>
-<p>系统自动添加了192.168.2.0/24这条路由信息。</p>
-<h4 id="手动添加路由"><a href="#手动添加路由" class="headerlink" title="手动添加路由"></a>手动添加路由</h4><p>我们可以通过route这条命令手动添加路由信息，但是需要注意的一点就是，<strong>我们所添加的路由，必须是我们主机上的设备（网络接口）或IP可以直接连接的才行。</strong><br>举个例子：我们现在有个路由器IP为192.168.10.254，我们想要连接到这个路由器，可以运行下面的命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# route add -net 192.168.10.0 netmask 255.255.255.0 gw 192.168.10.254</div><div class="line">SIOCADDRT: No such process</div></pre></td></tr></table></figure></p>
-<p>系统提示，不能连接到该网络，应为我们的网络接口与192.168.10.0/24根本就没有关系。那如果192.168.10.254真的是我们的实体网络连接，并且是通过eth0连接在一起的，那其实我们可以这样做：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">[root@gy-vm02 ~]# route add -net 192.168.10.0 netmask 255.255.255.0 dev eth0</div><div class="line">[root@gy-vm02 ~]# route -n</div><div class="line">Kernel IP routing table</div><div class="line">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</div><div class="line">192.168.2.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.1.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">192.168.168.0   0.0.0.0         255.255.255.0   U     0      0        0 eth1</div><div class="line">192.168.10.0    0.0.0.0         255.255.255.0   U     0      0        0 eth0</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1002   0        0 eth0</div><div class="line">169.254.0.0     0.0.0.0         255.255.0.0     U     1003   0        0 eth1</div><div class="line">172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0</div><div class="line">0.0.0.0         192.168.1.1     0.0.0.0         UG    0      0        0 eth0</div></pre></td></tr></table></figure></p>
-<p>这样，主机就可以通过eth0去连接192.168.10.254了。</p>
+        <p>AWK是由 Alfred Aho、Peter Weinberger、Brian Kernighan三人创造出来的一款非常棒的数据处理工具。<br>相比于sed作用于一整行的数据处理方式，awk则是将一行数据分成数个“字段”来处理，而默认的字段分隔符为空格键或[tab]键。</p>
+<p><strong>使用语法：</strong></p>
+<blockquote>
+<p>awk ‘条件类型1{动作1} 条件类型2{动作2}…’ filename</p>
+</blockquote>
+<p><strong>实例 1</strong><br>使用last查看最后10条登录记录，并只查看登录用户名和IP<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">[ggyy@gy-vm02 ~]$ last -n10 |awk &apos;&#123;print $1 &quot;\t&quot; $3&#125;&apos;</div><div class="line">ggyy	192.168.168.1</div><div class="line">reboot	boot</div><div class="line">ggyy	192.168.168.1</div><div class="line">ggyy	192.168.168.1</div><div class="line">reboot	boot</div><div class="line">ggyy	192.168.168.1</div><div class="line">reboot	boot</div><div class="line">ggyy	192.168.168.1</div><div class="line">ggyy	192.168.168.1</div><div class="line">reboot	boot</div></pre></td></tr></table></figure></p>
+<p>print是awk最常使用的动作，通过print的功能将字段数据列出来。其中的<figure class="highlight plain"><figcaption><span>的意思是```$1``` 和 ```$3``` 之间用[tab]隔开。</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">awk的处理数据的流程如下；</div><div class="line">1、读入第一行，并将第一行的数据填入 ```$0,$1,$2``` 等变量中；</div><div class="line">2、依据条件类型的限制，判断是否需要进行后面的动作；</div><div class="line">3、做完所有的动作与条件类型；</div><div class="line">4、若还有后续的数据，则重复上面的1-3的步骤，直到所有的数据都读完为止。</div><div class="line"></div><div class="line">通过上面的讲叙，我们知道awk是以行为一次的处理单位，以字段为最小的处理单位。那么awk怎么知道到底这个数据有几行几列？我们来了解一下awk内置的变量</div><div class="line">&gt; NF：每一行（$0）拥有的字段总数</div><div class="line">&gt; NR：目前awk所处理的是“第几行”数据</div><div class="line">&gt; FS：目前的分隔字符，默认是空格键</div><div class="line"></div><div class="line">**tips：**</div><div class="line">由于单引号是awk的固定用法，awk后续的所有动作都是以单引号括住的，所以使用print打印时，非变量的文字部分，包括 \t ，都需要使用双引号括起来。</div><div class="line"></div><div class="line">#### AWK的逻辑运算符</div><div class="line">逻辑运算符是作用在条件里面，awk主要有的逻辑运算符有：</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>大于<br> &lt; 小于<br>= 大于等于<br> &lt;= 小于等于<br> == 等于<br> != 不等于<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">**实例2**</div><div class="line">查看/etc/password里面UID小于5，且只显示用户名和UID</div></pre></td></tr></table></figure></p>
+</blockquote>
+<p>[ggyy@gy-vm02 ~]$ awk ‘{FS=”:”}$3&lt;5{print $1 “\t” $3}’ /etc/passwd<br>root:x:0:0:root:/root:/bin/bash<br>bin    1<br>daemon    2<br>adm    3<br>lp    4<br>[ggyy@gy-vm02 ~]$<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">我们可以看到第一行数据并没有按照我们的想法输出，这是因为我们定义的```FS=“:”``` 动作要从第二行才开始生效，第一行还是按照原来的方式输出了，所以这个时候需要加上BEGIN关键字：</div></pre></td></tr></table></figure></p>
+<p>[ggyy@gy-vm02 ~]$ awk ‘BEGIN{FS=”:”}$3&lt;5{print $1 “\t” $3}’ /etc/passwd<br>root    0<br>bin    1<br>daemon    2<br>adm    3<br>lp    4<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">**实例3**</div><div class="line">awk还可以像grep去匹配数据</div></pre></td></tr></table></figure></p>
+<p>[ggyy@gy-vm02 ~]$ awk ‘$6 ~ /FIN|TIME/ {print NR,$4,$5,$6}’ 1.txt<br>5 coolshell.cn:80 124.205.5.146:18245 TIME_WAIT<br>6 coolshell.cn:80 61.140.101.185:37538 FIN_WAIT2<br>9 coolshell.cn:80 116.234.127.77:11502 FIN_WAIT2<br>11 coolshell.cn:80 183.60.215.36:36970 TIME_WAIT<br>13 coolshell.cn:80 124.152.181.209:26825 FIN_WAIT1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">还可以取反</div></pre></td></tr></table></figure></p>
+<p>[ggyy@gy-vm02 ~]$ awk ‘$6 !~ /FIN|TIME/ {print NR,$4,$5,$6}’ 1.txt<br>1 Local-Address Foreign-Address State<br>2 0.0.0.0:3306 0.0.0.0:<em> LISTEN<br>3 0.0.0.0:80 0.0.0.0:</em> LISTEN<br>4 127.0.0.1:9000 0.0.0.0:<em> LISTEN<br>7 coolshell.cn:80 110.194.134.189:103 ESTABLISHED<br>8 coolshell.cn:80 123.169.124.111:49809 ESTABLISHED<br>10 coolshell.cn:80 123.169.124.111:49829 ESTABLISHED<br>12 coolshell.cn:80 61.148.242.38:30901 ESTABLISHED<br>14 :::22 :::</em> LISTEN<br>```</p>
+<p>除此之外，AWK还有很多高级语法，这里就不详细讲叙了，了解基础就可以应付大部分的操作了。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/05/29/route/" data-id="ciu2ftole000pw5hpjh6l4sy5" class="article-share-link">Share</a>
+      <a data-url="http://gongyang.wiki/2016/06/26/awk/" data-id="ciusdxy4d0002ychpzvfqg0nf" class="article-share-link">Share</a>
       
       
     </footer>
@@ -125,7 +122,7 @@
 
 
   <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/15/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><span class="page-number current">16</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/17/">__('next') &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/15/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><span class="page-number current">16</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/17/">__('next') &raquo;</a>
   </nav>
 </section>
         
@@ -143,7 +140,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
     </div>
   </div>
 
@@ -156,23 +153,23 @@
       <ul>
         
           <li>
+            <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+          </li>
+        
+          <li>
             <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
           </li>
         
           <li>
             <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/04/conntrack/">系统内核参数--nf_conntrack</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/tmpwatch/">tmpwatch</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/21/puppet/">puppet 安装</a>
           </li>
         
       </ul>
