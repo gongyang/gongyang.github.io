@@ -1,95 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
+<!-- Head tag -->
 <head>
-  <meta charset="utf-8">
-  
-  <title>mongodb 在复制集上创建修改索引 | ban</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="在讲mongodb如何在复制集上创建或修改索引的操作步骤前，我们先来了解一下mongodb在创建索引时会产生什么影响。mongodb在默认情况下，创建索引会阻塞数据库中所有其他操作。当在一个集合上创建索引时，存储了这个集合的数据库变成不可读不可写的状态直到索引建立完毕。任何需要所有数据库中读或者写锁的操作(例如 listDatabases )将会等待，直到索引创建完成。对于可能需要长时间运行的索引">
-<meta property="og:type" content="article">
-<meta property="og:title" content="mongodb 在复制集上创建修改索引">
-<meta property="og:url" content="http://gongyang.wiki/2016/03/06/mongodb/index.html">
-<meta property="og:site_name" content="ban">
-<meta property="og:description" content="在讲mongodb如何在复制集上创建或修改索引的操作步骤前，我们先来了解一下mongodb在创建索引时会产生什么影响。mongodb在默认情况下，创建索引会阻塞数据库中所有其他操作。当在一个集合上创建索引时，存储了这个集合的数据库变成不可读不可写的状态直到索引建立完毕。任何需要所有数据库中读或者写锁的操作(例如 listDatabases )将会等待，直到索引创建完成。对于可能需要长时间运行的索引">
-<meta property="og:updated_time" content="2016-10-09T08:53:48.000Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="mongodb 在复制集上创建修改索引">
-<meta name="twitter:description" content="在讲mongodb如何在复制集上创建或修改索引的操作步骤前，我们先来了解一下mongodb在创建索引时会产生什么影响。mongodb在默认情况下，创建索引会阻塞数据库中所有其他操作。当在一个集合上创建索引时，存储了这个集合的数据库变成不可读不可写的状态直到索引建立完毕。任何需要所有数据库中读或者写锁的操作(例如 listDatabases )将会等待，直到索引创建完成。对于可能需要长时间运行的索引">
-  
-    <link rel="alternate" href="/atom.xml" title="ban" type="application/atom+xml">
-  
-  
-    <link rel="icon" href="/favicon.png">
-  
-  
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
-  
-  <link rel="stylesheet" href="/css/style.css">
-  
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+    
+        <meta name="description" content="gy blogs">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="ggyy">
+    
+
+    <!--Open Graph Title-->
+    
+        <meta property="og:title" content="mongodb 在复制集上创建修改索引"/>
+    
+
+    <!--Open Graph Description-->
+    
+        <meta property="og:description" content="gy blogs" />
+    
+
+    <!--Open Graph Site Name-->
+    <meta property="og:site_name" content="做人要低调，做事要高调"/>
+
+    <!--Type page-->
+    
+        <meta property="og:type" content="article" />
+    
+
+    <!--Page Cover-->
+    
+
+    <meta name="twitter:card" content="summary" />
+    
+
+    <!-- Title -->
+    
+    <title>mongodb 在复制集上创建修改索引 - 做人要低调，做事要高调</title>
+
+    <!-- Tachyons Core CSS -->
+    <link rel="stylesheet" href="//unpkg.com/tachyons/css/tachyons.min.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Google Analytics -->
+    
+
 
 </head>
 
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">ban</a>
-      </h1>
-      
-        <h2 id="subtitle-wrap">
-          <a href="/" id="subtitle">blogs</a>
-        </h2>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://gongyang.wiki"></form>
-      </div>
-    </div>
-  </div>
-</header>
-      <div class="outer">
-        <section id="main"><article id="post-mongodb" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/03/06/mongodb/" class="article-date">
-  <time datetime="2016-03-05T16:00:00.000Z" itemprop="datePublished">2016-03-06</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      mongodb 在复制集上创建修改索引
-    </h1>
-  
 
-      </header>
+<body>
+
+<!-- Main Content -->
+<!-- Banner -->
+<!-- Banner -->
+<div class="w-100 bg-1 ph5-ns ph3 text-light">
     
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>在讲mongodb如何在复制集上创建或修改索引的操作步骤前，我们先来了解一下mongodb在创建索引时会产生什么影响。<br>mongodb在默认情况下，创建索引会阻塞数据库中所有其他操作。当在一个集合上创建索引时，存储了这个集合的数据库变成不可读不可写的状态直到索引建立完毕。任何需要所有数据库中读或者写锁的操作(例如 listDatabases )将会等待，直到索引创建完成。<br>对于可能需要长时间运行的索引创建操作，可以考虑 background 选项，这样MongoDB数据库在索引创建期间仍然是可用的。<br>例如，在 people 集合的 zipcode 键上创建一个索引，这个过程在后台运行，可以使用如下方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">db.people.createIndex( &#123; zipcode: 1&#125;, &#123;background: true&#125; )</div></pre></td></tr></table></figure></p>
+    <nav class="db dt-l w-100 mw8 center border-box pv3">
+        <a class="db dtc-l v-mid link dim w-100 w-25-l tc tl-l mb2 mb0-l white" href="/" title="做人要低调，做事要高调">
+            <img src="http://www.codeblocq.com/assets/projects/hexo-theme-anodyne/assets/anodyne.svg" class="dib h3" alt="做人要低调，做事要高调">
+        </a>
+        <div class="db dtc-l v-mid w-100 w-75-l tc tr-l">
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="Home">
+                    Home
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/archives" 
+                    title="Archives">
+                    Archives
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="About">
+                    About
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="Contact">
+                    Contact
+                </a>
+            
+        </div>
+    </nav>
+
+    <!-- Title -->
+    <div class="w-100 mw8 center vh-40 dt">
+        <div class="dtc v-mid white">
+            <h1 class="f1-l f2-m tc tc-m tl-ns">mongodb 在复制集上创建修改索引</h1>
+            <p class="f4 fw3 pab-100px tc tc-m tl-ns">2016-03-06</p>
+        </div>
+    </div>
+
+    <!-- Icon -->
+    <div class="relative w-100 mw8 center white dn dn-m db-ns">
+        <i class="header-icon fa fa-file-text-o"></i>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="w-100 ph2 ph4-m ph5-l mv5 mv6-l">
+    <div class="content">
+        <div class="mw8 center">
+            <div class="cf">
+                <div class="fl w-100 w-70-l mw7 left fw3 lh-copy pr4-ns pr0-m post-content">
+                    <!-- Tags Vertical -->
+                    
+
+                    <!-- Main Post Content -->
+                    <p>在讲mongodb如何在复制集上创建或修改索引的操作步骤前，我们先来了解一下mongodb在创建索引时会产生什么影响。<br>mongodb在默认情况下，创建索引会阻塞数据库中所有其他操作。当在一个集合上创建索引时，存储了这个集合的数据库变成不可读不可写的状态直到索引建立完毕。任何需要所有数据库中读或者写锁的操作(例如 listDatabases )将会等待，直到索引创建完成。<br>对于可能需要长时间运行的索引创建操作，可以考虑 background 选项，这样MongoDB数据库在索引创建期间仍然是可用的。<br>例如，在 people 集合的 zipcode 键上创建一个索引，这个过程在后台运行，可以使用如下方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">db.people.createIndex( &#123; zipcode: 1&#125;, &#123;background: true&#125; )</div></pre></td></tr></table></figure></p>
 <p>默认地，MongoDB索引创建的 background 是 false 。索引在创建过程中,查询将不会使用部分建立的索引：索引只有在建立完毕之后才是可用的。</p>
 <p><strong>tips：</strong><br>使用后台索引的方式，虽然可以保证数据库可用，但是会影响mongodb的性能，后台索引创建操作使用的是一种增量的方式，这会比普通的 “前台” 创建过程慢。如果索引大于现有的内存，那么这个增量处理过程将会比前台创建过程 久得多 。<br>如果MongoDB在后台创建一个索引，您不能执行其他会涉及到该集合的管理操作，包括 repairDatabase 命令，删除集合(例如 db.collection.drop() )，和 compact 命令。当后台创建索引时，这些操作会返回一个错误。<br>If your application includes createIndex() operations, and an index doesn’t exist for other operational concerns, building the index can have a severe impact on the performance of the database.<br>为了避免性能问题，请确保您的应用在启动时就使用 getIndexes() 方法或者其他 equivalent method for your driver 检查索引是否存在，如果不存在请退出应用。或者在生产实例上使用不同的应用代码在指定的维护时间窗口期间创建索引。</p>
 <p>处于以上考虑，对于mongodb复制集的索引创建和修改，mongodb官方建议使用下面步骤</p>
@@ -100,122 +144,140 @@
 <p>停止一个从节点<br>创建索引<br>重启 mongod 进程</p>
 <p><strong>主节点</strong><br>使用 mongo shell 中的 rs.stepDown() 方法让主节点下台(step down)，这样主节点平滑地过渡为从节点，且允许复制集选举其他成员为主节点。<br>然后重启上述索引创建步骤，在(原)主节点上创建索引:<br>停止一个从节点<br>创建索引<br>重启 mongod 进程<br>在后台创建索引会比前台方式耗时更久，且会生成不够紧凑的索引 结构。此外，后台创建索引可能会影响主节点的写性能。但是，在后台建立索引允许复制集在MongoDB建立索引期间持续写操作。</p>
 
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://gongyang.wiki/2016/03/06/mongodb/" data-id="ciusdxy54000fychp9qaz10fg" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2016/03/13/rsync/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          rsync实现机制原理
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2016/02/27/ftp/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">记一次关于ftp使用的那些事</div>
-    </a>
-  
-</nav>
+                    
+                    <!-- Tags Bottom -->
+                    
 
-  
-</article>
-
-</section>
-        
-          <aside id="sidebar">
-  
-    
-
-  
-    
-
-  
-    
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li></ul>
-    </div>
-  </div>
+                    <!-- Comments -->
+                    
 
 
-  
+
+                </div>
+                <div class="fl w-100 w-30-l center fw3 lh-copy pl4-ns tl black-50">
+                    
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 1: About -->
+                    <div class="mt5 mt0-l">
+    <article class="dt db-l mw8 mw8-m mw5-ns center ml0-l bg-white mv3">
+        <div class="dn dtc-m db-l v-mid tc pr4 pr0-l" style="min-width: 6rem;">
+            <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="ggyy">
+        </div>
+        <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
+            
+        </div>
+    </article>
+</div>
+
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 2: Categories -->
+                    
+
+                    <!-- Widget 3: Recent Posts -->
+                    <div class="mt5 tc tl-l">
+    <h3>Recent Posts</h3>
     
-  <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
+        <p>
             <a href="/2016/10/27/ulimit/">linux内建命令之--ulimit</a>
-          </li>
-        
-          <li>
-            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
-          </li>
-        
-          <li>
-            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
-        
-      </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      &copy; 2016 ggyy<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
+        </p>
     
+        <p>
+            <a href="/2016/10/23/nginx_config/">Nginx 配置文件详解</a>
+        </p>
+    
+        <p>
+            <a href="/2016/10/16/nginx_limit/">nginx limit_conn  limit_req模块讲解</a>
+        </p>
+    
+        <p>
+            <a href="/2016/09/25/php-cgi/">使用Spawn-FCGI管理php-cgi</a>
+        </p>
+    
+        <p>
+            <a href="/2016/09/17/ngxtop/">ngxtop---nginx日志实时监控工具</a>
+        </p>
+    
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Footer -->
+<div class="bg-1 ph2 ph5-ns pv5">
+        <div class="mv8">
+            <div class="center tc">
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://twitter.com/?lang=en" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://www.facebook.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://dribbble.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://github.com/klugjo/hexo-theme-anodyne" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://plus.google.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://www.behance.net/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://500px.com/" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="mailto:test@example.com" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="/#" target="_blank">
+                            <i class="fa "></i>
+                        </a>
+                    </div>
+                
+            </div>
+            <div class="f6 f5-ns center tc white pt5 fw3">
+                
+            </div>
+        </div>
+    </div>
+
+<!-- After Footer -->
+<!-- Disqus Comments -->
 
 
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
-  <script src="/fancybox/jquery.fancybox.pack.js"></script>
 
-
-<script src="/js/script.js"></script>
-
-  </div>
 </body>
+
 </html>
